@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9SM Barbería — Estilo & Precisión</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav__logo">9<span>SM</span></div>
+    <ul class="nav__links">
+      <li><a href="#inicio">Inicio</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#barberos">Equipo</a></li>
+      <li><a href="#galeria">Galería</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="#reservar" class="btn btn--gold">Reservar Cita</a>
+    <button class="nav__toggle" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero__bg"></div>
+    <div class="hero__content">
+      <p class="hero__tag">Barbería Premium</p>
+      <h1 class="hero__title">Arte en <br/><span>cada corte</span></h1>
+      <p class="hero__sub">Donde la tradición se encuentra con el estilo moderno. Barberos expertos, ambiente único.</p>
+      <div class="hero__btns">
+        <a href="#reservar" class="btn btn--gold">Reservar Ahora</a>
+        <a href="#servicios" class="btn btn--outline">Ver Servicios</a>
+      </div>
+    </div>
+    <div class="hero__scroll">
+      <div class="hero__scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stats__item">
+      <span class="stats__num" data-target="1200">0</span><span class="stats__plus">+</span>
+      <p>Clientes satisfechos</p>
+    </div>
+    <div class="stats__item">
+      <span class="stats__num" data-target="8">0</span>
+      <p>Años de experiencia</p>
+    </div>
+    <div class="stats__item">
+      <span class="stats__num" data-target="6">0</span>
+      <p>Barberos expertos</p>
+    </div>
+    <div class="stats__item">
+      <span class="stats__num" data-target="4">0</span><span class="stats__star">★</span><span class="stats__plus">.9</span>
+      <p>Valoración media</p>
+    </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section class="section" id="servicios">
+    <div class="container">
+      <div class="section__header">
+        <p class="section__tag">Lo que ofrecemos</p>
+        <h2 class="section__title">Nuestros Servicios</h2>
+      </div>
+      <div class="services__grid">
+        <div class="service-card">
+          <div class="service-card__icon">✂️</div>
+          <h3>Corte Clásico</h3>
+          <p>Corte de pelo a la medida de tu estilo, con acabado perfecto y detallado.</p>
+          <span class="service-card__price">desde 15€</span>
+        </div>
+        <div class="service-card service-card--featured">
+          <div class="service-card__badge">Popular</div>
+          <div class="service-card__icon">🪒</div>
+          <h3>Corte + Barba</h3>
+          <p>El pack completo: corte profesional y arreglo de barba con navaja.</p>
+          <span class="service-card__price">desde 25€</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">👑</div>
+          <h3>Afeitado Real</h3>
+          <p>Afeitado tradicional con toalla caliente, espuma artesanal y navaja.</p>
+          <span class="service-card__price">desde 20€</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">🎨</div>
+          <h3>Color & Mechas</h3>
+          <p>Tinte, decoloración y mechas para un look diferente y moderno.</p>
+          <span class="service-card__price">desde 30€</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">💆</div>
+          <h3>Tratamiento Capilar</h3>
+          <p>Hidratación profunda, anticaída y tratamientos especializados.</p>
+          <span class="service-card__price">desde 20€</span>
+        </div>
+        <div class="service-card">
+          <div class="service-card__icon">⭐</div>
+          <h3>Pack VIP</h3>
+          <p>Corte + Barba + Tratamiento + Masaje capilar. La experiencia completa.</p>
+          <span class="service-card__price">desde 50€</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BARBEROS -->
+  <section class="section section--dark" id="barberos">
+    <div class="container">
+      <div class="section__header">
+        <p class="section__tag">Conoce al equipo</p>
+        <h2 class="section__title">Nuestros Barberos</h2>
+      </div>
+      <div class="barbers__grid">
+        <div class="barber-card">
+          <div class="barber-card__avatar">
+            <div class="avatar-placeholder">SM</div>
+          </div>
+          <h3>Samuel M.</h3>
+          <p class="barber-card__role">Barbero Principal · Fundador</p>
+          <p class="barber-card__bio">8 años de experiencia. Especialista en fade y diseños artísticos.</p>
+          <div class="barber-card__tags">
+            <span>Fade</span><span>Diseños</span><span>Clásico</span>
+          </div>
+        </div>
+        <div class="barber-card">
+          <div class="barber-card__avatar">
+            <div class="avatar-placeholder">CR</div>
+          </div>
+          <h3>Carlos R.</h3>
+          <p class="barber-card__role">Barbero Senior</p>
+          <p class="barber-card__bio">Maestro del afeitado clásico con navaja y experto en barba.</p>
+          <div class="barber-card__tags">
+            <span>Barba</span><span>Navaja</span><span>Color</span>
+          </div>
+        </div>
+        <div class="barber-card">
+          <div class="barber-card__avatar">
+            <div class="avatar-placeholder">AL</div>
+          </div>
+          <h3>Alejandro L.</h3>
+          <p class="barber-card__role">Barbero Estilista</p>
+          <p class="barber-card__bio">Especialista en coloración y tendencias actuales. Cortes modernos.</p>
+          <div class="barber-card__tags">
+            <span>Mechas</span><span>Moderno</span><span>Color</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERÍA -->
+  <section class="section" id="galeria">
+    <div class="container">
+      <div class="section__header">
+        <p class="section__tag">Nuestro trabajo</p>
+        <h2 class="section__title">Galería</h2>
+      </div>
+      <div class="gallery__grid">
+        <div class="gallery__item gallery__item--tall">
+          <div class="gallery__placeholder" style="background:#1a1a1a;">
+            <span>Fade + Diseño</span>
+          </div>
+        </div>
+        <div class="gallery__item">
+          <div class="gallery__placeholder" style="background:#111;">
+            <span>Corte Clásico</span>
+          </div>
+        </div>
+        <div class="gallery__item">
+          <div class="gallery__placeholder" style="background:#222;">
+            <span>Barba Perfilada</span>
+          </div>
+        </div>
+        <div class="gallery__item gallery__item--wide">
+          <div class="gallery__placeholder" style="background:#1a1a2e;">
+            <span>Pack Completo</span>
+          </div>
+        </div>
+        <div class="gallery__item">
+          <div class="gallery__placeholder" style="background:#16213e;">
+            <span>Afeitado Real</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESERVAR -->
+  <section class="section section--dark" id="reservar">
+    <div class="container">
+      <div class="section__header">
+        <p class="section__tag">Sin esperas</p>
+        <h2 class="section__title">Reserva tu Cita</h2>
+      </div>
+      <form class="booking-form" id="bookingForm">
+        <div class="booking-form__row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" placeholder="+34 600 000 000" required />
+          </div>
+        </div>
+        <div class="booking-form__row">
+          <div class="form-group">
+            <label>Servicio</label>
+            <select required>
+              <option value="">Selecciona un servicio</option>
+              <option>Corte Clásico — 15€</option>
+              <option>Corte + Barba — 25€</option>
+              <option>Afeitado Real — 20€</option>
+              <option>Color & Mechas — 30€</option>
+              <option>Tratamiento Capilar — 20€</option>
+              <option>Pack VIP — 50€</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Barbero</label>
+            <select>
+              <option value="">Sin preferencia</option>
+              <option>Samuel M.</option>
+              <option>Carlos R.</option>
+              <option>Alejandro L.</option>
+            </select>
+          </div>
+        </div>
+        <div class="booking-form__row">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" required />
+          </div>
+          <div class="form-group">
+            <label>Hora</label>
+            <select required>
+              <option value="">Selecciona hora</option>
+              <option>09:00</option><option>09:30</option>
+              <option>10:00</option><option>10:30</option>
+              <option>11:00</option><option>11:30</option>
+              <option>12:00</option><option>12:30</option>
+              <option>16:00</option><option>16:30</option>
+              <option>17:00</option><option>17:30</option>
+              <option>18:00</option><option>18:30</option>
+              <option>19:00</option><option>19:30</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas adicionales</label>
+          <textarea placeholder="Algún detalle especial para tu corte..." rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn--gold btn--full">Confirmar Reserva</button>
+      </form>
+      <div class="booking-success" id="bookingSuccess" style="display:none;">
+        <div class="booking-success__icon">✓</div>
+        <h3>¡Reserva confirmada!</h3>
+        <p>Te contactaremos por WhatsApp para confirmar tu cita. ¡Nos vemos pronto!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section class="section" id="contacto">
+    <div class="container">
+      <div class="section__header">
+        <p class="section__tag">Encuéntranos</p>
+        <h2 class="section__title">Contacto & Horarios</h2>
+      </div>
+      <div class="contact__grid">
+        <div class="contact__info">
+          <div class="contact__item">
+            <div class="contact__icon">📍</div>
+            <div>
+              <h4>Dirección</h4>
+              <p>Calle Mayor 9, Local SM<br/>28001 Madrid</p>
+            </div>
+          </div>
+          <div class="contact__item">
+            <div class="contact__icon">📞</div>
+            <div>
+              <h4>Teléfono / WhatsApp</h4>
+              <p>+34 600 000 009</p>
+            </div>
+          </div>
+          <div class="contact__item">
+            <div class="contact__icon">📧</div>
+            <div>
+              <h4>Email</h4>
+              <p>hola@9sm.es</p>
+            </div>
+          </div>
+          <div class="contact__item">
+            <div class="contact__icon">🕐</div>
+            <div>
+              <h4>Horarios</h4>
+              <p>Lun – Vie: 09:00 – 20:00<br/>Sáb: 09:00 – 18:00<br/>Dom: Cerrado</p>
+            </div>
+          </div>
+          <div class="contact__social">
+            <a href="#" class="social-btn">Instagram</a>
+            <a href="#" class="social-btn">TikTok</a>
+            <a href="#" class="social-btn social-btn--whatsapp">WhatsApp</a>
+          </div>
+        </div>
+        <div class="contact__map">
+          <div class="map-placeholder">
+            <span>📍 Mapa — Calle Mayor 9, Madrid</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <div class="nav__logo">9<span>SM</span></div>
+          <p>Barbería premium desde 2016. Arte, estilo y precisión en cada visita.</p>
+        </div>
+        <div class="footer__links">
+          <h4>Servicios</h4>
+          <ul>
+            <li><a href="#servicios">Corte Clásico</a></li>
+            <li><a href="#servicios">Corte + Barba</a></li>
+            <li><a href="#servicios">Afeitado Real</a></li>
+            <li><a href="#servicios">Pack VIP</a></li>
+          </ul>
+        </div>
+        <div class="footer__links">
+          <h4>Barbería</h4>
+          <ul>
+            <li><a href="#barberos">Nuestro Equipo</a></li>
+            <li><a href="#galeria">Galería</a></li>
+            <li><a href="#reservar">Reservar Cita</a></li>
+            <li><a href="panel/login.html">Panel Barberos</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p>© 2024 9SM Barbería. Todos los derechos reservados.</p>
+        <a href="panel/login.html" class="footer__panel-link">Panel de administración →</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

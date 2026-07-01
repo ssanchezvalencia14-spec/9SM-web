@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9SM — Clientes</title>
+  <link rel="stylesheet" href="../css/panel.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="panel-page">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <div class="sidebar__logo">9<span>SM</span></div>
+      <button class="sidebar__close" id="sidebarClose">✕</button>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="sidebar__link"><span class="sidebar__icon">📊</span> Dashboard</a>
+      <a href="citas.html" class="sidebar__link"><span class="sidebar__icon">📅</span> Citas</a>
+      <a href="clientes.html" class="sidebar__link sidebar__link--active"><span class="sidebar__icon">👥</span> Clientes</a>
+      <a href="servicios.html" class="sidebar__link"><span class="sidebar__icon">✂️</span> Servicios</a>
+      <a href="barberos.html" class="sidebar__link"><span class="sidebar__icon">💈</span> Barberos</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" id="sidebarAvatar">SM</div>
+        <div>
+          <p class="sidebar__uname" id="sidebarName">Samuel M.</p>
+          <p class="sidebar__urole" id="sidebarRole">Barbero Principal</p>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="panel-main">
+    <header class="topbar">
+      <button class="topbar__menu" id="menuBtn">☰</button>
+      <div class="topbar__title">Clientes</div>
+      <div class="topbar__right">
+        <span class="topbar__date" id="topbarDate"></span>
+        <a href="../index.html" class="topbar__site" target="_blank">🌐 Ver web</a>
+      </div>
+    </header>
+
+    <div class="panel-content">
+
+      <div class="page-actions">
+        <div class="page-actions__left">
+          <input type="text" class="search-input" placeholder="🔍 Buscar cliente..." id="searchInput" />
+        </div>
+        <button class="btn btn--gold" id="newClientBtn">+ Nuevo Cliente</button>
+      </div>
+
+      <!-- CLIENTES GRID -->
+      <div class="clients-grid" id="clientsGrid"></div>
+
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 id="modalTitle">Nuevo Cliente</h3>
+        <button class="modal__close" id="modalClose">✕</button>
+      </div>
+      <form class="modal__form" id="clientForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="cName" placeholder="Nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" id="cPhone" placeholder="+34 600 000 000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="cEmail" placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="form-group">
+          <label>Notas</label>
+          <textarea id="cNotes" placeholder="Preferencias de corte, alergias, etc." rows="3"></textarea>
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--outline" id="modalCancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn--gold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/panel.js"></script>
+  <script>
+    let clients = JSON.parse(localStorage.getItem('9sm_clients') || 'null') || [
+      { id:1, name:'Marco Rodríguez',  phone:'600001001', email:'marco@email.com',   visits:7, spent:175, lastVisit:'Hoy',          notes:'Prefiere fade alto' },
+      { id:2, name:'Diego Fernández',  phone:'600001002', email:'diego@email.com',   visits:6, spent:90,  lastVisit:'Hoy',          notes:'' },
+      { id:3, name:'Adrián López',     phone:'600001003', email:'adrian@email.com',  visits:5, spent:250, lastVisit:'Hoy',          notes:'Cliente VIP fiel' },
+      { id:4, name:'Pablo García',     phone:'600001004', email:'pablo@email.com',   visits:3, spent:60,  lastVisit:'Hace 3 días',  notes:'' },
+      { id:5, name:'Javier Martín',    phone:'600001005', email:'',                  visits:2, spent:30,  lastVisit:'Hace 1 sem',   notes:'' },
+      { id:6, name:'Rubén Sánchez',    phone:'600001006', email:'ruben@email.com',   visits:4, spent:100, lastVisit:'Esta semana',  notes:'Le gusta dejarse la barba larga' },
+      { id:7, name:'Luis Pérez',       phone:'600001007', email:'luis@email.com',    visits:8, spent:240, lastVisit:'Ayer',         notes:'Coloración frecuente' },
+      { id:8, name:'Tomás Vega',       phone:'600001008', email:'tomas@email.com',   visits:3, spent:60,  lastVisit:'Ayer',         notes:'' },
+    ];
+
+    let editId = null;
+
+    function save() { localStorage.setItem('9sm_clients', JSON.stringify(clients)); }
+
+    function initials(name) {
+      return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    }
+
+    function render() {
+      const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+      const filtered = clients.filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search));
+      const grid = document.getElementById('clientsGrid');
+      if (!grid) return;
+      grid.innerHTML = filtered.map(c => `
+        <div class="client-card">
+          <div class="client-card__header">
+            <div class="client-avatar">${initials(c.name)}</div>
+            <div class="client-card__actions">
+              <button class="tbl-btn tbl-btn--edit" onclick="editClient(${c.id})">✏️</button>
+              <button class="tbl-btn tbl-btn--del"  onclick="deleteClient(${c.id})">🗑️</button>
+            </div>
+          </div>
+          <h3 class="client-card__name">${c.name}</h3>
+          <p class="client-card__phone">${c.phone}</p>
+          ${c.email ? `<p class="client-card__email">${c.email}</p>` : ''}
+          <div class="client-card__stats">
+            <div class="client-stat">
+              <span class="client-stat__val">${c.visits}</span>
+              <span class="client-stat__lbl">visitas</span>
+            </div>
+            <div class="client-stat">
+              <span class="client-stat__val">${c.spent}€</span>
+              <span class="client-stat__lbl">gastado</span>
+            </div>
+            <div class="client-stat">
+              <span class="client-stat__val" style="font-size:11px;">${c.lastVisit}</span>
+              <span class="client-stat__lbl">última visita</span>
+            </div>
+          </div>
+          ${c.notes ? `<p class="client-card__notes">"${c.notes}"</p>` : ''}
+          <a href="citas.html" class="client-card__book">+ Nueva cita</a>
+        </div>
+      `).join('') || '<p style="color:var(--gray);text-align:center;padding:40px;">No se encontraron clientes.</p>';
+    }
+
+    function openModal(reset=true) {
+      document.getElementById('modalOverlay').style.display = 'flex';
+      if (reset) {
+        document.getElementById('clientForm').reset();
+        document.getElementById('modalTitle').textContent = 'Nuevo Cliente';
+        editId = null;
+      }
+    }
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; editId = null; }
+
+    function editClient(id) {
+      const c = clients.find(x=>x.id===id);
+      if (!c) return;
+      editId = id;
+      document.getElementById('cName').value = c.name;
+      document.getElementById('cPhone').value = c.phone;
+      document.getElementById('cEmail').value = c.email;
+      document.getElementById('cNotes').value = c.notes;
+      document.getElementById('modalTitle').textContent = 'Editar Cliente';
+      openModal(false);
+    }
+
+    function deleteClient(id) {
+      if (!confirm('¿Eliminar este cliente?')) return;
+      clients = clients.filter(c=>c.id!==id);
+      save(); render();
+    }
+
+    document.getElementById('newClientBtn')?.addEventListener('click', () => openModal());
+    document.getElementById('modalClose')?.addEventListener('click', closeModal);
+    document.getElementById('modalCancelBtn')?.addEventListener('click', closeModal);
+    document.getElementById('modalOverlay')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    });
+
+    document.getElementById('clientForm')?.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        id: editId || (Math.max(0,...clients.map(c=>c.id))+1),
+        name: document.getElementById('cName').value.trim(),
+        phone: document.getElementById('cPhone').value.trim(),
+        email: document.getElementById('cEmail').value.trim(),
+        notes: document.getElementById('cNotes').value.trim(),
+        visits: editId ? clients.find(c=>c.id===editId).visits : 0,
+        spent:  editId ? clients.find(c=>c.id===editId).spent  : 0,
+        lastVisit: editId ? clients.find(c=>c.id===editId).lastVisit : 'Nuevo',
+      };
+      if (editId) { clients = clients.map(c=>c.id===editId?data:c); }
+      else { clients.push(data); }
+      save(); render(); closeModal();
+    });
+
+    document.getElementById('searchInput')?.addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>

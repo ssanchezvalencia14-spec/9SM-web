@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9SM — Servicios</title>
+  <link rel="stylesheet" href="../css/panel.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="panel-page">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <div class="sidebar__logo">9<span>SM</span></div>
+      <button class="sidebar__close" id="sidebarClose">✕</button>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="sidebar__link"><span class="sidebar__icon">📊</span> Dashboard</a>
+      <a href="citas.html" class="sidebar__link"><span class="sidebar__icon">📅</span> Citas</a>
+      <a href="clientes.html" class="sidebar__link"><span class="sidebar__icon">👥</span> Clientes</a>
+      <a href="servicios.html" class="sidebar__link sidebar__link--active"><span class="sidebar__icon">✂️</span> Servicios</a>
+      <a href="barberos.html" class="sidebar__link"><span class="sidebar__icon">💈</span> Barberos</a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" id="sidebarAvatar">SM</div>
+        <div>
+          <p class="sidebar__uname" id="sidebarName">Samuel M.</p>
+          <p class="sidebar__urole" id="sidebarRole">Barbero Principal</p>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <div class="panel-main">
+    <header class="topbar">
+      <button class="topbar__menu" id="menuBtn">☰</button>
+      <div class="topbar__title">Gestión de Servicios</div>
+      <div class="topbar__right">
+        <span class="topbar__date" id="topbarDate"></span>
+        <a href="../index.html" class="topbar__site" target="_blank">🌐 Ver web</a>
+      </div>
+    </header>
+
+    <div class="panel-content">
+
+      <div class="page-actions">
+        <div class="page-actions__left"></div>
+        <button class="btn btn--gold" id="newServiceBtn">+ Nuevo Servicio</button>
+      </div>
+
+      <div class="services-admin-grid" id="servicesGrid"></div>
+
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal__header">
+        <h3 id="modalTitle">Nuevo Servicio</h3>
+        <button class="modal__close" id="modalClose">✕</button>
+      </div>
+      <form class="modal__form" id="serviceForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del servicio</label>
+            <input type="text" id="sName" placeholder="Nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Icono (emoji)</label>
+            <input type="text" id="sIcon" placeholder="✂️" maxlength="4" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Precio desde (€)</label>
+            <input type="number" id="sPrice" placeholder="0" min="0" required />
+          </div>
+          <div class="form-group">
+            <label>Duración (min)</label>
+            <input type="number" id="sDuration" placeholder="30" min="15" step="15" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="sDesc" placeholder="Descripción del servicio..." rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Activo</label>
+          <select id="sActive">
+            <option value="true">Sí</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--outline" id="modalCancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn--gold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/panel.js"></script>
+  <script>
+    let services = JSON.parse(localStorage.getItem('9sm_services') || 'null') || [
+      { id:1, icon:'✂️', name:'Corte Clásico',       price:15, duration:30, desc:'Corte de pelo a la medida de tu estilo.', active:true,  requests:284 },
+      { id:2, icon:'🪒', name:'Corte + Barba',        price:25, duration:45, desc:'Corte profesional y arreglo de barba.',   active:true,  requests:382 },
+      { id:3, icon:'👑', name:'Afeitado Real',         price:20, duration:30, desc:'Afeitado con toalla caliente y navaja.',  active:true,  requests:112 },
+      { id:4, icon:'🎨', name:'Color & Mechas',        price:30, duration:60, desc:'Tinte, decoloración y mechas.',           active:true,  requests:51 },
+      { id:5, icon:'💆', name:'Tratamiento Capilar',   price:20, duration:45, desc:'Hidratación y tratamientos especiales.',  active:true,  requests:98 },
+      { id:6, icon:'⭐', name:'Pack VIP',              price:50, duration:90, desc:'Corte + Barba + Tratamiento + Masaje.',   active:true,  requests:183 },
+    ];
+
+    let editId = null;
+    function save() { localStorage.setItem('9sm_services', JSON.stringify(services)); }
+
+    function render() {
+      const grid = document.getElementById('servicesGrid');
+      if (!grid) return;
+      grid.innerHTML = services.map(s => `
+        <div class="service-admin-card ${!s.active ? 'service-admin-card--inactive' : ''}">
+          <div class="service-admin-card__top">
+            <div class="service-admin-icon">${s.icon}</div>
+            <div class="service-admin-card__actions">
+              <button class="tbl-btn tbl-btn--edit" onclick="editService(${s.id})">✏️</button>
+              <button class="tbl-btn tbl-btn--del"  onclick="deleteService(${s.id})">🗑️</button>
+            </div>
+          </div>
+          <h3>${s.name}</h3>
+          <p class="service-admin-desc">${s.desc}</p>
+          <div class="service-admin-meta">
+            <span class="service-price">desde ${s.price}€</span>
+            <span class="service-duration">⏱ ${s.duration} min</span>
+          </div>
+          <div class="service-admin-footer">
+            <span class="service-requests">${s.requests} solicitudes</span>
+            <label class="toggle">
+              <input type="checkbox" ${s.active ? 'checked' : ''} onchange="toggleActive(${s.id}, this.checked)" />
+              <span class="toggle__slider"></span>
+              <span class="toggle__label">${s.active ? 'Activo' : 'Inactivo'}</span>
+            </label>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleActive(id, val) {
+      const s = services.find(x=>x.id===id);
+      if (s) { s.active = val; save(); render(); }
+    }
+
+    function openModal(reset=true) {
+      document.getElementById('modalOverlay').style.display = 'flex';
+      if (reset) {
+        document.getElementById('serviceForm').reset();
+        document.getElementById('sIcon').value = '✂️';
+        document.getElementById('sDuration').value = '30';
+        document.getElementById('modalTitle').textContent = 'Nuevo Servicio';
+        editId = null;
+      }
+    }
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; editId = null; }
+
+    function editService(id) {
+      const s = services.find(x=>x.id===id);
+      if (!s) return;
+      editId = id;
+      document.getElementById('sIcon').value = s.icon;
+      document.getElementById('sName').value = s.name;
+      document.getElementById('sPrice').value = s.price;
+      document.getElementById('sDuration').value = s.duration;
+      document.getElementById('sDesc').value = s.desc;
+      document.getElementById('sActive').value = String(s.active);
+      document.getElementById('modalTitle').textContent = 'Editar Servicio';
+      openModal(false);
+    }
+
+    function deleteService(id) {
+      if (!confirm('¿Eliminar este servicio?')) return;
+      services = services.filter(s=>s.id!==id);
+      save(); render();
+    }
+
+    document.getElementById('newServiceBtn')?.addEventListener('click', () => openModal());
+    document.getElementById('modalClose')?.addEventListener('click', closeModal);
+    document.getElementById('modalCancelBtn')?.addEventListener('click', closeModal);
+    document.getElementById('modalOverlay')?.addEventListener('click', e => {
+      if (e.target===document.getElementById('modalOverlay')) closeModal();
+    });
+
+    document.getElementById('serviceForm')?.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        id: editId || (Math.max(0,...services.map(s=>s.id))+1),
+        icon: document.getElementById('sIcon').value || '✂️',
+        name: document.getElementById('sName').value.trim(),
+        price: +document.getElementById('sPrice').value,
+        duration: +document.getElementById('sDuration').value,
+        desc: document.getElementById('sDesc').value.trim(),
+        active: document.getElementById('sActive').value === 'true',
+        requests: editId ? services.find(s=>s.id===editId).requests : 0,
+      };
+      if (editId) { services = services.map(s=>s.id===editId?data:s); }
+      else { services.push(data); }
+      save(); render(); closeModal();
+    });
+
+    render();
+  </script>
+</body>
+</html>
