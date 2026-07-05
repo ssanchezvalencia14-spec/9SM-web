@@ -1,0 +1,2996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // Aplica el tema guardado antes de pintar la página, para que no haya parpadeo.
+    if (localStorage.getItem('9sm_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9SM NEXO — Barbería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0c;
+      --surface: #131313;
+      --surface2: #1c1c1c;
+      --surface3: #252525;
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --text-soft: #999;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.18);
+      --white: #ffffff;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Playfair Display', serif;
+      --max: 1160px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    /* ── Modo claro: invierte toda la página (funciona porque el diseño es monocromo —
+       cada gris/blanco/negro y cada glow se reacoplan solos, manteniendo el mismo contraste
+       relativo que en oscuro). hue-rotate(180deg) además preserva el matiz de cualquier color
+       (ej. el rojo de "cancelar cita"), solo invirtiendo su luminosidad.
+       Las fotos y el video reales se "desinvierten" aparte para no verse en negativo. */
+    html[data-theme="light"] {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    html[data-theme="light"] #heroVideo {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    /* .gallery-photo ya tiene su propio filter (brightness) en reposo y al hover; como "filter"
+       no se combina entre reglas distintas, la desinversión se incluye aquí junto con cada
+       brightness, en reglas más específicas, para que ambos efectos convivan sin pisarse. */
+    html[data-theme="light"] .gallery-item .gallery-photo {
+      filter: invert(1) hue-rotate(180deg) brightness(0.88);
+    }
+    html[data-theme="light"] .gallery-item:hover .gallery-photo.gp-active {
+      filter: invert(1) hue-rotate(180deg) brightness(1.05);
+    }
+    /* Fotos de barberos: contra-inversión igual que galería */
+    html[data-theme="light"] .barber-avatar img {
+      filter: invert(1) hue-rotate(180deg);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ═══════════════════════════
+       NAV
+    ═══════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 68px;
+      padding: 0 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.5s var(--ease), border-color 0.5s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(12,12,12,0.88);
+      backdrop-filter: blur(20px) saturate(1.5);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-logo { display: flex; align-items: center; text-decoration: none; }
+    .nav-logo img {
+      height: 36px; width: auto;
+      filter: invert(1);
+      transition: opacity 0.2s;
+    }
+    .nav-logo:hover img { opacity: 0.8; }
+
+    .nav-links {
+      display: flex; gap: 40px; list-style: none;
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      position: relative;
+      padding-bottom: 3px;
+      transition: color 0.25s;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0%; height: 1px;
+      background: var(--white);
+      transition: width 0.3s var(--ease);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { width: 100%; }
+    .nav-links a.active { color: var(--white); }
+
+    .nav-cta {
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.55);
+      background: transparent;
+      padding: 9px 24px;
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    /* ── Configuración (engranaje flotante + panel desplegable) ── */
+    .settings-wrap {
+      position: fixed; bottom: 32px; left: 32px;
+      z-index: 190;
+    }
+    .settings-btn {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      width: 46px; height: 46px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      transition: border-color 0.25s, color 0.25s, background 0.25s, transform 0.35s var(--ease);
+    }
+    .settings-btn:hover {
+      border-color: rgba(255,255,255,0.6); color: var(--white);
+      background: var(--surface2);
+    }
+    .settings-btn.open { transform: rotate(45deg); }
+
+    .settings-panel {
+      position: absolute; bottom: calc(100% + 14px); left: 0;
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      padding: 18px 20px; min-width: 230px;
+      opacity: 0; visibility: hidden; transform: translateY(8px);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), visibility 0.25s;
+      z-index: 250;
+    }
+    @media (max-width: 768px) {
+      .settings-wrap { display: none; }
+    }
+    .settings-panel.open { opacity: 1; visibility: visible; transform: none; }
+    .settings-panel-title {
+      display: block; font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.82rem; color: var(--text-soft); font-weight: 300;
+    }
+    .theme-switch {
+      width: 46px; height: 26px; border-radius: 999px; flex-shrink: 0;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      position: relative; cursor: pointer; padding: 0;
+    }
+    .theme-switch-knob {
+      position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--white); color: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s var(--ease);
+    }
+    html[data-theme="light"] .theme-switch-knob { transform: translateX(20px); }
+    .theme-switch-knob .icon-moon { display: none; }
+    html[data-theme="light"] .theme-switch-knob .icon-sun { display: none; }
+    html[data-theme="light"] .theme-switch-knob .icon-moon { display: block; }
+
+    .nav-cancel-link {
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-right: 18px; text-decoration: none;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .nav-cancel-link:hover { color: var(--white); }
+    .nav-cta:hover {
+      border-color: var(--white);
+      color: var(--bg);
+      background: var(--white);
+    }
+
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 1px; background: var(--text); transition: all 0.35s var(--ease); }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed; top: 68px; left: 0; right: 0; z-index: 199;
+      background: rgba(12,12,12,0.97);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s var(--ease), padding 0.4s var(--ease);
+    }
+    .mobile-menu.open { max-height: 400px; padding: 32px 48px; }
+    .mobile-menu a,
+    .mobile-menu .mobile-link {
+      display: block; width: 100%;
+      background: none; border: none; text-align: left; cursor: pointer;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s, padding-left 0.2s;
+    }
+    .mobile-menu a:last-child,
+    .mobile-menu .mobile-link:last-child { border-bottom: none; }
+    .mobile-menu a:hover,
+    .mobile-menu .mobile-link:hover { color: var(--white); padding-left: 8px; }
+    .mobile-menu-divider {
+      display: block; font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════
+       FLOATING CTA
+    ═══════════════════════════ */
+    .float-cta {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      z-index: 190;
+      background: var(--white);
+      color: var(--bg);
+      padding: 14px 28px;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      text-decoration: none;
+      opacity: 0; pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.35s, transform 0.35s var(--ease), background 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .float-cta.visible { opacity: 1; pointer-events: auto; transform: none; }
+    .float-cta:hover { background: #e0e0e0; }
+
+    /* ═══════════════════════════
+       HERO SCROLL-VIDEO
+    ═══════════════════════════ */
+    .scroll-video-hero {
+      height: 300vh; position: relative;
+      overflow: clip;
+    }
+    .scroll-video-sticky {
+      position: sticky; top: 0;
+      height: 100vh; width: 100%; overflow: hidden;
+      background: #000;
+    }
+    .scroll-video-sticky video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    /* Logo: zona superior, bien separado del texto */
+    .hero-logo {
+      position: absolute;
+      top: 96px;
+      left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      opacity: 0; animation: fadeUp 0.9s 0.15s forwards;
+    }
+    .hero-logo img {
+      height: 80px; width: auto;
+      filter: invert(1);
+      display: block;
+    }
+    /* Texto: zona central-baja, bien separado del logo */
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.44);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 2; text-align: center;
+      padding: 0 24px;
+    }
+    .hero-eyebrow {
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 16px;
+      opacity: 0; animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7.5vw, 6.5rem);
+      font-weight: 400; line-height: 1.02;
+      color: #fff;
+      opacity: 0; animation: fadeUp 0.9s 0.65s forwards;
+    }
+    .hero-title em { font-style: italic; color: rgba(255,255,255,0.6); }
+    .hero-sub {
+      margin-top: 18px;
+      font-size: 0.9rem; font-weight: 300;
+      color: rgba(255,255,255,0.45);
+      max-width: 400px;
+      opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+    }
+    .hero-actions {
+      margin-top: 36px;
+      display: flex; gap: 14px; justify-content: center;
+      opacity: 0; animation: fadeUp 0.9s 0.95s forwards;
+    }
+    @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    /* ═══════════════════════════
+       BUTTONS
+    ═══════════════════════════ */
+    .btn-primary {
+      background: var(--white);
+      color: var(--bg);
+      padding: 13px 34px;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      text-decoration: none; display: inline-block;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s var(--ease);
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:hover::before { left: 100%; }
+
+    .btn-ghost {
+      background: none; cursor: pointer;
+      font-family: var(--font-body);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.75);
+      padding: 13px 34px;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      text-decoration: none; display: inline-block;
+      transition: border-color 0.25s, color 0.25s, transform 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.6); color: var(--white); transform: translateY(-2px); }
+
+    /* ═══════════════════════════
+       SHARED / LAYOUT
+    ═══════════════════════════ */
+    section { padding: 120px 48px; }
+    .container { max-width: var(--max); margin: 0 auto; }
+
+    .section-num {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 10vw, 8rem);
+      font-weight: 400; color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.06);
+      line-height: 1; margin-bottom: -24px;
+      display: block; user-select: none;
+    }
+    .section-label {
+      font-size: 0.63rem; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 500; display: block; margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      font-weight: 400; line-height: 1.08; color: var(--text);
+    }
+    .divider { width: 32px; height: 1px; background: rgba(255,255,255,0.2); margin: 28px 0; }
+
+    /* Scroll reveals */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-left { opacity: 0; transform: translateX(-36px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal-left.visible { opacity: 1; transform: none; }
+    .reveal-right { opacity: 0; transform: translateX(36px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal-right.visible { opacity: 1; transform: none; }
+    .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+    .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
+    .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
+    .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
+    .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
+    .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+
+    /* ── Clientes glow ── */
+    .clients-glow {
+      margin-top: 40px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .clients-number {
+      font-family: var(--font-body);
+      font-size: 3.8rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1;
+      position: relative;
+      display: inline-block;
+      text-shadow:
+        0 0 20px rgba(255,255,255,0.35),
+        0 0 50px rgba(255,255,255,0.15),
+        0 0 90px rgba(255,255,255,0.08);
+      animation: glowPulse 3.5s ease-in-out infinite;
+    }
+    .clients-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    @keyframes glowPulse {
+      0%, 100% {
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.3),
+          0 0 45px rgba(255,255,255,0.12),
+          0 0 80px rgba(255,255,255,0.06);
+      }
+      50% {
+        text-shadow:
+          0 0 28px rgba(255,255,255,0.55),
+          0 0 65px rgba(255,255,255,0.25),
+          0 0 120px rgba(255,255,255,0.12);
+      }
+    }
+
+    /* ═══════════════════════════
+       MARQUEE
+    ═══════════════════════════ */
+    .parallax-line {
+      overflow: hidden; padding: 22px 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .parallax-text {
+      font-family: var(--font-body);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: flex; gap: 32px; align-items: center;
+      width: 100%; justify-content: space-between;
+    }
+    .parallax-text span {
+      color: rgba(255,255,255,0.2);
+      font-size: 0.45rem;
+    }
+
+    /* ═══════════════════════════
+       ABOUT
+    ═══════════════════════════ */
+    .about { background: var(--surface); }
+    .about-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 88px; align-items: center;
+    }
+    .about-text p {
+      color: var(--text-muted); font-weight: 300;
+      font-size: 1rem; line-height: 1.9; margin-bottom: 20px;
+    }
+    .about-highlight {
+      font-family: var(--font-display);
+      font-size: 1.25rem; font-style: italic;
+      color: var(--text-soft); line-height: 1.5;
+      border-left: 2px solid rgba(255,255,255,0.15);
+      padding-left: 24px; margin: 32px 0;
+    }
+    .about-img {
+      aspect-ratio: 3/4; background: var(--surface2);
+      position: relative; overflow: hidden;
+    }
+    .about-img::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    }
+    .about-img-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+      color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.1em;
+    }
+    .about-img-placeholder svg { opacity: 0.2; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 28px; margin-top: 52px; padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 2.6rem; font-weight: 400;
+      color: var(--text); line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.68rem; color: var(--text-muted);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
+    }
+
+    /* ═══════════════════════════
+       SERVICES
+    ═══════════════════════════ */
+    .services-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 56px;
+    }
+    .service-category { margin-bottom: 64px; }
+    .service-category:last-child { margin-bottom: 0; }
+    .service-category-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 400;
+      letter-spacing: 0.02em; color: var(--text-soft);
+      margin-bottom: 24px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .services-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1px; background: var(--border);
+    }
+    .services-grid.cols-1 { grid-template-columns: 1fr; max-width: 360px; }
+    .services-grid.cols-2 { grid-template-columns: repeat(2,1fr); }
+    .services-grid.cols-3 { grid-template-columns: repeat(3,1fr); }
+    .service-card {
+      background: var(--bg);
+      padding: 44px 36px;
+      position: relative; overflow: hidden;
+      cursor: default;
+      transition: background 0.35s var(--ease), transform 0.35s var(--ease);
+    }
+    .service-card.featured { background: var(--surface); }
+    .service-card:hover { background: var(--surface2); transform: translateY(-3px); }
+
+    .service-badge {
+      display: inline-block;
+      font-size: 0.58rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--text-soft);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 3px 10px; margin-bottom: 20px;
+    }
+    .service-badge.hot {
+      color: var(--white);
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+    }
+    .service-icon {
+      width: 32px; height: 32px;
+      color: var(--text-soft); margin-bottom: 20px;
+      transition: transform 0.35s var(--ease), color 0.2s;
+    }
+    .service-card:hover .service-icon { transform: scale(1.15); color: var(--white); }
+    .service-name {
+      font-family: var(--font-display);
+      font-size: 1.25rem; font-weight: 400;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .service-desc {
+      font-size: 0.83rem; color: var(--text-muted);
+      line-height: 1.75; margin-bottom: 28px;
+    }
+    .service-price {
+      font-size: 1.5rem; font-weight: 300; color: var(--text);
+    }
+    .service-price small {
+      font-size: 0.68rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-left: 6px; font-weight: 400;
+    }
+    .service-cta-link {
+      display: inline-block; margin-top: 18px;
+      font-size: 0.65rem; letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-family: var(--font-body); font-weight: 500;
+      color: var(--text-soft);
+      background: none; border: 1px solid var(--border);
+      padding: 10px 18px; cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .service-cta-link:hover {
+      color: var(--bg);
+      background: var(--white);
+      border-color: var(--white);
+    }
+
+    /* ═══════════════════════════
+       GALLERY
+    ═══════════════════════════ */
+    .gallery { background: var(--surface); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px; margin-top: 56px;
+      border: 2px solid rgba(255,255,255,0.95);
+      animation: galleryFrameGlow 3.2s ease-in-out infinite;
+    }
+    @keyframes galleryFrameGlow {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255,255,255,0.7),
+                    0 0 24px rgba(255,255,255,0.4),
+                    inset 0 0 10px rgba(255,255,255,0.15);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255,255,255,1),
+                    0 0 44px rgba(255,255,255,0.7),
+                    inset 0 0 16px rgba(255,255,255,0.3);
+      }
+    }
+    /* fila 1 — 3 cuadrados */
+    .gallery-item {
+      grid-column: span 2;
+      aspect-ratio: 1 / 1;
+      background: var(--surface2); overflow: hidden;
+      position: relative; cursor: zoom-in;
+    }
+    /* fila 2 — 2 fotos panorámicas a media pantalla */
+    .gallery-item--half {
+      grid-column: span 3;
+      aspect-ratio: 4 / 3;
+    }
+
+    /* Fotos apiladas — fade entre ellas */
+    .gallery-photo {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.5s ease, transform 0.65s var(--ease), filter 0.4s;
+      filter: brightness(0.88);
+      transform: scale(1);
+    }
+    .gallery-photo.gp-active {
+      opacity: 1;
+    }
+    .gallery-item:hover .gallery-photo.gp-active {
+      transform: scale(1.06);
+      filter: brightness(1.05);
+    }
+
+    /* ═══════════════════════════
+       CITA — formulario simplificado
+    ═══════════════════════════ */
+    .cita-section { background: var(--bg); }
+    .cita-inner {
+      display: grid; grid-template-columns: 1fr 1.1fr;
+      gap: 80px; align-items: start;
+    }
+
+    /* Info lado izquierdo */
+    .cita-info p {
+      color: var(--text-muted); font-weight: 300;
+      font-size: 0.95rem; line-height: 1.85; margin-bottom: 48px;
+    }
+    .info-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .info-item {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .info-item:first-child { border-top: 1px solid var(--border); }
+    .info-item:hover { border-bottom-color: var(--border-hover); }
+    .info-label {
+      font-size: 0.6rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 600; min-width: 72px; padding-top: 2px;
+    }
+    .info-value { color: var(--text-muted); font-size: 0.9rem; font-weight: 300; }
+
+    /* Formulario lado derecho — minimalista */
+    .cita-form-wrap {
+      background: var(--surface);
+      padding: 52px 48px;
+      border: 1px solid var(--border);
+    }
+    .cita-form-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem; font-weight: 400;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .cita-form-sub {
+      font-size: 0.82rem; color: var(--text-muted);
+      font-weight: 300; margin-bottom: 40px;
+    }
+
+    /* ── Booking panel rediseñado ── */
+    .cita-book-panel {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 56px 44px 48px;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+    .cita-book-panel:hover {
+      border-color: rgba(255,255,255,0.13);
+      box-shadow: 0 0 60px rgba(255,255,255,0.04), inset 0 0 80px rgba(255,255,255,0.02);
+    }
+    /* radial glow halo de fondo */
+    .cita-book-panel::before {
+      content: '';
+      position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+      width: 280px; height: 220px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .cita-book-panel > * { position: relative; z-index: 1; }
+
+    .cbp-eyebrow {
+      font-size: 0.56rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 600; margin-bottom: 20px;
+    }
+
+    /* número 30 con glow animado */
+    .cbp-hero {
+      display: flex; align-items: baseline; gap: 8px;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .cbp-thirty {
+      font-family: var(--font-body);
+      font-size: 8.5rem; font-weight: 100;
+      letter-spacing: -0.07em; color: var(--white);
+      display: inline-block; position: relative;
+      text-shadow:
+        0 0 18px rgba(255,255,255,0.55),
+        0 0 50px rgba(255,255,255,0.22),
+        0 0 110px rgba(255,255,255,0.10);
+      animation: cbp-glow 4s ease-in-out infinite;
+    }
+    @keyframes cbp-glow {
+      0%, 100% {
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.55),
+          0 0 50px rgba(255,255,255,0.22),
+          0 0 110px rgba(255,255,255,0.10);
+      }
+      50% {
+        text-shadow:
+          0 0 28px rgba(255,255,255,0.95),
+          0 0 75px rgba(255,255,255,0.45),
+          0 0 160px rgba(255,255,255,0.22);
+      }
+    }
+    /* shimmer sweep */
+    .cbp-thirty::after {
+      content: '';
+      position: absolute; inset: -8px -24px;
+      background: linear-gradient(
+        108deg,
+        transparent 38%, rgba(255,255,255,0.28) 50%, transparent 62%
+      );
+      animation: cbp-shimmer 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes cbp-shimmer {
+      0%    { transform: translateX(-120%) skewX(-12deg); }
+      22%, 100% { transform: translateX(220%) skewX(-12deg); }
+    }
+    .cbp-unit {
+      font-family: var(--font-body);
+      font-size: 2.2rem; font-weight: 200;
+      color: var(--white); letter-spacing: -0.02em;
+      opacity: 0.65;
+    }
+
+    /* línea decorativa */
+    .cbp-rule {
+      width: 40px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+      margin: 22px auto 22px;
+    }
+
+    .cbp-desc {
+      font-size: 0.82rem; color: var(--text-muted);
+      font-weight: 300; line-height: 1.85;
+      max-width: 280px;
+    }
+
+    /* chips de beneficios */
+    .cbp-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin: 28px 0 36px;
+    }
+    .cbp-chip {
+      font-size: 0.63rem; letter-spacing: 0.1em;
+      font-weight: 400; color: var(--text-soft);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .cbp-chip:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .cbp-sched {
+      font-size: 0.63rem; color: var(--text-muted);
+      font-weight: 300; letter-spacing: 0.07em;
+      margin-top: 16px;
+    }
+    .cita-form {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .field-wrap {
+      position: relative;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+      margin-bottom: 0;
+    }
+    .field-wrap:focus-within { border-bottom-color: var(--white); }
+    .field-wrap:first-of-type { border-top: 1px solid var(--border); }
+
+    .field-wrap input,
+    .field-wrap select {
+      width: 100%;
+      background: transparent;
+      border: none; outline: none;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem; font-weight: 300;
+      padding: 20px 0 8px 0;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer;
+    }
+    .field-wrap select option { background: var(--surface2); color: var(--text); }
+    .field-wrap label {
+      position: absolute; top: 8px; left: 0;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--text-muted);
+      font-weight: 500; pointer-events: none;
+      transition: color 0.2s;
+    }
+    .field-wrap:focus-within label { color: var(--text-soft); }
+    .field-wrap .select-arrow {
+      position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--text-muted);
+    }
+
+    .cita-submit {
+      margin-top: 40px;
+      background: var(--white);
+      color: var(--bg);
+      border: none; width: 100%;
+      padding: 18px;
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.2s var(--ease);
+      position: relative; overflow: hidden;
+    }
+    .cita-submit::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.08);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s var(--ease);
+    }
+    .cita-submit:hover { transform: translateY(-1px); }
+    .cita-submit:hover::before { transform: scaleX(1); }
+    .cita-submit:active { transform: translateY(0); }
+
+    /* ═══════════════════════════
+       FOOTER
+    ═══════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 44px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-logo img {
+      height: 30px; width: auto;
+      filter: invert(1); opacity: 0.55;
+      transition: opacity 0.2s;
+    }
+    .footer-logo:hover img { opacity: 0.8; }
+    .footer-copy { font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.06em; }
+    .footer-socials { display: flex; gap: 24px; }
+    .footer-socials a {
+      color: var(--text-muted); font-size: 0.68rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      text-decoration: none; transition: color 0.2s;
+      position: relative;
+    }
+    .footer-socials a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0%; height: 1px; background: var(--white);
+      transition: width 0.25s var(--ease);
+    }
+    .footer-socials a:hover { color: var(--white); }
+    .footer-socials a:hover::after { width: 100%; }
+
+    /* ═══════════════════════════
+       ANIMATIONS
+    ═══════════════════════════ */
+    @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+    /* ═══════════════════════════
+       TRANSICIONES SUAVES GLOBALES
+    ═══════════════════════════ */
+
+    /* Entrada de página — SOLO opacidad, sin transform (el transform en body rompe position:fixed) */
+    body { opacity: 0; transition: opacity 0.55s ease; }
+    body.page-ready { opacity: 1; }
+
+    /* Reveals mejorados — más suaves y profundos */
+    .reveal        { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .reveal-left   { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .reveal-right  { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .stagger > *   { transition: opacity 0.75s var(--ease), transform 0.75s var(--ease); }
+
+    /* Botón primario — glow al pasar */
+    .btn-primary {
+      transition: transform 0.25s var(--ease), box-shadow 0.4s var(--ease);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 32px rgba(255,255,255,0.18), 0 6px 24px rgba(0,0,0,0.45);
+    }
+
+    /* Botón ghost — glow sutil */
+    .btn-ghost {
+      transition: border-color 0.3s, color 0.3s, transform 0.3s var(--ease), box-shadow 0.3s;
+    }
+    .btn-ghost:hover {
+      box-shadow: 0 0 20px rgba(255,255,255,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Float CTA — elevación */
+    .float-cta {
+      transition: background 0.25s, transform 0.35s var(--ease),
+                  box-shadow 0.35s var(--ease), opacity 0.35s var(--ease);
+    }
+    .float-cta:hover {
+      background: #e8e8e8;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+    }
+
+    /* Service card — shimmer en hover */
+    .service-card {
+      transition: background 0.4s var(--ease), transform 0.4s var(--ease),
+                  box-shadow 0.4s var(--ease);
+    }
+    .service-card::after {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 55%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+      transition: left 0.7s var(--ease);
+      pointer-events: none; /* no bloquea clicks */
+    }
+    .service-card:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07); }
+    .service-card:hover::after { left: 160%; }
+
+    /* Service CTA link — glow */
+    .service-cta-link {
+      transition: color 0.25s, border-color 0.25s, background 0.25s,
+                  box-shadow 0.3s, transform 0.25s;
+    }
+    .service-cta-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255,255,255,0.08);
+    }
+
+    /* Galería — marco brillante solo en el contorno exterior del collage, con pulso animado
+       IMPORTANTE: incluye opacity para no anular el stagger de scroll */
+    .gallery-item {
+      transition: opacity 0.75s var(--ease), transform 0.45s var(--ease);
+    }
+    .gallery-item:hover {
+      transform: scale(1.012);
+    }
+
+    /* About highlight — borde con glow */
+    .about-highlight {
+      transition: border-color 0.4s, padding-left 0.4s var(--ease);
+    }
+    .about-highlight:hover {
+      border-color: rgba(255,255,255,0.35);
+      padding-left: 32px;
+    }
+
+    /* Número de clientes — count-up listo */
+    .clients-number {
+      transition: text-shadow 0.5s;
+    }
+
+    /* Nav logo */
+    .nav-logo { transition: opacity 0.2s, transform 0.3s var(--ease); }
+    .nav-logo:hover { opacity: 0.85; transform: scale(1.04); }
+
+    /* Booking panel button glow
+       Sin transform: el padre tiene overflow:hidden y cliparía el movimiento */
+    .cita-book-panel .open-booking {
+      transition: background 0.2s, box-shadow 0.4s var(--ease);
+    }
+    .cita-book-panel .open-booking:hover {
+      box-shadow: 0 0 40px rgba(255,255,255,0.22), 0 8px 28px rgba(0,0,0,0.4);
+    }
+
+    /* ═══════════════════════════
+       RESPONSIVE
+    ═══════════════════════════ */
+    @media (max-width: 960px) {
+      nav { padding: 0 24px; }
+      .nav-links, .nav-cta-wrap { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { padding-left: 24px; padding-right: 24px; }
+      .mobile-menu.open { padding: 24px; }
+      section { padding: 80px 24px; }
+      .about-inner { grid-template-columns: 1fr; gap: 48px; }
+      .about-img { aspect-ratio: 16/9; }
+      .services-grid,
+      .services-grid.cols-1,
+      .services-grid.cols-2,
+      .services-grid.cols-3 { grid-template-columns: 1fr !important; max-width: none !important; gap: 1px; }
+      .service-card { padding: 32px 24px; }
+      .services-header { flex-direction: column; align-items: flex-start; gap: 20px; margin-bottom: 32px; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; gap: 3px; }
+      .gallery-item,
+      .gallery-item--half { grid-column: span 1 !important; aspect-ratio: 1/1 !important; }
+      .cita-inner { grid-template-columns: 1fr; gap: 56px; }
+      .cita-form-wrap { padding: 36px 28px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; padding: 32px 24px; }
+      .float-cta { display: none; }
+    }
+
+    /* ═══════════════════════════
+       BOOKING MODAL v2
+    ═══════════════════════════ */
+    .booking-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0);
+      display: flex; align-items: flex-end; justify-content: center;
+      pointer-events: none;
+      transition: background 0.4s var(--ease), backdrop-filter 0.4s;
+    }
+    .booking-overlay.open {
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: all;
+    }
+    .booking-sheet {
+      width: 100%; max-width: 540px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      transform: translateY(105%);
+      transition: transform 0.55s var(--ease);
+      max-height: 90vh;
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin; scrollbar-color: #2a2a2a transparent;
+    }
+    .booking-overlay.open .booking-sheet { transform: translateY(0); }
+    @media (min-width: 600px) {
+      .booking-overlay { align-items: center; }
+      .booking-sheet {
+        border-radius: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        max-height: 88vh;
+        transform: translateY(24px) scale(0.97);
+        opacity: 0;
+        transition: transform 0.5s var(--ease), opacity 0.4s var(--ease);
+      }
+      .booking-overlay.open .booking-sheet { transform: none; opacity: 1; }
+    }
+
+    /* Header */
+    .booking-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 28px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .booking-back {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-family: var(--font-body);
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0;
+      transition: color 0.2s;
+    }
+    .booking-back:hover { color: var(--white); }
+    .booking-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: color 0.2s, background 0.2s;
+      width: 32px; height: 32px;
+    }
+    .booking-close:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+    .booking-steps { display: flex; align-items: center; gap: 6px; }
+    .bstep {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-muted); font-size: 0.6rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s var(--ease);
+    }
+    .bstep.active { border-color: var(--white); background: var(--white); color: var(--bg); }
+    .bstep.done { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.3); }
+    .bstep-line { width: 18px; height: 1px; background: rgba(255,255,255,0.12); }
+
+    /* View body */
+    .booking-view { padding: 28px 28px 0; }
+    .booking-section-label {
+      font-size: 0.6rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 500; display: block; margin-bottom: 10px;
+    }
+    .booking-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 400; color: var(--text); line-height: 1.1; margin-bottom: 28px;
+    }
+    .booking-title em { font-style: italic; color: var(--text-soft); }
+
+    /* Week nav */
+    .week-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; padding: 11px 16px;
+      background: var(--bg); border: 1px solid var(--border);
+    }
+    .week-label {
+      font-size: 0.78rem; font-weight: 500; color: var(--text); letter-spacing: 0.04em;
+    }
+    .week-arrow {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px;
+      display: flex; align-items: center; transition: color 0.2s;
+    }
+    .week-arrow:hover:not(:disabled) { color: var(--white); }
+    .week-arrow:disabled { color: rgba(255,255,255,0.15); cursor: default; }
+
+    /* Days strip */
+    .days-strip {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 24px;
+    }
+    .day-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 4px; background: none; border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-muted); transition: all 0.2s var(--ease);
+      font-family: var(--font-body);
+    }
+    .day-chip:hover:not(.disabled):not(.selected) {
+      border-color: rgba(255,255,255,0.25); color: var(--text);
+    }
+    .day-chip.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .day-chip.disabled { opacity: 0.22; cursor: default; pointer-events: none; }
+    .day-name-label {
+      font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+    }
+    .day-num-label { font-size: 1rem; font-weight: 300; line-height: 1; }
+    .day-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+
+    /* Time slots */
+    .slots-wrap { min-height: 100px; }
+    .slots-title {
+      font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-soft); font-weight: 500; margin-bottom: 14px;
+    }
+    .slots-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
+    .slot-btn {
+      padding: 8px 15px; background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-body);
+      font-size: 0.78rem; font-weight: 400; letter-spacing: 0.03em;
+      cursor: pointer; transition: all 0.2s var(--ease);
+    }
+    .slot-btn:hover:not(.unavailable):not(.selected) {
+      border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04);
+    }
+    .slot-btn.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .slot-btn.unavailable { opacity: 0.18; cursor: not-allowed; text-decoration: line-through; }
+    .slot-btn.booked { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; color: #e05555; border-color: rgba(224,85,85,0.25); }
+    .slots-empty {
+      color: var(--text-muted); font-size: 0.82rem; font-weight: 300; font-style: italic; padding: 12px 0;
+    }
+
+    /* Footer */
+    .booking-footer {
+      display: flex; justify-content: flex-end;
+      padding: 18px 0 4px; border-top: 1px solid var(--border); margin-top: 4px;
+    }
+    .booking-next-btn {
+      background: var(--white); color: var(--bg); border: none; padding: 14px 32px;
+      font-family: var(--font-body); font-size: 0.75rem;
+      font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+      cursor: pointer; display: flex; align-items: center; gap: 10px;
+      transition: background 0.2s, transform 0.2s var(--ease), opacity 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .booking-next-btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .booking-next-btn:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+    .booking-next-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: translateX(-100%); transition: transform 0.45s;
+    }
+    .booking-next-btn:hover:not(:disabled)::before { transform: translateX(100%); }
+
+    /* ── Block labels ── */
+    .bblock-label {
+      font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px; display: block;
+    }
+
+    /* ── Barbers (view 1) ── */
+    .barbers-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 28px;
+    }
+    .barber-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      padding: 16px 10px; background: none; border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-muted); font-family: var(--font-body);
+      text-align: center; transition: all 0.22s var(--ease);
+    }
+    .barber-chip:hover:not(.selected) { border-color: rgba(255,255,255,0.25); color: var(--text); }
+    .barber-chip.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .barber-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.04); transition: all 0.22s;
+      overflow: hidden;
+    }
+    .barber-avatar img {
+      width: 100%; height: 100%; object-fit: cover; object-position: top center;
+      border-radius: 50%;
+    }
+    .barber-chip.selected .barber-avatar { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+    .barber-name { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; }
+    .barber-role { font-size: 0.57rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+
+    /* ── Services (view 1) ── */
+    .bsvc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 28px;
+    }
+    .bsvc-chip {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+      padding: 14px 16px; background: none; border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-muted); font-family: var(--font-body);
+      text-align: left; transition: all 0.22s var(--ease);
+    }
+    .bsvc-chip:hover:not(.selected) { border-color: rgba(255,255,255,0.25); color: var(--text); }
+    .bsvc-chip.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .bsvc-chip-name { font-size: 0.82rem; font-weight: 500; display: block; }
+    .bsvc-chip-meta { display: flex; align-items: center; gap: 5px; }
+    .bsvc-chip-price { font-size: 0.72rem; font-weight: 600; opacity: 0.9; }
+    .bsvc-chip-dot   { font-size: 0.6rem; opacity: 0.3; }
+    .bsvc-chip-time  { font-size: 0.58rem; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.55; }
+    .bsvc-chip.selected .bsvc-chip-price,
+    .bsvc-chip.selected .bsvc-chip-time,
+    .bsvc-chip.selected .bsvc-chip-dot { opacity: 0.65; }
+
+    /* ── Selection pill (view 2) ── */
+    .bsel-pill {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 10px 16px; margin-bottom: 20px;
+      font-size: 0.78rem; color: var(--text-soft); font-weight: 300;
+    }
+    .bsel-pill strong { color: var(--text); font-weight: 500; }
+    .bsel-pill-dot { opacity: 0.3; }
+    .bsel-sep { opacity: 0.3; padding: 0 2px; }
+    .bsel-pill span { color: var(--text); }
+
+    /* ── Time slots — grouped Mañana / Tarde ── */
+    .time-group { margin-bottom: 18px; }
+    .time-group-label {
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-soft); font-weight: 600; margin-bottom: 10px;
+    }
+    .slots-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .slot-btn {
+      padding: 10px 16px; background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-body); font-size: 0.82rem;
+      font-weight: 400; min-width: 68px; text-align: center;
+      cursor: pointer; transition: all 0.2s var(--ease);
+    }
+    .slot-btn:hover:not(.unavailable):not(.selected) {
+      border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04);
+    }
+    .slot-btn.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .slot-btn.unavailable { opacity: 0.15; cursor: not-allowed; text-decoration: line-through; }
+    .slots-empty { color: var(--text-muted); font-size: 0.82rem; font-weight: 300; font-style: italic; padding: 10px 0; }
+
+    /* ── Appointment card (view 3) ── */
+    .bappt-card {
+      background: var(--bg); border: 1px solid var(--border); padding: 0 20px; margin-bottom: 28px;
+    }
+    .bappt-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+    }
+    .bappt-row:last-child { border-bottom: none; }
+    .bappt-lbl { color: var(--text-muted); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; }
+    .bappt-row span:last-child { color: var(--text); }
+
+    /* ── Form field (view 3) ── */
+    .bfield-wrap {
+      position: relative; border-bottom: 1px solid var(--border); transition: border-color 0.25s;
+    }
+    .bfield-wrap:focus-within { border-bottom-color: var(--white); }
+    .bfield-wrap:first-of-type { border-top: 1px solid var(--border); }
+    .bfield-label {
+      display: block; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 500; padding-top: 10px; transition: color 0.2s;
+    }
+    .bfield-wrap:focus-within .bfield-label { color: var(--text-soft); }
+    .bfield-input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--font-body);
+      font-size: 0.95rem; font-weight: 300; padding: 6px 0 12px 0;
+    }
+
+    /* ── Success (view 3 after submit) ── */
+    .booking-success {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 48px 28px 40px;
+    }
+    .success-check {
+      width: 68px; height: 68px; border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px; color: var(--white);
+      animation: checkReveal 0.65s var(--ease) forwards;
+    }
+    @keyframes checkReveal { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title { font-family: var(--font-display); font-size: 2rem; font-weight: 400; color: var(--text); margin-bottom: 10px; }
+    .success-sub { font-size: 0.9rem; color: var(--text-muted); font-weight: 300; margin-bottom: 28px; }
+    .success-details {
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 0 22px; width: 100%; max-width: 340px; text-align: left; margin-bottom: 24px;
+    }
+    .success-detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted);
+    }
+    .success-detail-row:last-child { border-bottom: none; }
+    .success-detail-row span:last-child { color: var(--text); }
+    .success-note { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 32px; font-weight: 300; }
+    .success-detail-row .success-code {
+      font-family: var(--font-display); letter-spacing: 0.18em; font-weight: 500;
+    }
+
+    /* ── Cancelar cita ── */
+    .cancel-hint { font-size: 0.82rem; color: var(--text-muted); font-weight: 300; margin: -16px 0 24px; }
+    .cancel-code-input { text-align: center; letter-spacing: 0.3em; font-size: 1.2rem; text-transform: uppercase; }
+    .booking-footer.split { justify-content: space-between; align-items: center; }
+    .booking-next-btn.danger { background: #e05555; color: #fff; }
+
+    .booking-close-full {
+      background: none; border: 1px solid rgba(255,255,255,0.18); color: var(--text-muted);
+      padding: 12px 40px; font-family: var(--font-body); font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+      transition: border-color 0.25s, color 0.25s;
+    }
+    .booking-close-full:hover { border-color: var(--white); color: var(--white); }
+
+    .open-booking { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#top" class="nav-logo">
+    <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#nosotros" data-section="nosotros">Nosotros</a></li>
+    <li><a href="#servicios" data-section="servicios">Servicios</a></li>
+    <li><a href="#galeria" data-section="galeria">Galería</a></li>
+    <li><a href="#contacto" data-section="contacto">Contacto</a></li>
+  </ul>
+  <div class="nav-cta-wrap">
+    <a href="javascript:void(0)" onclick="openMyCitas()" class="nav-cancel-link">Mis citas</a>
+    <button onclick="openBooking()" class="nav-cta open-booking">Reservar cita</button>
+  </div>
+  <div class="hamburger" id="hamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#nosotros" class="mobile-link">Nosotros</a>
+  <a href="#servicios" class="mobile-link">Servicios</a>
+  <a href="#galeria" class="mobile-link">Galería</a>
+  <button onclick="openBooking(); closeMobileMenu()" class="mobile-link open-booking">Reservar cita</button>
+  <button onclick="openMyCitas()" class="mobile-link">Mis citas</button>
+  <span class="mobile-menu-divider">Configuración</span>
+  <button onclick="toggleTheme()" class="mobile-link" id="mobileThemeLabel">Modo claro</button>
+</div>
+
+<!-- FLOATING CTA -->
+<button onclick="openBooking()" class="float-cta open-booking" id="floatCta">Reservar cita</button>
+
+<!-- CONFIGURACIÓN (flotante) -->
+<div class="settings-wrap">
+  <button class="settings-btn" onclick="toggleSettingsPanel()" id="settingsBtn" aria-label="Configuración" title="Configuración">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a8 8 0 0 0-1.7-1L14.9 2h-3.8l-.4 2.9a8 8 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.97 7.97 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a8 8 0 0 0 1.7 1l.4 2.9h3.8l.4-2.9a8 8 0 0 0 1.7-1l2.5 1 2-3.5-2.1-1.6Z"/></svg>
+  </button>
+  <div class="settings-panel" id="settingsPanel">
+    <span class="settings-panel-title">Configuración</span>
+    <div class="settings-row">
+      <span>Apariencia</span>
+      <button class="theme-switch" onclick="toggleTheme()" id="themeSwitch" aria-label="Cambiar a modo claro">
+        <span class="theme-switch-knob">
+          <svg class="icon-sun" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="icon-moon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO SCROLL-VIDEO -->
+<section class="scroll-video-hero" id="scroll-hero">
+  <div class="scroll-video-sticky">
+    <video id="heroVideo" src="assets/9sm-video.mp4" playsinline muted preload="auto"></video>
+    <div class="hero-logo">
+      <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+    </div>
+    <div class="hero-overlay">
+<h1 class="hero-title">El corte<br/>que te <em>define</em></h1>
+      <p class="hero-sub">Precisión, estilo y cuidado personal.<br/>En 9SM NEXO cada visita es una experiencia.</p>
+      <div class="hero-actions">
+        <button onclick="openBooking()" class="btn-primary open-booking">Reservar cita</button>
+        <a href="#servicios" class="btn-ghost">Ver servicios</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="parallax-line" id="marquee">
+  <div class="parallax-text" id="marqueeInner">
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section class="about" id="nosotros">
+  <div class="container">
+    <div class="about-inner">
+
+      <div class="about-text reveal-left">
+        <span class="section-num">01</span>
+        <span class="section-label">Sobre nosotros</span>
+        <h2 class="section-title">Artesanía<br/>en cada detalle</h2>
+        <div class="divider"></div>
+        <p>En 9SM NEXO somos más que una barbería — somos un espacio donde el cuidado personal se convierte en ritual. Cada cliente recibe atención personalizada y el mejor resultado.</p>
+        <blockquote class="about-highlight">
+          "El corte perfecto no es solo técnica.<br/>Es conocerte."
+        </blockquote>
+        <div class="clients-glow reveal">
+          <span class="clients-number">+1800</span>
+          <span class="clients-label">clientes satisfechos</span>
+        </div>
+      </div>
+
+      <div class="about-img reveal-right">
+        <div class="about-img-placeholder">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>[FOTO DEL LOCAL]</span>
+          <span style="font-size:0.62rem;opacity:0.4;">assets/local.jpg</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="container">
+    <div class="services-header">
+      <div class="reveal">
+        <span class="section-num">02</span>
+        <span class="section-label">Lo que ofrecemos</span>
+        <h2 class="section-title">Servicios</h2>
+      </div>
+      <button onclick="openBooking()" class="btn-ghost reveal open-booking" style="transition-delay:0.15s;">Reservar →</button>
+    </div>
+
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Cejas</h3>
+      <div class="services-grid cols-1 stagger">
+
+        <div class="service-card">
+          <span class="service-badge">Express</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 10 Q12 4 20 10"/><path d="M6 10 Q12 6 18 10"/><circle cx="8" cy="11" r="1.5"/><circle cx="16" cy="11" r="1.5"/></svg>
+          <div class="service-name">09 brow</div>
+          <p class="service-desc">Diseño y definición de cejas con técnica precisa para un acabado limpio y natural.</p>
+          <div class="service-price">$8.000</div>
+          <button onclick="openBooking('09 brow')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Cortes</h3>
+      <div class="services-grid cols-3 stagger">
+
+        <div class="service-card">
+          <span class="service-badge">Clásico</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 9 C7.5 6 10 4 12 4 C14 4 16.5 6 18 9"/><path d="M6 15 C7.5 18 10 20 12 20 C14 20 16.5 18 18 15"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+          <div class="service-name">NEXO Classic</div>
+          <p class="service-desc">Corte clásico adaptado a tu estilo y tipo de cara, con acabado prolijo y atención al detalle.</p>
+          <div class="service-price">$25.000</div>
+          <button onclick="openBooking('NEXO Classic')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card featured">
+          <span class="service-badge hot">★ Más solicitado</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9"/></svg>
+          <div class="service-name">NEXO Cut</div>
+          <p class="service-desc">Corte personalizado con lavado y styling incluido, para un resultado de barbería completo.</p>
+          <div class="service-price">$35.000</div>
+          <button onclick="openBooking('NEXO Cut')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card">
+          <span class="service-badge">Barbería</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 8 C7 5 9 3 12 3 C15 3 17 5 17 8 C17 12 15 15 12 16 C9 15 7 12 7 8Z"/><path d="M9 16 C7 18 6 20 6 22"/><path d="M15 16 C17 18 18 20 18 22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+          <div class="service-name">09 Beard</div>
+          <p class="service-desc">Perfilado y arreglo de barba con navaja, para una línea definida y un acabado impecable.</p>
+          <div class="service-price">$17.000</div>
+          <button onclick="openBooking('09 Beard')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Limpieza facial</h3>
+      <div class="services-grid cols-2 stagger">
+
+        <div class="service-card">
+          <span class="service-badge">Ritual</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="10" r="5"/><path d="M7 10 Q7 16 12 18 Q17 16 17 10"/><path d="M9 5 Q10 3 12 3 Q14 3 15 5"/><circle cx="12" cy="10" r="2"/></svg>
+          <div class="service-name">PRIME Ritual</div>
+          <p class="service-desc">Limpieza facial profunda con productos especializados para piel sana, poros limpios y aspecto luminoso.</p>
+          <div class="service-price">$50.000</div>
+          <button onclick="openBooking('PRIME Ritual')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card">
+          <span class="service-badge">Premium</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3 C8 3 4 6 4 10 C4 15 8 18 12 19 C16 18 20 15 20 10 C20 6 16 3 12 3Z"/><path d="M9 10 Q12 7 15 10"/><path d="M8 13 Q12 10 16 13"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          <div class="service-name">NEXO Experience</div>
+          <p class="service-desc">Tratamiento facial premium de mayor duración, pensado para una piel renovada de principio a fin.</p>
+          <div class="service-price">$60.000<small>– $70.000</small></div>
+          <button onclick="openBooking('NEXO Experience')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- GALERÍA -->
+<section class="gallery" id="galeria">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-num">03</span>
+      <span class="section-label">Nuestro trabajo</span>
+      <h2 class="section-title">Galería</h2>
+    </div>
+    <div class="gallery-grid stagger">
+      <!-- Celda 1: g01 ↔ g06 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g01.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g06.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 2: g02 ↔ g07 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g02.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g07.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 3: g03 ↔ g08 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g03.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g08.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 4 (panorámica): g04 ↔ g09 -->
+      <div class="gallery-item gallery-item--half">
+        <img class="gallery-photo gp-active" src="assets/g04.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g09.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 5 (panorámica): g05 fija -->
+      <div class="gallery-item gallery-item--half">
+        <img class="gallery-photo gp-active" src="assets/g05.jpg" alt="Corte" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVAR CITA -->
+<section class="cita-section" id="contacto">
+  <div class="container">
+
+    <div class="reveal" style="margin-bottom:72px;">
+      <span class="section-num">04</span>
+      <span class="section-label">Reserva</span>
+      <h2 class="section-title">Pide tu cita</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="cita-inner">
+
+      <!-- Info -->
+      <div class="cita-info reveal-left">
+        <p>Elige tu servicio, dinos tu nombre y nosotros nos encargamos del resto. Sin complicaciones.</p>
+        <ul class="info-list">
+          <li class="info-item">
+            <span class="info-label">Dirección</span>
+            <span class="info-value">[TU DIRECCIÓN AQUÍ]</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Teléfono</span>
+            <span class="info-value">[TU TELÉFONO AQUÍ]</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Horario</span>
+            <span class="info-value">Lun–Jue 10:00–20:00 · Vie 07:00–21:00 · Sáb 07:00–20:00 · Dom cerrado</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Redes</span>
+            <span class="info-value">[TUS REDES AQUÍ]</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Booking CTA -->
+      <div class="reveal-right">
+        <div class="cita-form-wrap cita-book-panel">
+          <p class="cbp-eyebrow">Reserva online</p>
+
+          <div class="cbp-hero">
+            <span class="cbp-thirty">30</span>
+            <span class="cbp-unit">seg.</span>
+          </div>
+
+          <div class="cbp-rule"></div>
+
+          <p class="cbp-desc">Elige tu día, tu hora y tu barbero.<br>Sin llamadas, sin esperas.</p>
+
+          <div class="cbp-chips">
+            <span class="cbp-chip">✓ Sin llamadas</span>
+            <span class="cbp-chip">✓ Confirmación inmediata</span>
+            <span class="cbp-chip">✓ Cancela gratis</span>
+          </div>
+
+          <button onclick="openBooking()" class="cita-submit open-booking" style="margin-top:0;">
+            Ver disponibilidad
+          </button>
+
+          <p class="cbp-sched">Lun–Jue 10:00–20:00 &nbsp;·&nbsp; Vie–Sáb 07:00–20/21:00 &nbsp;·&nbsp; Dom cerrado</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#top" class="footer-logo">
+    <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+  </a>
+  <div class="footer-copy">© 2026 9SM NEXO · Todos los derechos reservados.</div>
+  <div class="footer-socials">
+    <a href="#">Instagram</a>
+    <a href="#">TikTok</a>
+    <a href="#">WhatsApp</a>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     BOOKING MODAL v2 — 3 pasos
+═══════════════════════════════════════════ -->
+<div class="booking-overlay" id="bookingOverlay" role="dialog" aria-modal="true" aria-label="Reservar cita">
+  <div class="booking-sheet" id="bookingSheet">
+
+    <!-- Header fijo -->
+    <div class="booking-header">
+      <button class="booking-back" id="bookingBack" style="display:none" onclick="bPrevView()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Volver
+      </button>
+      <div class="booking-steps" id="bookingSteps">
+        <span class="bstep active" id="bs1">1</span>
+        <span class="bstep-line"></span>
+        <span class="bstep" id="bs2">2</span>
+        <span class="bstep-line"></span>
+        <span class="bstep" id="bs3">3</span>
+      </div>
+      <button class="booking-close" onclick="closeBooking()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- ───── PASO 1: Barbero + Servicio ───── -->
+    <div class="booking-view" id="bview-1">
+      <span class="booking-section-label">Paso 1 de 3</span>
+      <h2 class="booking-title">Tu cita,<br/><em>a tu medida</em></h2>
+
+      <p class="bblock-label">Elige tu barbero</p>
+      <div class="barbers-grid" id="barbersGrid"></div>
+
+      <p class="bblock-label">Elige el servicio</p>
+      <div class="bsvc-grid" id="bSvcGrid"></div>
+
+      <div class="booking-footer">
+        <button class="booking-next-btn" id="toCalBtn" disabled onclick="bGoToView(2)">
+          Elegir fecha
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ───── PASO 2: Fecha + Hora ───── -->
+    <div class="booking-view" id="bview-2" style="display:none">
+      <span class="booking-section-label">Paso 2 de 3</span>
+      <h2 class="booking-title">Elige fecha<br/>y <em>hora</em></h2>
+
+      <div class="bsel-pill" id="bSelPill"></div>
+
+      <div class="week-nav">
+        <button class="week-arrow" id="weekPrev" onclick="bChangeWeek(-1)" aria-label="Semana anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="week-label" id="weekLabel"></span>
+        <button class="week-arrow" id="weekNext" onclick="bChangeWeek(1)" aria-label="Semana siguiente">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="days-strip" id="daysStrip"></div>
+
+      <div id="slotsWrap" style="min-height:80px">
+        <div id="slotsContent"></div>
+      </div>
+
+      <div class="booking-footer">
+        <button class="booking-next-btn" id="toConfirmBtn" disabled onclick="bGoToView(3)">
+          Confirmar
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ───── PASO 3: Confirmar + Éxito ───── -->
+    <div class="booking-view" id="bview-3" style="display:none">
+
+      <!-- Estado: formulario -->
+      <div id="bConfirmForm">
+        <span class="booking-section-label">Paso 3 de 3</span>
+        <h2 class="booking-title" style="margin-bottom:22px">Tu <em>reserva</em></h2>
+
+        <div class="bappt-card">
+          <div class="bappt-row"><span class="bappt-lbl">Barbero</span><span id="sum-barber"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Servicio</span><span id="sum-service"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Fecha</span><span id="sum-date"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Hora</span><span id="sum-time"></span></div>
+        </div>
+
+        <form id="bForm" onsubmit="bSubmit(event)">
+          <!-- Cliente registrado: muestra tarjeta con su info -->
+          <div id="bClientReturn" style="display:none;margin-bottom:20px">
+            <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">
+              <div id="bRetInitial" style="width:42px;height:42px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0;color:var(--white)">?</div>
+              <div style="flex:1;min-width:0;overflow:hidden">
+                <p id="bRetNombre" style="font-weight:600;font-size:0.9rem;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
+                <p id="bRetTel" style="color:var(--text-muted);font-size:0.77rem;margin:0"></p>
+              </div>
+              <button type="button" onclick="bClearClientData()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:5px 10px;border-radius:6px;font-size:0.65rem;cursor:pointer;white-space:nowrap;flex-shrink:0">↩ No soy yo</button>
+            </div>
+          </div>
+
+          <!-- Cliente nuevo: campos de datos -->
+          <div id="bClientNew">
+            <div class="bfield-wrap">
+              <label class="bfield-label" for="b-nombre">Tu nombre</label>
+              <input class="bfield-input" id="b-nombre" type="text" autocomplete="name" placeholder=" " />
+            </div>
+            <div class="bfield-wrap">
+              <label class="bfield-label" for="b-telefono">Tu WhatsApp</label>
+              <input class="bfield-input" id="b-telefono" type="tel" autocomplete="tel" placeholder=" " />
+            </div>
+            <p class="cancel-hint" style="margin:6px 0 0;font-size:0.68rem">Te confirmaremos la cita por este número.</p>
+          </div>
+
+          <p id="bSubmitError" style="display:none;color:#e05555;font-size:0.72rem;margin-top:12px;line-height:1.5;"></p>
+          <div class="booking-footer" style="margin-top:24px">
+            <button type="submit" class="booking-next-btn" style="width:100%;justify-content:center">
+              Confirmar reserva
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Estado: éxito (tras submit) -->
+      <div id="bSuccess" style="display:none">
+        <div class="booking-success">
+          <div class="success-check">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2 class="success-title">¡Cita confirmada!</h2>
+          <p class="success-sub" id="bSuccessSub"></p>
+          <div class="success-details" id="bSuccessDetails"></div>
+          <p class="success-note">Te contactaremos por WhatsApp para confirmar tu cita.<br/>Puedes gestionar tus citas en <em>Mis citas</em>.</p>
+          <p id="bReloadCountdown" style="font-size:0.75rem;color:#888;margin-top:10px;"></p>
+          <button class="booking-close-full" onclick="closeBooking()">Cerrar</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- MIS CITAS -->
+<div class="booking-overlay" id="myCitasOverlay" role="dialog" aria-modal="true" aria-label="Mis citas">
+  <div class="booking-sheet">
+    <div class="booking-header">
+      <span></span>
+      <span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Mi cita</span>
+      <button class="booking-close" onclick="closeMyCitas()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Cargando -->
+    <div id="mcLoading" style="display:none;padding:52px 28px;text-align:center">
+      <p style="color:var(--text-muted);font-size:0.82rem;letter-spacing:0.06em">Cargando…</p>
+    </div>
+
+    <!-- Tarjeta de cita -->
+    <div id="mcCard" style="display:none;padding:8px 28px 32px">
+      <!-- Badge estado -->
+      <div style="display:inline-flex;align-items:center;gap:7px;margin-bottom:24px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0"></span>
+        <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.15em;color:#22c55e;font-weight:600">Confirmada</span>
+      </div>
+      <!-- Fecha + Hora -->
+      <p id="mcCardFecha" style="font-size:0.8rem;color:var(--text-muted);margin:0 0 8px;letter-spacing:0.02em"></p>
+      <p id="mcCardHora"  style="font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin:0 0 26px;line-height:1"></p>
+      <!-- Detalles -->
+      <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;display:flex;flex-direction:column;gap:14px;margin-bottom:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.11em;color:var(--text-muted)">Barbero</span>
+          <span id="mcCardBarber" style="font-size:0.85rem;font-weight:500;color:var(--white)"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.11em;color:var(--text-muted)">Servicio</span>
+          <span id="mcCardService" style="font-size:0.85rem;color:var(--text-soft)"></span>
+        </div>
+      </div>
+      <!-- Acciones -->
+      <div id="mcCardActions"></div>
+    </div>
+
+    <!-- Sin citas -->
+    <div id="mcEmpty" style="display:none;padding:52px 28px;text-align:center">
+      <p style="font-size:1rem;font-weight:600;margin:0 0 8px;letter-spacing:-0.01em">Sin citas próximas</p>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:0 0 32px;line-height:1.6">Cuando reserves una cita<br/>aparecerá aquí.</p>
+      <button onclick="closeMyCitas()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:11px 28px;border-radius:8px;font-size:0.75rem;cursor:pointer;letter-spacing:0.06em">Cerrar</button>
+    </div>
+
+    <!-- Formulario (fallback sin datos guardados) -->
+    <div id="mcPhoneForm" style="display:none;padding:8px 28px 32px">
+      <h2 class="booking-title" style="margin-bottom:6px">Tu número<br/><em>de WhatsApp</em></h2>
+      <p class="cancel-hint" style="margin-bottom:28px">Ingresa el número con el que reservaste.</p>
+      <form onsubmit="mcBuscarPorTel(event)">
+        <div class="bfield-wrap">
+          <label class="bfield-label" for="mcPhoneInput">Tu WhatsApp</label>
+          <input class="bfield-input" id="mcPhoneInput" type="tel" placeholder=" " />
+        </div>
+        <p id="mcPhoneError" style="display:none;color:#e05555;font-size:0.72rem;margin-top:8px"></p>
+        <div class="booking-footer" style="margin-top:24px">
+          <button type="submit" class="booking-next-btn" style="width:100%;justify-content:center">Ver mi cita</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Cancelada OK -->
+    <div id="mcDone" style="display:none;padding:52px 28px;text-align:center">
+      <div style="width:48px;height:48px;border-radius:50%;border:1.5px solid #22c55e;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <p style="font-size:1.05rem;font-weight:700;margin:0 0 8px">Cita cancelada</p>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:0 0 36px;line-height:1.5">Tu espacio quedó liberado.</p>
+      <button onclick="closeMyCitas()" class="booking-next-btn" style="width:100%;justify-content:center">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Modo claro/oscuro ── */
+function syncThemeUI() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const switchBtn = document.getElementById('themeSwitch');
+  if (switchBtn) switchBtn.setAttribute('aria-label', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+  const mobileLabel = document.getElementById('mobileThemeLabel');
+  if (mobileLabel) mobileLabel.textContent = isLight ? 'Modo oscuro' : 'Modo claro';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('9sm_theme', next);
+  syncThemeUI();
+}
+syncThemeUI();
+
+/* ── Panel de configuración (engranaje en el nav) ── */
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settingsPanel');
+  const btn   = document.getElementById('settingsBtn');
+  const willOpen = !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  btn.classList.toggle('open', willOpen);
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.settings-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('settingsPanel').classList.remove('open');
+    document.getElementById('settingsBtn').classList.remove('open');
+  }
+});
+
+/* ── NAV scroll + float CTA ── */
+const nav      = document.getElementById('nav');
+const floatCta = document.getElementById('floatCta');
+window.addEventListener('scroll', () => {
+  const s = window.scrollY;
+  nav.classList.toggle('scrolled', s > 50);
+  floatCta.classList.toggle('visible', s > window.innerHeight * 0.8);
+}, { passive: true });
+
+/* ── Scroll spy ── */
+const sections = document.querySelectorAll('section[id], div[id]');
+const navAs    = document.querySelectorAll('.nav-links a[data-section]');
+const spyObs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navAs.forEach(a => a.classList.toggle('active', a.dataset.section === e.target.id));
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => spyObs.observe(s));
+
+/* ── Hamburger ── */
+const ham = document.getElementById('hamburger');
+const mob = document.getElementById('mobileMenu');
+ham.addEventListener('click', () => {
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+document.querySelectorAll('.mobile-link').forEach(l =>
+  l.addEventListener('click', () => { ham.classList.remove('open'); mob.classList.remove('open'); })
+);
+
+/* ── Intersection Observer (reveal + stagger) ── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .stagger').forEach(el => io.observe(el));
+
+/* ── Counter animation ── */
+const cntObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('.counter').forEach(c => {
+      const n = parseInt(c.dataset.target);
+      if (isNaN(n) || n === 0) return;
+      let t0 = null;
+      const dur = 1800;
+      const step = ts => {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        c.textContent = Math.floor(ease * n);
+        if (p < 1) requestAnimationFrame(step); else c.textContent = n;
+      };
+      requestAnimationFrame(step);
+    });
+    cntObs.unobserve(e.target);
+  });
+}, { threshold: 0.5 });
+const sb = document.getElementById('statsBlock');
+if (sb) cntObs.observe(sb);
+
+/* ── Count-up "+1800 clientes" ── */
+(function() {
+  var el = document.querySelector('.clients-number');
+  if (!el) return;
+  var target = 1800;
+  var done = false;
+  var obs = new IntersectionObserver(function(entries) {
+    if (done || !entries[0].isIntersecting) return;
+    done = true;
+    obs.disconnect();
+    var t0 = null;
+    var dur = 2000;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = '+' + Math.floor(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = '+' + target;
+    }
+    requestAnimationFrame(step);
+  }, { threshold: 0.5 });
+  obs.observe(el);
+})();
+
+/* ── Scroll-video hero (avance suave: el video persigue el scroll con inercia, no salta de golpe) ── */
+(function () {
+  const video = document.getElementById('heroVideo');
+  const hero  = document.getElementById('scroll-hero');
+  if (!video || !hero) return;
+
+  // El video NUNCA se reproduce solo: siempre queda en pausa y el scroll es lo único que mueve el frame.
+  video.autoplay = false;
+  video.loop = false;
+  video.removeAttribute('autoplay');
+  video.removeAttribute('loop');
+  video.pause();
+  video.currentTime = 0;
+  video.addEventListener('play', () => video.pause()); // por si algo externo intenta reproducirlo
+
+  let ready = false;
+  video.addEventListener('loadedmetadata', () => { ready = true; computeTarget(); });
+  video.addEventListener('error', () => console.error('No se pudo cargar el video del hero:', video.error));
+  video.load();
+
+  let targetTime   = 0;    // punto del video que le corresponde a la posición actual del scroll
+  let renderedTime = 0;    // punto realmente mostrado, que avanza poco a poco hacia targetTime
+  const SMOOTHING  = 0.07; // más bajo = más suave/lento; más alto = sigue el scroll más de cerca
+
+  function computeTarget() {
+    if (!ready || !video.duration) return;
+    const rect = hero.getBoundingClientRect();
+    const scrolled   = -rect.top;
+    const scrollable = hero.offsetHeight - window.innerHeight;
+    const p = scrollable > 0 ? Math.min(1, Math.max(0, scrolled / scrollable)) : 0;
+    targetTime = p * video.duration;
+  }
+  window.addEventListener('scroll', computeTarget, { passive: true });
+  window.addEventListener('resize', computeTarget);
+
+  function tick() {
+    renderedTime += (targetTime - renderedTime) * SMOOTHING;
+    if (Math.abs(targetTime - renderedTime) > 0.01 && !video.seeking) {
+      video.currentTime = renderedTime;
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+
+/* ══════════════════════════════════════════
+   BOOKING MODAL v2 — 3 pasos
+══════════════════════════════════════════ */
+const BMTHS     = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const BDAYS     = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+const BDAYSFULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+const BARBERS = [
+  { id: 'any', name: 'Cualquiera', role: '1.º disponible', init: '✦' },
+  { id: 'b1',  name: 'Sebastian Montoya Garcia', role: 'Head Barber', init: 'SM', photo: 'assets/barber1.jpg' },
+  { id: 'b2',  name: 'Miguel Angel Zuluaga',    role: 'Barber',      init: 'MA', photo: 'assets/barber2.jpg' },
+];
+const BSERVICES = [
+  { id: 'brow',       name: '09 brow',         time: '15 min', price: '$8.000',            mins: 15  },
+  { id: 'classic',    name: 'NEXO Classic',    time: '40 min', price: '$25.000',           mins: 40  },
+  { id: 'cut',        name: 'NEXO Cut',        time: '50 min', price: '$35.000',           mins: 50  },
+  { id: 'beard',      name: '09 Beard',        time: '25 min', price: '$17.000',           mins: 25  },
+  { id: 'ritual',     name: 'PRIME Ritual',    time: '45 min', price: '$50.000',           mins: 45  },
+  { id: 'experience', name: 'NEXO Experience', time: '1 hora', price: '$60.000 – $70.000', mins: 60  },
+];
+
+let bState = { weekOffset: 0, selDate: null, selTime: null, selBarber: 'any', selService: '' };
+
+function openBooking(service) {
+  bState = { weekOffset: 0, selDate: null, selTime: null, selBarber: 'any', selService: service || '' };
+  document.getElementById('bookingOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bGoToView(1);
+  // Carga inicial y arranca listener en tiempo real
+  bLoadBookings().then(function() { bRenderStep1(); bStartRealtimeListener(); });
+}
+
+function closeBooking() {
+  document.getElementById('bookingOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  bStopRealtimeListener();
+}
+
+function closeMobileMenu() {
+  const ham = document.getElementById('hamburger');
+  const mob = document.getElementById('mobileMenu');
+  if (ham) ham.classList.remove('open');
+  if (mob) mob.classList.remove('open');
+}
+
+function bGoToView(n) {
+  [1,2,3].forEach(function(i) {
+    const v = document.getElementById('bview-' + i);
+    if (v) v.style.display = (i === n) ? 'block' : 'none';
+  });
+  const back  = document.getElementById('bookingBack');
+  const steps = document.getElementById('bookingSteps');
+  const bs = [document.getElementById('bs1'), document.getElementById('bs2'), document.getElementById('bs3')];
+  if (back)  back.style.display  = (n > 1) ? 'flex' : 'none';
+  if (steps) steps.style.display = 'flex';
+  bs.forEach(function(el, i) {
+    if (!el) return;
+    el.className = 'bstep' + (i+1 === n ? ' active' : i+1 < n ? ' done' : '');
+  });
+  const sheet = document.getElementById('bookingSheet');
+  if (sheet) sheet.scrollTop = 0;
+  if (n === 2) bRenderCalendar();
+  if (n === 3) bRenderConfirm();
+}
+
+function bPrevView() {
+  const cur = [1,2,3].find(function(i) {
+    const v = document.getElementById('bview-' + i);
+    return v && v.style.display !== 'none';
+  });
+  if (cur > 1) bGoToView(cur - 1);
+}
+
+/* ── Paso 1: Barbero + Servicio ── */
+function bRenderStep1() {
+  const bg = document.getElementById('barbersGrid');
+  bg.innerHTML = '';
+  BARBERS.forEach(function(b) {
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'barber-chip' + (bState.selBarber === b.id ? ' selected' : '');
+    var avatarInner = b.photo
+      ? '<img src="' + b.photo + '" alt="' + b.name + '" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + b.init + '\'">'
+      : b.init;
+    c.innerHTML = '<div class="barber-avatar">' + avatarInner + '</div>'
+      + '<span class="barber-name">' + b.name + '</span>'
+      + '<span class="barber-role">' + b.role + '</span>';
+    c.addEventListener('click', function() { bState.selBarber = b.id; bRenderStep1(); });
+    bg.appendChild(c);
+  });
+  const sg = document.getElementById('bSvcGrid');
+  sg.innerHTML = '';
+  BSERVICES.forEach(function(s) {
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'bsvc-chip' + (bState.selService === s.name ? ' selected' : '');
+    c.innerHTML = '<span class="bsvc-chip-name">' + s.name + '</span>'
+      + '<span class="bsvc-chip-meta">'
+      + '<span class="bsvc-chip-price">' + s.price + '</span>'
+      + '<span class="bsvc-chip-dot">·</span>'
+      + '<span class="bsvc-chip-time">' + s.time + '</span>'
+      + '</span>';
+    c.addEventListener('click', function() { bState.selService = s.name; bRenderStep1(); });
+    sg.appendChild(c);
+  });
+  const btn = document.getElementById('toCalBtn');
+  if (btn) btn.disabled = !bState.selService;
+}
+
+/* ── Paso 2: Calendario ── */
+function bChangeWeek(delta) {
+  const next = bState.weekOffset + delta;
+  if (next < 0) return;
+  bState.weekOffset = next;
+  bState.selDate = null;
+  bState.selTime = null;
+  bRenderCalendar();
+  bUpdateCalBtn();
+}
+
+function bGetMonday(offset) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const dow = t.getDay();
+  const shift = (dow === 0) ? -6 : 1 - dow;
+  const m = new Date(t);
+  m.setDate(t.getDate() + shift + offset * 7);
+  return m;
+}
+
+/* ── Firebase SDK (real-time) ── */
+const FB_URL = 'https://sm-72741-default-rtdb.firebaseio.com';
+
+firebase.initializeApp({
+  apiKey:            'AIzaSyCY6nAgMYnMaurqNlaMAZiY_ZfkANAvSqs',
+  authDomain:        'sm-72741.firebaseapp.com',
+  databaseURL:       'https://sm-72741-default-rtdb.firebaseio.com',
+  projectId:         'sm-72741',
+  storageBucket:     'sm-72741.firebasestorage.app',
+  messagingSenderId: '763739661918',
+  appId:             '1:763739661918:web:63e0a0eab88a3315d776cf'
+}, 'booking-public');
+const bDB = firebase.app('booking-public').database();
+
+function fmt12(time) {
+  if (!time) return time;
+  var parts = time.split(':');
+  var h = parseInt(parts[0], 10), m = parts[1];
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+
+// Cache local { 'YYYY-MM-DD': ['10:00', '11:30', ...] }
+let bBookedCache = {};
+// Slots bloqueados por admin { 'b1': { '2026-07-01': { '10_00': true } } }
+let bBlockedCache = {};
+// Handles para detener actualizaciones en tiempo real
+let bRTListener  = null;
+let bPollInterval = null;
+
+function bDateKey(date) {
+  return date.getFullYear() + '-'
+    + String(date.getMonth() + 1).padStart(2, '0') + '-'
+    + String(date.getDate()).padStart(2, '0');
+}
+
+function bIsBooked(date, time) {
+  const key = bDateKey(date);
+  return !!(bBookedCache[key] && bBookedCache[key].includes(time));
+}
+
+/* Reconstruye ambos caches desde datos crudos JSON (REST) o snapshot SDK */
+function bProcessData(data) {
+  bBookedCache = {};
+  bBlockedCache = {};
+  if (!data || typeof data !== 'object') return;
+  Object.values(data).forEach(function(b) {
+    if (!b) return;
+    if (b.status === 'blocked' && b.barber && b.date && b.time) {
+      if (!bBlockedCache[b.barber]) bBlockedCache[b.barber] = {};
+      if (!bBlockedCache[b.barber][b.date]) bBlockedCache[b.barber][b.date] = {};
+      bBlockedCache[b.barber][b.date][b.time.replace(':', '_')] = true;
+      return;
+    }
+    if (b.status === 'cancelled') return;
+    if (!bBookedCache[b.date]) bBookedCache[b.date] = [];
+    if (!bBookedCache[b.date].includes(b.time)) bBookedCache[b.date].push(b.time);
+  });
+}
+
+/* Re-renderiza el calendario completo si la vista de fecha/hora esta visible */
+function bRefreshSlotsIfVisible() {
+  var view2 = document.getElementById('bview-2');
+  if (view2 && view2.style.display === 'block') {
+    bRenderCalendar();
+  }
+}
+
+/* Fetch REST que actualiza datos y re-renderiza */
+function bFetchAndRefresh() {
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && typeof data === 'object' && !data.error) {
+        bProcessData(data);
+        bRefreshSlotsIfVisible();
+      }
+    })
+    .catch(function() {});
+}
+
+/* Arranca el listener SDK + polling REST cada 1 s (doble mecanismo) */
+function bStartRealtimeListener() {
+  bStopRealtimeListener();
+
+  // 1) Firebase SDK listener (tiempo real instantáneo)
+  try {
+    bRTListener = bDB.ref('bookings').on('value', function(snap) {
+      bProcessData(snap.val());
+      bRefreshSlotsIfVisible();
+    }, function() {});
+  } catch(e) {}
+
+  // 2) Polling REST cada 1 s (respaldo garantizado)
+  bPollInterval = setInterval(bFetchAndRefresh, 1000);
+}
+
+function bStopRealtimeListener() {
+  if (bRTListener !== null) {
+    try { bDB.ref('bookings').off('value', bRTListener); } catch(e) {}
+    bRTListener = null;
+  }
+  if (bPollInterval) { clearInterval(bPollInterval); bPollInterval = null; }
+}
+
+function bLoadBookings() {
+  bBookedCache = {};
+  bBlockedCache = {};
+
+  // Carga localStorage inmediatamente
+  try {
+    var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+    local.forEach(function(b) {
+      if (!b || b.status === 'cancelled') return;
+      if (!bBookedCache[b.date]) bBookedCache[b.date] = [];
+      if (!bBookedCache[b.date].includes(b.time)) bBookedCache[b.date].push(b.time);
+    });
+  } catch(e) {}
+
+  // Snapshot inicial vía REST
+  var ctrl = new AbortController();
+  setTimeout(function() { ctrl.abort(); }, 6000);
+  return fetch(FB_URL + '/bookings.json?t=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data && typeof data === 'object' && !data.error) bProcessData(data);
+    })
+    .catch(function() {});
+}
+
+function bIsBlocked(date, time) {
+  const dateKey = bDateKey(date);
+  const timeKey = time.replace(':', '_');
+  const selBarber = bState.selBarber;
+  if (selBarber === 'any') {
+    // Bloqueado para "cualquiera" si ALGÚN barbero lo tiene bloqueado
+    return ['b1', 'b2'].some(function(bid) {
+      return bBlockedCache[bid] && bBlockedCache[bid][dateKey] && bBlockedCache[bid][dateKey][timeKey];
+    });
+  }
+  return !!(bBlockedCache[selBarber] && bBlockedCache[selBarber][dateKey] && bBlockedCache[selBarber][dateKey][timeKey]);
+}
+
+/* Genera los slots consecutivos a partir de una hora (cada 45 min) */
+function generateSlotTimes(startTime, count) {
+  const result = [];
+  const [h, m] = startTime.split(':').map(Number);
+  let totalMins = h * 60 + m;
+  for (let i = 0; i < count; i++) {
+    const hh = Math.floor(totalMins / 60);
+    const mm = totalMins % 60;
+    result.push(String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0'));
+    totalMins += 45;
+  }
+  return result;
+}
+
+/* Código corto para que el cliente identifique su reserva al cancelarla */
+function genBookingCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sin 0/O/1/I/L para evitar confusión
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function bSaveBooking(date, time, barber, service, nombre, telefono) {
+  const barberObj = BARBERS.find(function(x) { return x.id === barber; });
+  const svc = BSERVICES.find(function(s) { return s.name === service; });
+  const mins = svc ? svc.mins : 45;
+  const slotsNeeded = Math.ceil(mins / 45);          // cuántos slots de 45 min ocupa
+  const blockedTimes = generateSlotTimes(time, slotsNeeded);
+  const dateKey = bDateKey(date);
+  const ts = Date.now();
+  const code = genBookingCode();
+
+  const bookingEntries = blockedTimes.map(function(t, i) {
+    return {
+      date:       dateKey,
+      time:       t,
+      barber:     barber,
+      barberName: barberObj ? barberObj.name : 'Cualquiera',
+      service:    service,
+      nombre:     nombre,
+      telefono:   telefono,
+      status:     i === 0 ? 'pending' : 'overflow',
+      parentTime: i === 0 ? null : time,
+      code:       code,
+      ts:         ts
+    };
+  });
+
+  // 1. Guarda en localStorage INMEDIATAMENTE (siempre funciona)
+  try {
+    var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+    bookingEntries.forEach(function(b) { local.push(b); });
+    localStorage.setItem('9sm_bookings', JSON.stringify(local));
+  } catch(e) {}
+
+  // 2. Actualiza el cache local
+  if (!bBookedCache[dateKey]) bBookedCache[dateKey] = [];
+  blockedTimes.forEach(function(t) { bBookedCache[dateKey].push(t); });
+
+  // 3. Intenta sincronizar con Firebase en segundo plano (no bloquea)
+  var ctrl = new AbortController();
+  var fbTimer = setTimeout(function() { ctrl.abort(); }, 8000);
+  Promise.all(bookingEntries.map(function(data) {
+    return fetch(FB_URL + '/bookings.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      signal: ctrl.signal
+    });
+  }))
+  .then(function() { clearTimeout(fbTimer); })
+  .catch(function(err) { clearTimeout(fbTimer); console.warn('Firebase sync:', err.message); });
+
+  // 4. Devuelve promesa resuelta de inmediato (localStorage ya está guardado)
+  return Promise.resolve(code);
+}
+
+/* ══════════════════════════════════════════
+   MI CITA — última reserva del cliente
+══════════════════════════════════════════ */
+var _mcCurrentKey = null;
+
+function mcShowView(id) {
+  ['mcLoading','mcCard','mcEmpty','mcPhoneForm','mcDone'].forEach(function(v) {
+    document.getElementById(v).style.display = (v === id) ? 'block' : 'none';
+  });
+}
+
+function openMyCitas() {
+  closeBooking();
+  closeMobileMenu();
+  _mcCurrentKey = null;
+  document.getElementById('myCitasOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // 1. Buscar en localStorage 9sm_bookings (más rápido, no necesita red)
+  var todayKey = bDateKey(new Date());
+  var local = [];
+  try { local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]'); } catch(e) {}
+  var upcoming = local.filter(function(b) {
+    return b && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey;
+  }).sort(function(a, b) {
+    return a.date.localeCompare(b.date) || a.time.localeCompare(b.time);
+  });
+
+  if (upcoming.length) {
+    // Mostrar inmediatamente desde localStorage
+    mcMostrarCita(upcoming[0], null);
+    // Verificar en Firebase si no fue cancelada por el admin
+    mcVerificarEnFirebase(upcoming[0]);
+    return;
+  }
+
+  // 2. Fallback: si tiene teléfono guardado, buscar en Firebase
+  var saved = getSavedClient();
+  if (saved && saved.telefono) {
+    mcShowView('mcLoading');
+    mcCargarUltimaCita(saved.telefono);
+    return;
+  }
+
+  // 3. Último recurso: pedir teléfono
+  mcShowView('mcPhoneForm');
+  var inp = document.getElementById('mcPhoneInput');
+  if (inp) inp.value = '';
+  var errEl = document.getElementById('mcPhoneError');
+  if (errEl) errEl.style.display = 'none';
+}
+
+function closeMyCitas() {
+  document.getElementById('myCitasOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function mcBuscarPorTel(e) {
+  e.preventDefault();
+  var tel = (document.getElementById('mcPhoneInput').value || '').trim();
+  var errEl = document.getElementById('mcPhoneError');
+  if (!tel) { errEl.textContent = 'Ingresa tu número de WhatsApp.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  mcShowView('mcLoading');
+  mcCargarUltimaCita(tel);
+}
+
+function mcMostrarCita(cita, fbKey) {
+  var DAYS2 = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var MTHS2 = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  if (fbKey) _mcCurrentKey = fbKey;
+  var d = new Date(cita.date + 'T00:00:00');
+  document.getElementById('mcCardFecha').textContent   = DAYS2[d.getDay()] + ', ' + d.getDate() + ' de ' + MTHS2[d.getMonth()];
+  document.getElementById('mcCardHora').textContent    = fmt12(cita.time);
+  document.getElementById('mcCardBarber').textContent  = cita.barberName || 'Cualquiera';
+  document.getElementById('mcCardService').textContent = cita.service || '';
+  mcSetActions('cancelar');
+  mcShowView('mcCard');
+}
+
+function mcVerificarEnFirebase(localCita) {
+  // Busca el fbKey real y confirma que no fue cancelada por el admin
+  var cleanTel = (localCita.telefono || '').replace(/\D/g, '');
+  var todayKey = bDateKey(new Date());
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || typeof data !== 'object') return;
+      var match = null;
+      Object.entries(data).forEach(function(kv) {
+        var b = kv[1];
+        if (!b) return;
+        var bTel = (b.telefono || '').replace(/\D/g, '');
+        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
+          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
+            match = Object.assign({ _fbKey: kv[0] }, b);
+          }
+        }
+      });
+      if (match) {
+        _mcCurrentKey = match._fbKey;
+      } else {
+        // La cita fue cancelada por el admin → actualizar localStorage y mostrar vacío
+        try {
+          var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+          local = local.map(function(b) {
+            return (b && b.date === localCita.date && b.time === localCita.time) ? Object.assign({}, b, { status: 'cancelled' }) : b;
+          });
+          localStorage.setItem('9sm_bookings', JSON.stringify(local));
+        } catch(e) {}
+        // Si el overlay sigue abierto y mostrando la tarjeta, actualizar
+        if (document.getElementById('mcCard').style.display !== 'none') {
+          mcShowView('mcEmpty');
+        }
+      }
+    })
+    .catch(function() {});
+}
+
+function mcCargarUltimaCita(telefono) {
+  var cleanTel = telefono.replace(/\D/g, '');
+  var todayKey = bDateKey(new Date());
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || typeof data !== 'object' || data.error) { mcShowView('mcEmpty'); return; }
+      var match = null;
+      Object.entries(data).forEach(function(kv) {
+        var b = kv[1];
+        if (!b) return;
+        var bTel = (b.telefono || '').replace(/\D/g, '');
+        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
+          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
+            match = Object.assign({ _fbKey: kv[0] }, b);
+          }
+        }
+      });
+      if (!match) { mcShowView('mcEmpty'); return; }
+      mcMostrarCita(match, match._fbKey);
+    })
+    .catch(function() { mcShowView('mcEmpty'); });
+}
+
+function mcSetActions(state) {
+  var div = document.getElementById('mcCardActions');
+  if (!div) return;
+  if (state === 'cancelar') {
+    div.innerHTML =
+      '<button onclick="mcSetActions(\'confirmar\')" style="width:100%;background:none;border:1px solid rgba(239,68,68,0.35);color:#ef4444;padding:13px;border-radius:10px;font-size:0.78rem;font-weight:500;cursor:pointer;letter-spacing:0.04em;transition:background 0.2s" onmouseover="this.style.background=\'rgba(239,68,68,0.08)\'" onmouseout="this.style.background=\'none\'">Cancelar cita</button>';
+  } else if (state === 'confirmar') {
+    div.innerHTML =
+      '<p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin:0 0 16px;line-height:1.5">¿Estás seguro? Esta acción<br/>no se puede deshacer.</p>' +
+      '<div style="display:flex;gap:10px">' +
+      '  <button onclick="mcSetActions(\'cancelar\')" style="flex:1;background:none;border:1px solid var(--border);color:var(--text-muted);padding:13px;border-radius:10px;font-size:0.78rem;cursor:pointer;font-weight:500">Mantener</button>' +
+      '  <button onclick="mcEjecutarCancelar()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:13px;border-radius:10px;font-size:0.78rem;font-weight:600;cursor:pointer">Sí, cancelar</button>' +
+      '</div>';
+  } else if (state === 'cargando') {
+    div.innerHTML = '<p style="text-align:center;font-size:0.78rem;color:var(--text-muted);padding:12px 0;letter-spacing:0.06em">Cancelando…</p>';
+  } else if (state === 'error') {
+    div.innerHTML =
+      '<p style="text-align:center;font-size:0.76rem;color:#ef4444;margin:0 0 14px">No se pudo cancelar. Intenta de nuevo.</p>' +
+      '<button onclick="mcSetActions(\'cancelar\')" style="width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);padding:12px;border-radius:10px;font-size:0.76rem;cursor:pointer">Volver</button>';
+  }
+}
+
+function mcEjecutarCancelar() {
+  if (!_mcCurrentKey) return;
+  mcSetActions('cargando');
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, 8000);
+  fetch(FB_URL + '/bookings/' + _mcCurrentKey + '.json', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'cancelled' }),
+    signal: ctrl.signal
+  }).then(function() {
+    clearTimeout(t);
+    mcShowView('mcDone');
+  }).catch(function() {
+    clearTimeout(t);
+    mcSetActions('error');
+  });
+}
+
+function bSlots(date) {
+  const now   = new Date();
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (date < today) return [];               // Past
+
+  const day = date.getDay(); // 0=Dom, 1=Lun … 5=Vie, 6=Sáb
+  let times;
+  if (day === 0) {
+    // Domingo: 07:00 – 14:00
+    times = ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15','13:00'];
+  } else if (day >= 1 && day <= 4) {
+    // Lunes a jueves: 10:00 – 20:00
+    times = ['10:00','10:45','11:30','12:15','13:00','13:45',
+             '14:30','15:15','16:00','16:45','17:30','18:15','19:00'];
+  } else if (day === 5) {
+    // Viernes: 07:00 – 21:00
+    times = ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15',
+             '13:00','13:45','14:30','15:15','16:00','16:45','17:30','18:15',
+             '19:00','19:45'];
+  } else {
+    // Sábado: 07:00 – 20:00
+    times = ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15',
+             '13:00','13:45','14:30','15:15','16:00','16:45','17:30','18:15','19:00'];
+  }
+  const isToday = date.getTime() === today.getTime();
+
+  return times.map((t) => {
+    // Hora pasada (hoy) — ocultar completamente
+    if (isToday) {
+      const [h, m] = t.split(':').map(Number);
+      const sd = new Date(); sd.setHours(h, m, 0, 0);
+      if (sd <= now) return null;
+    }
+    // Bloqueada por el admin — desaparece (como si no existiera)
+    if (bIsBlocked(date, t)) return null;
+    // Ocupada por cita real — visible pero no disponible
+    if (bIsBooked(date, t)) return { time: t, available: false, booked: true };
+    // Libre
+    return { time: t, available: true };
+  }).filter(Boolean);
+}
+
+function bRenderCalendar() {
+  /* ── Pill: barbero + servicio seleccionados ── */
+  const pill = document.getElementById('bSelPill');
+  if (pill) {
+    const b = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+    const bName = b ? (b.id === 'any' ? 'Cualquier barbero' : b.name) : '';
+    const sName = bState.selService || '';
+    pill.innerHTML = bName && sName
+      ? '<span>' + bName + '</span><span class="bsel-sep">·</span><span>' + sName + '</span>'
+      : '<span>' + (bName || sName || '') + '</span>';
+  }
+
+  const mon = bGetMonday(bState.weekOffset);
+  const sat = new Date(mon); sat.setDate(mon.getDate() + 5);
+  const sameMonth = mon.getMonth() === sat.getMonth();
+  document.getElementById('weekLabel').textContent = sameMonth
+    ? mon.getDate() + ' – ' + sat.getDate() + ' ' + BMTHS[sat.getMonth()]
+    : mon.getDate() + ' ' + BMTHS[mon.getMonth()] + ' – ' + sat.getDate() + ' ' + BMTHS[sat.getMonth()];
+  document.getElementById('weekPrev').disabled = bState.weekOffset === 0;
+
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const strip  = document.getElementById('daysStrip');
+  strip.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const slots  = bSlots(d);
+    const hasAv  = slots.some(s => s.available);
+    const isPast = d < today;
+    const isToday= d.getTime() === today.getTime();
+    const isSel  = bState.selDate && d.getTime() === bState.selDate.getTime();
+
+    const chip = document.createElement('button');
+    chip.className = 'day-chip'
+      + (isSel  ? ' selected' : '')
+      + ((isPast || !hasAv) ? ' disabled' : '')
+      + (isToday ? ' today-chip' : '');
+    chip.type = 'button';
+    chip.innerHTML =
+      '<span class="day-name-label">' + (isToday ? 'Hoy' : BDAYS[d.getDay()]) + '</span>' +
+      '<span class="day-num-label">'  + d.getDate() + '</span>' +
+      (hasAv && !isPast ? '<span class="day-dot"></span>' : '');
+    if (!isPast && hasAv) chip.addEventListener('click', function() { bSelectDay(d); });
+    strip.appendChild(chip);
+  }
+
+  if (bState.selDate) bRenderSlots(bState.selDate);
+  else {
+    const sc = document.getElementById('slotsContent');
+    if (sc) sc.innerHTML = '';
+  }
+}
+
+function bSelectDay(date) {
+  bState.selDate = date;
+  bState.selTime = null;
+  // Renderiza con datos en cache primero (instantáneo)
+  bRenderCalendar();
+  bUpdateCalBtn();
+  // Luego re-fetcha Firebase y actualiza si hay cambios
+  bFetchAndRefresh();
+}
+
+function bRenderSlots(date) {
+  const sc = document.getElementById('slotsContent');
+  if (!sc) return;
+  sc.innerHTML = '';
+
+  const slots  = bSlots(date);
+  const avail  = slots.filter(function(s) { return s.available; });
+
+  if (!slots.length || !avail.length) {
+    sc.innerHTML = '<p class="slots-empty">No hay disponibilidad este día.</p>';
+    return;
+  }
+
+  /* Separar mañana (< 14:00) y tarde (≥ 14:00) */
+  function makeGroup(label, list) {
+    if (!list.length) return null;
+    const wrap = document.createElement('div');
+    wrap.className = 'time-group';
+    const lbl = document.createElement('p');
+    lbl.className = 'time-group-label';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'slots-row';
+    list.forEach(function(s) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-btn'
+        + (s.booked ? ' booked unavailable' : (!s.available ? ' unavailable' : ''))
+        + (bState.selTime === s.time ? ' selected' : '');
+      btn.textContent = fmt12(s.time);
+      btn.disabled = !s.available;
+      if (s.available) btn.addEventListener('click', function() { bSelectTime(s.time); });
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  const morning = slots.filter(function(s) { return parseInt(s.time) < 14; });
+  const afternoon = slots.filter(function(s) { return parseInt(s.time) >= 14; });
+
+  const gMorn = makeGroup('Mañana', morning);
+  const gAft  = makeGroup('Tarde',  afternoon);
+  if (gMorn) sc.appendChild(gMorn);
+  if (gAft)  sc.appendChild(gAft);
+
+  setTimeout(function() {
+    const w = document.getElementById('slotsWrap');
+    if (w) w.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 60);
+}
+
+function bSelectTime(time) {
+  bState.selTime = time;
+  if (bState.selDate) bRenderSlots(bState.selDate);
+  bUpdateCalBtn();
+}
+
+function bUpdateCalBtn() {
+  const btn = document.getElementById('toConfirmBtn');
+  if (btn) btn.disabled = !(bState.selDate && bState.selTime);
+}
+
+function getSavedClient() {
+  try { return JSON.parse(localStorage.getItem('9sm_client') || 'null'); } catch(e) { return null; }
+}
+
+function bClearClientData() {
+  localStorage.removeItem('9sm_client');
+  document.getElementById('bClientReturn').style.display = 'none';
+  document.getElementById('bClientNew').style.display = 'block';
+  var nb = document.getElementById('b-nombre');
+  var tb = document.getElementById('b-telefono');
+  if (nb) nb.value = '';
+  if (tb) tb.value = '';
+}
+
+/* ── Paso 3: Confirmar ── */
+function bRenderConfirm() {
+  const d   = bState.selDate;
+  const fmt = BDAYSFULL[d.getDay()] + ' ' + d.getDate() + ' de ' + BMTHS[d.getMonth()];
+  const b   = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+  document.getElementById('sum-barber').textContent  = b ? b.name : 'Cualquiera';
+  document.getElementById('sum-service').textContent = bState.selService;
+  document.getElementById('sum-date').textContent    = fmt;
+  document.getElementById('sum-time').textContent    = bState.selTime;
+  document.getElementById('bConfirmForm').style.display = 'block';
+  document.getElementById('bSuccess').style.display    = 'none';
+  var errEl = document.getElementById('bSubmitError');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+
+  var saved = getSavedClient();
+  if (saved && saved.nombre && saved.telefono) {
+    document.getElementById('bClientReturn').style.display = 'block';
+    document.getElementById('bClientNew').style.display    = 'none';
+    document.getElementById('bRetInitial').textContent     = saved.nombre.charAt(0).toUpperCase();
+    document.getElementById('bRetNombre').textContent      = saved.nombre;
+    document.getElementById('bRetTel').textContent         = saved.telefono;
+  } else {
+    document.getElementById('bClientReturn').style.display = 'none';
+    document.getElementById('bClientNew').style.display    = 'block';
+  }
+}
+
+function bSubmit(e) {
+  e.preventDefault();
+
+  var nombre, telefono;
+  var returnDiv = document.getElementById('bClientReturn');
+  if (returnDiv && returnDiv.style.display !== 'none') {
+    var saved = getSavedClient();
+    if (!saved) return;
+    nombre   = saved.nombre;
+    telefono = saved.telefono;
+  } else {
+    nombre   = (document.getElementById('b-nombre')   || {}).value.trim();
+    telefono = (document.getElementById('b-telefono') || {}).value.trim();
+    if (!nombre || !telefono) {
+      var errEl = document.getElementById('bSubmitError');
+      if (errEl) { errEl.textContent = 'Por favor completa tu nombre y número de WhatsApp.'; errEl.style.display = 'block'; }
+      return;
+    }
+  }
+
+  // Guardar datos del cliente para futuros agendamientos (pre-relleno)
+  try { localStorage.setItem('9sm_client', JSON.stringify({ nombre: nombre, telefono: telefono })); } catch(e) {}
+
+  // Guardar cliente en Firebase para marketing (deduplicado por teléfono)
+  const clientKey = telefono.replace(/\D/g, '');
+  if (clientKey) {
+    fetch(FB_URL + '/clients/' + clientKey + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre:   nombre,
+        telefono: telefono,
+        ultimaCita: bDateKey(bState.selDate || new Date())
+      })
+    }).catch(function() {});
+  }
+  const d   = bState.selDate;
+  const fmt = BDAYSFULL[d.getDay()] + ' ' + d.getDate() + ' de ' + BMTHS[d.getMonth()];
+  const b   = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+
+  // ── Guardar en Firebase y bloquear la hora ──
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando…'; }
+
+  function showBookingError(msg) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Confirmar reserva'; }
+    var errEl = document.getElementById('bSubmitError');
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+  }
+
+  // Timeout de seguridad — si Firebase no responde en 12s muestra error
+  var saveTimeout = setTimeout(function() {
+    showBookingError('Tiempo de espera agotado. Comprueba tu conexión e inténtalo.');
+  }, 12000);
+
+  bSaveBooking(d, bState.selTime, bState.selBarber, bState.selService, nombre, telefono)
+  .then(function(code) {
+    clearTimeout(saveTimeout);
+    document.getElementById('bSuccessSub').textContent = fmt + ' · ' + bState.selTime;
+    document.getElementById('bSuccessDetails').innerHTML =
+      '<div class="success-detail-row"><span>Nombre</span><span>'    + nombre + '</span></div>' +
+      '<div class="success-detail-row"><span>Barbero</span><span>'   + (b ? b.name : 'Cualquiera') + '</span></div>' +
+      '<div class="success-detail-row"><span>Servicio</span><span>'  + bState.selService + '</span></div>' +
+      '<div class="success-detail-row"><span>Fecha</span><span>'     + fmt + '</span></div>' +
+      '<div class="success-detail-row"><span>Hora</span><span>'      + bState.selTime + '</span></div>' +
+      '<div class="success-detail-row"><span>Código de reserva</span><span class="success-code">' + code + '</span></div>';
+    document.getElementById('bConfirmForm').style.display = 'none';
+    document.getElementById('bSuccess').style.display     = 'block';
+    document.getElementById('bookingBack').style.display  = 'none';
+    document.getElementById('bookingSteps').style.display = 'none';
+
+    // Cuenta regresiva y recarga automática
+    var countdown = 4;
+    var cdEl = document.getElementById('bReloadCountdown');
+    function tickCountdown() {
+      countdown--;
+      if (countdown <= 0) {
+        cdEl.textContent = 'Recargando...';
+        setTimeout(function() { location.reload(); }, 400);
+      } else {
+        cdEl.textContent = 'Nueva cita en ' + countdown + ' segundo' + (countdown === 1 ? '' : 's') + '…';
+        setTimeout(tickCountdown, 1000);
+      }
+    }
+    cdEl.textContent = 'Nueva cita en 4 segundos…';
+    setTimeout(tickCountdown, 1000);
+
+  }).catch(function(err) {
+    clearTimeout(saveTimeout);
+    console.error('Firebase error:', err);
+    showBookingError('Error: ' + (err.message || 'no se pudo guardar. Verifica las reglas de Firebase.'));
+  });
+}
+
+// ── Fade-in de página (clase JS, no animación CSS en body) ──
+// Esto evita que el transform en body rompa position:fixed del booking overlay
+requestAnimationFrame(function() {
+  document.body.classList.add('page-ready');
+});
+
+// Close on backdrop
+document.getElementById('bookingOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeBooking();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('bookingOverlay').classList.contains('open')) closeBooking();
+});
+
+// ── Gallery fade ────────────────────────────────
+(function initGalleryFade() {
+  var items = Array.from(document.querySelectorAll('.gallery-item'));
+  // Inicializa índice activo en cada celda
+  items.forEach(function(item) {
+    item._gpIdx = 0;
+  });
+
+  var cardIdx = 0;
+  // Cada 2.2s cambia UNA celda, en secuencia → efecto continuo y escalonado
+  setInterval(function() {
+    var item = items[cardIdx];
+    var photos = item.querySelectorAll('.gallery-photo');
+    if (photos.length > 1) {
+      photos[item._gpIdx].classList.remove('gp-active');
+      item._gpIdx = (item._gpIdx + 1) % photos.length;
+      photos[item._gpIdx].classList.add('gp-active');
+    }
+    cardIdx = (cardIdx + 1) % items.length;
+  }, 2200);
+})();
+</script>
+</body>
+</html>
