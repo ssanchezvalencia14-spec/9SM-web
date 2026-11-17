@@ -4,6 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel Barbero — 9SM NEXO</title>
+  <!-- Instalable como app en el móvil: icono propio y pantalla completa -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#0a0a0a"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="9SM Panel"/>
+  <link rel="apple-touch-icon" href="/assets/icon-192.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -141,7 +149,17 @@
     .nav-item.active { color: var(--white); background: rgba(255,255,255,0.06); border-left-color: var(--white); }
     .nav-item svg { flex-shrink: 0; opacity: 0.5; transition: opacity 0.16s; }
     .nav-item.active svg, .nav-item:hover svg { opacity: 1; }
-    .nav-sep { height: 1px; background: var(--border); margin: 8px 20px; }
+    .nav-item .nav-label { flex: 1; min-width: 0; }
+    /* Contador de citas pendientes junto al nombre del menú */
+    .nav-count {
+      display: none; flex-shrink: 0;
+      min-width: 19px; padding: 0 5px; box-sizing: border-box;
+      border-radius: 10px; background: rgba(255,255,255,0.10);
+      color: var(--text); font-size: 0.62rem; font-weight: 600;
+      line-height: 18px; text-align: center;
+    }
+    .nav-item.active .nav-count { background: rgba(255,255,255,0.18); color: var(--white); }
+    .nav-sep { height: 1px; background: var(--border); margin: 10px 20px; }
 
     .sidebar-bottom { padding: 16px 20px; border-top: 1px solid var(--border); }
     .logout-btn {
@@ -161,7 +179,10 @@
       position: sticky; top: 0; z-index: 10;
       display: flex; align-items: center; justify-content: space-between;
     }
+    .main-head-txt { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .main-title { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; }
+    .main-sub { font-size: 0.72rem; color: var(--text-soft); line-height: 1.35; }
+    @media (max-width: 700px) { .main-sub { display: none; } }
     .main-body { padding: 32px 36px; width: 100%; box-sizing: border-box; }
 
     /* ── NAV INFERIOR MÓVIL ── */
@@ -199,15 +220,115 @@
       transform: translateY(100%); transition: transform 0.3s ease;
     }
     .mbn-more-sheet.open { transform: translateY(0); }
-    .mbn-more-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 24px; background: none; border: none;
-      width: 100%; text-align: left;
-      color: var(--text-soft); font-family: var(--font);
-      font-size: 0.85rem; cursor: pointer; transition: background 0.15s;
+    /* Asa superior, para que se lea como hoja deslizable */
+    .mbn-sheet-grip {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.18);
+      margin: 10px auto 14px;
     }
-    .mbn-more-item:hover { background: rgba(255,255,255,0.05); }
-    .mbn-more-item.danger { color: var(--red); }
+
+    /* Grupos con etiqueta, en vez de una lista larga y uniforme */
+    .mbn-group-label {
+      display: block; padding: 0 20px 8px;
+      font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .mbn-group {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 0 16px 16px;
+    }
+    .mbn-group + .mbn-group-label { padding-top: 6px; }
+
+    /* Cada opción es una pastilla con icono arriba: más superficie
+       para el dedo y se distingue de un vistazo */
+    .mbn-more-item {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 9px;
+      padding: 14px 13px; border-radius: 11px;
+      background: var(--bg); border: 1px solid var(--border);
+      text-align: left; color: var(--text);
+      font-family: var(--font); font-size: 0.78rem; line-height: 1.25;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .mbn-more-item svg { opacity: 0.5; flex-shrink: 0; }
+    .mbn-more-item:active { background: var(--surface2); border-color: var(--border-hover, rgba(255,255,255,0.18)); }
+    .mbn-more-item.danger {
+      flex-direction: row; align-items: center; gap: 10px;
+      grid-column: 1 / -1; justify-content: center;
+      color: var(--red); background: none;
+      border-color: rgba(239,68,68,0.28);
+    }
+    .mbn-more-item.danger svg { opacity: 0.8; }
+
+    /* ── Resumen de entrada ── */
+    .resumen-bar {
+      display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+      font-size: 0.78rem; color: var(--text-soft); line-height: 1.5;
+    }
+    .resumen-bar strong { color: var(--white); font-weight: 600; }
+    .resumen-punto {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+      flex-shrink: 0; box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+    }
+
+    /* ── Centro de avisos ── */
+    .notif-wrap { position: relative; display: flex; align-items: center; gap: 10px; }
+    .notif-btn {
+      position: relative; background: none; border: 1px solid var(--border);
+      color: var(--text-soft); border-radius: 10px; padding: 7px 9px;
+      cursor: pointer; display: flex; align-items: center; transition: all 0.2s;
+    }
+    .notif-btn:hover { border-color: var(--border-hover); color: var(--white); }
+    .notif-dot {
+      position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px;
+      border-radius: 9px; background: var(--red); color: #fff;
+      font-size: 0.6rem; font-weight: 700; line-height: 16px; text-align: center;
+      padding: 0 4px; box-sizing: border-box;
+    }
+    .notif-panel {
+      position: absolute; top: calc(100% + 10px); right: 0; width: 330px; max-width: 86vw;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45); z-index: 300; display: none;
+      max-height: 70vh; overflow-y: auto;
+    }
+    .notif-panel.open { display: block; }
+    .notif-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 15px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--surface);
+    }
+    .notif-head span { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); }
+    .notif-head button {
+      background: none; border: none; color: var(--text-soft);
+      font-size: 0.68rem; cursor: pointer; padding: 2px 4px;
+    }
+    .notif-head button:hover { color: var(--white); }
+    .notif-item {
+      display: flex; gap: 11px; padding: 12px 15px; cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s;
+      text-align: left; width: 100%; background: none; border-left: none;
+      border-right: none; border-top: none; font-family: var(--font);
+    }
+    .notif-item:hover { background: rgba(255,255,255,0.03); }
+    .notif-item.nueva { border-left: 2px solid var(--red); }
+    .notif-ico { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 0.72rem; }
+    .notif-ico.alta { background: rgba(34,197,94,0.14); color: #22c55e; }
+    .notif-ico.baja { background: rgba(239,68,68,0.14); color: var(--red); }
+    .notif-txt { min-width: 0; display: block; }
+    .notif-t1 { display: block; font-size: 0.76rem; color: var(--white); margin-bottom: 2px; line-height: 1.35; }
+    .notif-t2 { display: block; font-size: 0.68rem; color: var(--text-muted); line-height: 1.35; }
+    .notif-vacio { padding: 26px 15px; text-align: center; font-size: 0.72rem; color: var(--text-muted); }
+    .notif-pie { padding: 11px 15px; border-top: 1px solid var(--border); }
+    .notif-pie button {
+      width: 100%; background: none; border: 1px solid var(--border); color: var(--text-soft);
+      border-radius: 8px; padding: 9px; font-size: 0.68rem; cursor: pointer; font-family: var(--font);
+    }
+    .notif-pie button:hover { border-color: var(--border-hover); color: var(--white); }
+    @media (max-width: 700px) {
+      .notif-panel { position: fixed; top: 56px; right: 8px; left: 8px; width: auto; max-width: none; }
+    }
 
     /* Botón logout en header — solo móvil */
     .mobile-logout-btn { display: none; }
@@ -499,10 +620,11 @@
     .filter-btn.active { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.05); }
     .filter-btn:hover:not(.active) { border-color: var(--border-hover); color: var(--text-soft); }
     .bal-filter-btn {
-      background: none; border: 1px solid var(--border); border-radius: 6px;
+      display: inline-flex; align-items: center;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
       color: var(--text-muted); font-family: var(--font);
-      font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 6px 14px; cursor: pointer; transition: all 0.2s;
+      font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 7px 15px; cursor: pointer; transition: all 0.18s;
     }
     .bal-filter-btn.active { border-color: var(--white); color: var(--white); background: rgba(255,255,255,0.07); }
     .bal-filter-btn:hover:not(.active) { border-color: var(--border-hover); color: var(--text-soft); }
@@ -519,8 +641,349 @@
     /* ── Colores de barbero en calendario ── */
     .cal-event.barber-b1  { border-left-color: #3b82f6; background: rgba(59,130,246,0.14); }
     .cal-event.barber-b2  { border-left-color: #a855f7; background: rgba(168,85,247,0.14); }
+    .cal-event.barber-b3  { border-left-color: #10b981; background: rgba(16,185,129,0.14); }
     .cal-event.barber-any { border-left-color: #6b7280; background: rgba(107,114,128,0.10); }
     .cal-event.blocked    { border-left-color: #ef4444; background: rgba(239,68,68,0.08); color: var(--text-muted); }
+
+    /* ── Personalizar web ── */
+    .web-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 18px;
+    }
+    .web-card-title {
+      font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted); margin: 0 0 6px;
+    }
+    .web-card-sub {
+      font-size: 0.74rem; color: var(--text-muted);
+      margin: 0 0 16px; line-height: 1.55;
+    }
+    .web-notice {
+      background: rgba(217,164,65,0.10); border: 1px solid rgba(217,164,65,0.35);
+      color: #d9a441; border-radius: 10px; padding: 14px 16px;
+      font-size: 0.78rem; line-height: 1.6; margin-bottom: 18px;
+    }
+    .web-toggles { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 10px; }
+    .web-toggle {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+      cursor: pointer; font-size: 0.82rem; user-select: none;
+    }
+    .web-toggle input { accent-color: var(--green); width: 16px; height: 16px; cursor: pointer; }
+    .web-toggle.off { opacity: 0.5; }
+
+    .web-row {
+      display: grid; gap: 10px; align-items: end;
+      padding: 14px; margin-bottom: 10px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    }
+    .web-row--barber  { grid-template-columns: 1.4fr 1fr 0.5fr 1.4fr auto; }
+    .web-row--service { grid-template-columns: 1.6fr 0.9fr 0.9fr auto; }
+    @media (max-width: 820px) {
+      .web-row--barber, .web-row--service { grid-template-columns: 1fr 1fr; }
+    }
+    .web-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .web-field > span {
+      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+    .web-field input, .web-textarea {
+      width: 100%; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 9px 11px; font-size: 0.82rem; font-family: inherit; outline: none;
+    }
+    .web-field input:focus, .web-textarea:focus { border-color: rgba(255,255,255,0.3); }
+    .web-textarea { resize: vertical; line-height: 1.6; }
+    .web-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .web-field--wide { grid-column: 1 / -1; }
+    .web-field--desc { grid-column: 1 / -1; }
+    .web-field--email { grid-column: 1 / span 2; }
+    .web-admin-toggle {
+      grid-column: 3 / -1; display: flex; align-items: center; gap: 9px;
+      align-self: end; padding: 9px 12px; border-radius: 7px;
+      border: 1px solid var(--border); cursor: pointer;
+      font-size: 0.76rem; color: var(--text-muted); user-select: none;
+    }
+    .web-admin-toggle input { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+    .web-admin-toggle.on { color: var(--text); border-color: rgba(34,197,94,0.45); background: rgba(34,197,94,0.08); }
+    @media (max-width: 820px) {
+      .web-field--email, .web-admin-toggle { grid-column: 1 / -1; }
+    }
+    .web-field--desc .web-textarea { font-size: 0.78rem; }
+    .web-field--desc > span { display: flex; align-items: center; gap: 10px; }
+    .web-restore {
+      background: none; border: none; padding: 0;
+      color: var(--text-soft, #999); font-family: inherit;
+      font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase;
+      text-decoration: underline; cursor: pointer;
+    }
+    .web-restore:hover { color: var(--text); }
+    @media (max-width: 680px) { .web-grid { grid-template-columns: 1fr; } }
+
+    .web-del-btn {
+      background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; border-radius: 7px; padding: 9px 12px;
+      font-size: 0.72rem; cursor: pointer; white-space: nowrap; height: fit-content;
+    }
+    .web-add-btn {
+      background: none; border: 1px dashed var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: 11px 16px; font-size: 0.76rem;
+      cursor: pointer; width: 100%; font-family: inherit;
+    }
+    .web-add-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+
+    .web-actions {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; padding-bottom: 40px;
+    }
+    .web-save-btn {
+      background: var(--white, #fff); color: #000; border: none; border-radius: 8px;
+      padding: 12px 24px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .web-save-btn:disabled { opacity: 0.5; cursor: default; }
+    .web-reload-btn {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: 12px 18px; font-size: 0.78rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .web-save-msg { font-size: 0.76rem; color: var(--text-muted); }
+    .web-save-msg.ok  { color: var(--green); }
+    .web-save-msg.err { color: #ef4444; }
+
+    /* ── Galería del panel ── */
+    .web-gal-grid {
+      display: grid; grid-template-columns: repeat(auto-fill,minmax(130px,1fr));
+      gap: 12px; margin-bottom: 16px;
+    }
+    .web-gal-item {
+      position: relative; border-radius: 9px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--bg);
+      aspect-ratio: 1 / 1;
+    }
+    .web-gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .web-gal-item.missing {
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 8px; font-size: 0.6rem;
+      color: var(--text-muted); word-break: break-all;
+    }
+    .web-gal-tag {
+      position: absolute; left: 6px; bottom: 6px;
+      background: rgba(0,0,0,0.72); color: #fff;
+      font-size: 0.55rem; padding: 3px 6px; border-radius: 4px;
+      max-width: calc(100% - 42px); overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .web-gal-del {
+      position: absolute; top: 6px; right: 6px;
+      width: 24px; height: 24px; border-radius: 6px;
+      background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; cursor: pointer; font-size: 0.8rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center; padding: 0;
+    }
+    .web-gal-del:hover { background: rgba(239,68,68,0.85); border-color: transparent; }
+    .web-gal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .web-gal-actions .web-add-btn { width: auto; flex: 1; min-width: 200px; }
+    .web-upload-label { display: inline-block; text-align: center; }
+    .web-gal-status { font-size: 0.72rem; color: var(--text-muted); margin: 10px 0 0; }
+    .web-gal-status.err { color: #ef4444; }
+
+    /* ── Foto del local ── */
+    .web-local-wrap { display: grid; grid-template-columns: 200px 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 680px) { .web-local-wrap { grid-template-columns: 1fr; } }
+    .web-local-preview {
+      aspect-ratio: 3/4; border-radius: 9px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 10px;
+      font-size: 0.65rem; color: var(--text-muted);
+    }
+    .web-local-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .web-local-side { display: flex; flex-direction: column; gap: 10px; }
+    .web-local-side .web-add-btn { width: 100%; }
+    .web-local-side .web-del-btn { width: fit-content; }
+
+    /* ── Selects e inputs de las vistas nuevas ── */
+    .web-select, .web-input-date {
+      width: 100%; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 9px 11px; font-size: 0.82rem; font-family: inherit;
+      outline: none; cursor: pointer;
+    }
+    .web-select:focus, .web-input-date:focus { border-color: rgba(255,255,255,0.3); }
+
+    /* ── Horario semanal ── */
+    .hor-bloque {
+      margin-bottom: 8px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 9px; overflow: hidden;
+    }
+    .hor-bloque.off { opacity: 0.45; }
+    .hor-dia {
+      display: grid; grid-template-columns: 34px 1fr 100px 100px;
+      gap: 12px; align-items: center; padding: 12px 14px;
+    }
+
+    /* Franja de descanso, colgando del día */
+    .hor-descanso {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 9px 14px 11px 48px;
+      border-top: 1px dashed rgba(255,255,255,0.09);
+    }
+    .hor-desc-check {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; color: var(--text-muted); cursor: pointer; user-select: none;
+    }
+    .hor-descanso.on .hor-desc-check { color: var(--text); }
+    .hor-desc-check input { width: 15px; height: 15px; accent-color: #d9a441; cursor: pointer; }
+    .hor-descanso input[type="time"] {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 8px; font-size: 0.74rem; font-family: inherit; outline: none; width: 96px;
+    }
+    .hor-desc-sep  { font-size: 0.7rem; color: var(--text-muted); }
+    .hor-desc-hint { font-size: 0.68rem; color: var(--text-muted); }
+
+    /* ── Duración del turno ── */
+    .hor-paso {
+      display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+      padding: 14px; margin-bottom: 18px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    }
+    .hor-paso-hint {
+      flex: 1; min-width: 220px; margin: 0 0 4px;
+      font-size: 0.7rem; color: var(--text-muted); line-height: 1.55;
+    }
+
+    /* ── Tope de turnos diarios ── */
+    .hor-limite { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .hor-limite #horMaxWrap { display: flex; align-items: center; gap: 9px; }
+    .hor-limite input[type="number"] {
+      width: 80px; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 8px 10px; font-size: 0.82rem; font-family: inherit; outline: none;
+    }
+
+    /* ── Servicios por barbero ── */
+    .hor-svc {
+      display: grid; grid-template-columns: 30px 1fr 140px 90px;
+      gap: 12px; align-items: center;
+      padding: 12px 14px; margin-bottom: 8px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    }
+    .hor-svc.off { opacity: 0.45; }
+    .hor-svc input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; }
+    .hor-svc-name { font-size: 0.84rem; }
+    .hor-svc-meta { font-size: 0.64rem; color: var(--text-muted); display: block; margin-top: 2px; }
+    .hor-svc-mins { display: flex; align-items: center; gap: 7px; }
+    .hor-svc-mins input {
+      width: 66px; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 7px 9px; font-size: 0.78rem; font-family: inherit; outline: none;
+    }
+    .hor-svc-turnos {
+      font-size: 0.62rem; color: var(--text-muted);
+      text-align: right; letter-spacing: 0.04em;
+    }
+    @media (max-width: 760px) {
+      .hor-svc { grid-template-columns: 30px 1fr; row-gap: 10px; }
+      .hor-svc-mins, .hor-svc-turnos { grid-column: 2 / -1; text-align: left; }
+    }
+
+    /* ── Propuestas de servicio ── */
+    .hor-prop {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 12px 14px; margin-top: 8px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+      font-size: 0.8rem;
+    }
+    .hor-prop-main { flex: 1; min-width: 160px; }
+    .hor-prop-sub { display: block; font-size: 0.64rem; color: var(--text-muted); margin-top: 3px; }
+    .hor-prop-estado {
+      font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 9px; border-radius: 5px;
+    }
+    .hor-prop-estado.pending  { background: rgba(217,164,65,0.14); color: #d9a441; }
+    .hor-prop-estado.approved { background: rgba(34,197,94,0.14);  color: var(--green); }
+    .hor-prop-estado.rejected { background: rgba(239,68,68,0.12);  color: #ef4444; }
+    .hor-prop-btns { display: flex; gap: 8px; }
+    .hor-prop-ok, .hor-prop-no {
+      border-radius: 6px; padding: 7px 13px; font-size: 0.7rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .hor-prop-ok { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.4); color: var(--green); }
+    .hor-prop-no { background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
+    @media (max-width: 680px) { .hor-descanso { padding-left: 14px; } }
+    .hor-dia input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; }
+    .hor-nombre { font-size: 0.84rem; }
+    .hor-turnos { font-size: 0.64rem; color: var(--text-muted); display: block; margin-top: 2px; }
+    .hor-dia input[type="time"] {
+      width: 100%; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 7px 9px; font-size: 0.78rem; font-family: inherit; outline: none;
+    }
+    .hor-cerrado {
+      grid-column: 3 / -1; font-size: 0.7rem;
+      color: var(--text-muted); text-align: center;
+    }
+    @media (max-width: 680px) {
+      /* Apertura y cierre en fila propia, una por columna. Antes la
+         apertura caía en la columna de 30px del checkbox y quedaba tapada */
+      .hor-dia { grid-template-columns: 30px 1fr 1fr; row-gap: 8px; }
+      .hor-dia > div { grid-column: 2 / -1; }
+      .hor-dia [data-k="start"] { grid-column: 2; }
+      .hor-dia [data-k="end"]   { grid-column: 3; }
+      .hor-cerrado { grid-column: 2 / -1; text-align: left; }
+    }
+
+    /* ── Reseñas y QR ── */
+    .res-qr-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 14px; }
+    .res-qr-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 11px;
+      padding: 16px; text-align: center;
+    }
+    .res-qr-lienzo {
+      background: #fff; border-radius: 8px; padding: 10px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 150px; margin-bottom: 12px;
+    }
+    .res-qr-lienzo img, .res-qr-lienzo canvas { display: block; max-width: 100%; height: auto; }
+    .res-qr-nombre { font-size: 0.86rem; margin: 0 0 3px; }
+    .res-qr-link {
+      font-size: 0.6rem; color: var(--text-muted); word-break: break-all;
+      display: block; margin-bottom: 10px;
+    }
+    .res-qr-btn {
+      background: none; border: 1px solid var(--border); color: var(--text);
+      border-radius: 7px; padding: 8px 12px; font-size: 0.7rem;
+      cursor: pointer; font-family: inherit; width: 100%;
+    }
+    .res-qr-btn:hover { border-color: rgba(255,255,255,0.3); }
+
+    .res-resumen { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 12px; margin-bottom: 20px; }
+    .res-res-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px;
+    }
+    .res-res-nota { font-size: 1.5rem; color: #e7c04a; line-height: 1; }
+    .res-res-nombre { font-size: 0.78rem; margin: 6px 0 2px; }
+    .res-res-n { font-size: 0.64rem; color: var(--text-muted); }
+
+    .res-item {
+      padding: 12px 14px; margin-bottom: 8px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    }
+    .res-item-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .res-item-stars { color: #e7c04a; font-size: 0.82rem; letter-spacing: 0.08em; }
+    .res-item-meta { font-size: 0.64rem; color: var(--text-muted); margin-left: auto; }
+    .res-item-texto { font-size: 0.8rem; color: var(--text-soft); margin: 8px 0 0; line-height: 1.6; }
+
+    /* Distintivo de cita recurrente */
+    .appt-series {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(59,130,246,0.14); color: #7aa7f0;
+      border-radius: 5px; padding: 2px 7px; font-size: 0.6rem;
+      letter-spacing: 0.04em; margin-left: 6px; vertical-align: middle;
+    }
 
     /* Leyenda */
     .cal-legend {
@@ -626,19 +1089,28 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <span class="nav-section-label">Vista</span>
-        <button class="nav-item active" id="navCalendario" onclick="setTab('calendario',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Calendario</button>
-        <div class="nav-sep"></div>
-        <span class="nav-section-label">Citas</span>
-        <button class="nav-item" id="navHoy" onclick="setTab('hoy',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Hoy</button>
-        <button class="nav-item" id="navSemana" onclick="setTab('semana',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Esta semana</button>
-        <button class="nav-item" id="navTodas" onclick="setTab('todas',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Todas las citas</button>
+        <!-- Agenda: lo que se consulta a diario -->
+        <span class="nav-section-label">Agenda</span>
+        <button class="nav-item active" id="navCalendario" onclick="setTab('calendario',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> <span class="nav-label">Calendario</span></button>
+        <button class="nav-item" id="navHoy" onclick="setTab('hoy',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> <span class="nav-label">Hoy</span><span class="nav-count" id="navHoyCount"></span></button>
+        <button class="nav-item" id="navSemana" onclick="setTab('semana',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h3"/></svg> <span class="nav-label">Esta semana</span><span class="nav-count" id="navSemanaCount"></span></button>
+        <button class="nav-item" id="navTodas" onclick="setTab('todas',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> <span class="nav-label">Todas las citas</span></button>
+        <button class="nav-item" id="navNuevaCita" onclick="setTab('nuevacita',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg> <span class="nav-label">Nueva cita</span></button>
+
+        <!-- Mi trabajo: lo que cada barbero gestiona de lo suyo -->
+        <div class="nav-sep" id="propioSep" style="display:none"></div>
+        <span class="nav-section-label" id="propioNavLabel" style="display:none">Mi trabajo</span>
+        <button class="nav-item" id="navHorario" onclick="setTab('horario',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> <span class="nav-label">Mi horario</span></button>
+        <button class="nav-item" id="navBloquear" onclick="setTab('bloquear',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> <span class="nav-label">Bloquear espacios</span></button>
+        <button class="nav-item" id="navBalance" onclick="setTab('balance',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> <span class="nav-label">Balance</span></button>
+        <button class="nav-item" id="navResenas" onclick="setTab('resenas',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg> <span class="nav-label">Reseñas</span></button>
+
+        <!-- Administración: solo para quien lleva el local -->
         <div class="nav-sep" id="adminSep" style="display:none"></div>
-        <span class="nav-section-label" id="adminNavLabel" style="display:none">Admin</span>
-        <button class="nav-item" id="navBloquear" onclick="setTab('bloquear',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Bloquear espacios</button>
-        <button class="nav-item" id="navClientes" onclick="setTab('clientes',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button>
-        <button class="nav-item" id="navInventario" onclick="setTab('inventario',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Inventario</button>
-        <button class="nav-item" id="navBalance" onclick="setTab('balance',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Balance</button>
+        <span class="nav-section-label" id="adminNavLabel" style="display:none">Administración</span>
+        <button class="nav-item" id="navClientes" onclick="setTab('clientes',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> <span class="nav-label">Clientes</span></button>
+        <button class="nav-item" id="navInventario" onclick="setTab('inventario',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> <span class="nav-label">Inventario</span></button>
+        <button class="nav-item" id="navWeb" onclick="setTab('web',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> <span class="nav-label">Personalizar web</span></button>
       </nav>
       <div class="sidebar-bottom">
         <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
@@ -648,13 +1120,42 @@
     <!-- ── MAIN CONTENT ── -->
     <div class="main-content">
       <div class="main-header">
-        <span class="main-title" id="mainTitle">Calendario</span>
+        <div class="main-head-txt">
+          <span class="main-title" id="mainTitle">Calendario</span>
+          <span class="main-sub" id="mainSub"></span>
+        </div>
+        <div class="notif-wrap">
+          <!-- Centro de avisos: citas nuevas y cancelaciones -->
+          <button class="notif-btn" id="notifBtn" onclick="notifToggle()" aria-label="Avisos" title="Avisos">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span class="notif-dot" id="notifDot" style="display:none">0</span>
+          </button>
+          <div class="notif-panel" id="notifPanel">
+            <div class="notif-head">
+              <span>Avisos</span>
+              <button onclick="notifMarcarLeidos()">Marcar como leídos</button>
+            </div>
+            <div id="notifLista"></div>
+            <div class="notif-pie">
+              <button id="notifPermBtn" onclick="notifPedirPermiso()">Activar avisos del navegador</button>
+            </div>
+          </div>
+        </div>
         <button class="mobile-logout-btn" onclick="doLogout()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Salir
         </button>
       </div>
       <div class="main-body">
+    <!-- Resumen de entrada: lo que importa hoy, sin recorrer pestañas -->
+    <div id="resumenBar" class="resumen-bar" style="display:none"></div>
+
+    <!-- Agenda de quién: el administrador alterna entre el local y cada barbero -->
+    <div id="agendaScopeWrap" style="display:none;margin-bottom:18px">
+      <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);display:block;margin-bottom:8px">Agenda de</span>
+      <div id="agendaScopeChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
     <div id="appointmentsList" style="display:none">
       <div class="loader">Cargando citas...</div>
     </div>
@@ -676,9 +1177,9 @@
 
     <div id="blockView" style="display:none">
       <div class="block-panel">
-        <p class="block-section-title">Selecciona un barbero y una fecha para gestionar los espacios bloqueados</p>
+        <p class="block-section-title" id="blockIntro">Selecciona un barbero y una fecha para gestionar los espacios bloqueados</p>
         <div class="block-panel-row">
-          <div class="block-field">
+          <div class="block-field" id="blockBarberField">
             <label>Barbero</label>
             <select id="blockBarberSel" onchange="renderBlockPanel()"></select>
           </div>
@@ -690,6 +1191,7 @@
         <div id="blockLegendRow" class="block-legend-row" style="display:none">
           <div class="block-legend-item"><div class="block-legend-dot" style="background:var(--surface);border:1px solid var(--border);"></div>Libre — clic para bloquear</div>
           <div class="block-legend-item"><div class="block-legend-dot" style="background:#ef4444;"></div>Bloqueado — clic para desbloquear</div>
+          <div class="block-legend-item"><div class="block-legend-dot" style="background:rgba(234,179,8,0.55);"></div>Ocupado por una cita</div>
         </div>
         <p class="block-section-title" id="blockSlotsTitle" style="display:none">Horarios disponibles</p>
         <div class="block-slots-grid" id="blockSlotsGrid"></div>
@@ -772,11 +1274,25 @@
       <!-- filtro período -->
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:28px;flex-wrap:wrap">
         <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-right:4px">Período</span>
+        <span id="balNota" style="flex-basis:100%;font-size:0.7rem;color:var(--text-muted);margin-top:6px">Solo suman las citas marcadas como Completada.</span>
+        <!-- Corte de inicio: deja fuera las pruebas anteriores a la entrega -->
+        <label id="balDesdeWrap" style="display:none;align-items:center;gap:8px;flex-basis:100%;margin-top:4px">
+          <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted)">Contar desde</span>
+          <input type="date" id="balDesde" class="web-input-date" style="max-width:180px" onchange="balDesdeChanged()">
+          <button class="bal-filter-btn" onclick="balDesdeLimpiar()">Quitar</button>
+        </label>
         <button class="bal-filter-btn" onclick="setBalanceFilter('hoy',this)">Hoy</button>
         <button class="bal-filter-btn" onclick="setBalanceFilter('semana',this)">Esta semana</button>
         <button class="bal-filter-btn active" onclick="setBalanceFilter('mes',this)">Este mes</button>
         <button class="bal-filter-btn" onclick="setBalanceFilter('todo',this)">Todo</button>
       </div>
+      <!-- a quién corresponden las cifras -->
+      <div id="balScopeWrap" style="display:none;margin-bottom:22px">
+        <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);display:block;margin-bottom:8px">Ver balance de</span>
+        <div id="balScopeChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <!-- totales del período -->
+      <div id="balTotales" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px"></div>
       <!-- tarjetas por barbero -->
       <div id="balBarberCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:32px"></div>
       <!-- gráfico ingresos por día -->
@@ -807,6 +1323,237 @@
       </div>
     </div>
 
+    <!-- ══ MI HORARIO ══ -->
+    <div id="horarioView" style="display:none">
+      <div class="web-card">
+        <p class="web-card-title">Jornada semanal</p>
+        <p class="web-card-sub" id="horarioSub">Define a qué hora abres y cierras cada día. Los turnos se generan con la duración que elijas abajo. Apaga un día para no atender.</p>
+
+        <div id="horarioBarberSel" style="display:none;margin-bottom:18px">
+          <label class="web-field" style="max-width:320px">
+            <span>Barbero</span>
+            <select id="horarioBarber" class="web-select" onchange="horarioSwitchBarber()"></select>
+          </label>
+        </div>
+
+        <!-- Duración del turno: define la rejilla de horas de la web -->
+        <div class="hor-paso">
+          <label class="web-field" style="max-width:240px">
+            <span>Duración de cada turno</span>
+            <select id="horPaso" class="web-select" onchange="horarioPasoChanged()"></select>
+          </label>
+          <p class="hor-paso-hint" id="horPasoHint"></p>
+        </div>
+
+        <div id="horarioDias"></div>
+      </div>
+
+      <!-- Límite de turnos al día -->
+      <div class="web-card">
+        <p class="web-card-title">Turnos máximos al día</p>
+        <p class="web-card-sub">Tope de citas que aceptas por jornada. Al alcanzarlo, la web deja de ofrecer horas contigo ese día aunque queden huecos libres.</p>
+        <div class="hor-limite">
+          <label class="hor-desc-check">
+            <input type="checkbox" id="horMaxOn" onchange="horarioToggleMax()">
+            <span>Poner un tope</span>
+          </label>
+          <div id="horMaxWrap" style="display:none">
+            <input type="number" id="horMax" min="1" max="40" value="8" onchange="horarioMaxChanged()">
+            <span class="hor-desc-sep">citas por día</span>
+          </div>
+          <span class="hor-desc-hint" id="horMaxHint">Sin tope: se aceptan todas las que quepan en la jornada</span>
+        </div>
+      </div>
+
+      <!-- Servicios que ofrece este barbero -->
+      <div class="web-card">
+        <p class="web-card-title">Mis servicios y duración</p>
+        <p class="web-card-sub">Elige cuáles ofreces y cuánto tardas en cada uno. La duración es tuya: otro barbero puede tardar distinto en el mismo servicio. Se redondea a turnos completos según tu duración de turno.</p>
+        <div id="horServicios"></div>
+      </div>
+
+      <!-- Proponer un servicio nuevo -->
+      <div class="web-card" id="horPropCard">
+        <p class="web-card-title">Proponer un servicio nuevo</p>
+        <p class="web-card-sub">Envía tu propuesta al administrador. Hasta que la apruebe no aparece en la web.</p>
+        <div class="web-grid">
+          <label class="web-field"><span>Nombre</span><input type="text" id="horPropName" placeholder="Ej. Mascarilla de carbón"></label>
+          <label class="web-field"><span>Precio (COP)</span><input type="number" id="horPropPrice" min="0" step="1000" placeholder="20000"></label>
+          <label class="web-field"><span>Duración (minutos)</span><input type="number" id="horPropMins" min="15" max="240" step="5" value="45"></label>
+          <label class="web-field web-field--wide"><span>Descripción para la web</span><textarea id="horPropDesc" class="web-textarea" rows="2" placeholder="Qué incluye el servicio"></textarea></label>
+        </div>
+        <button class="web-add-btn" onclick="horPropEnviar()" style="margin-top:12px">Enviar propuesta al administrador</button>
+        <p class="web-gal-status" id="horPropMsg"></p>
+        <div id="horPropLista"></div>
+      </div>
+
+      <!-- Revisión de propuestas (solo admin) -->
+      <div class="web-card" id="horRevisionCard" style="display:none">
+        <p class="web-card-title">Propuestas por revisar</p>
+        <p class="web-card-sub">Servicios que han propuesto los barberos. Al aprobar uno se añade al catálogo de la web con su precio y duración.</p>
+        <div id="horRevision"></div>
+      </div>
+
+      <div class="web-actions">
+        <button class="web-save-btn" id="horarioSaveBtn" onclick="horarioSave()">Guardar configuración</button>
+        <button class="web-reload-btn" onclick="horarioLoad(true)">Descartar cambios</button>
+        <span id="horarioMsg" class="web-save-msg"></span>
+      </div>
+    </div>
+
+    <!-- ══ NUEVA CITA ══ -->
+    <div id="nuevaCitaView" style="display:none">
+      <div class="web-card">
+        <p class="web-card-title">Agendar una cita</p>
+        <p class="web-card-sub">Para reservas por teléfono o clientes que llegan sin cita. Solo se ofrecen los turnos libres de tu jornada.</p>
+
+        <div class="web-grid">
+          <label class="web-field" id="ncBarberWrap" style="display:none">
+            <span>Barbero</span>
+            <select id="ncBarber" class="web-select" onchange="ncRefreshSlots()"></select>
+          </label>
+          <label class="web-field">
+            <span>Fecha</span>
+            <input type="date" id="ncDate" class="web-input-date" onchange="ncRefreshSlots()">
+          </label>
+          <label class="web-field">
+            <span>Servicio</span>
+            <select id="ncService" class="web-select" onchange="ncRefreshSlots()"></select>
+          </label>
+          <label class="web-field">
+            <span>Hora</span>
+            <select id="ncTime" class="web-select"></select>
+          </label>
+          <label class="web-field">
+            <span>Nombre del cliente</span>
+            <input type="text" id="ncNombre" placeholder="Nombre y apellido">
+          </label>
+          <label class="web-field">
+            <span>WhatsApp</span>
+            <input type="text" id="ncTelefono" placeholder="300 000 0000">
+          </label>
+        </div>
+
+        <p class="web-gal-status" id="ncSlotInfo"></p>
+      </div>
+
+      <div class="web-actions">
+        <button class="web-save-btn" id="ncSaveBtn" onclick="ncSave()">Agendar cita</button>
+        <span id="ncMsg" class="web-save-msg"></span>
+      </div>
+    </div>
+
+    <!-- ══ RESEÑAS Y CÓDIGOS QR ══ -->
+    <div id="resenasView" style="display:none">
+      <div id="resAviso" class="web-notice" style="display:none"></div>
+
+      <div class="web-card">
+        <p class="web-card-title">Código QR de cada barbero</p>
+        <p class="web-card-sub">Imprime el QR y ponlo en el puesto o en la tarjeta. Al escanearlo se abre la web con el formulario de reseña de ese barbero ya seleccionado.</p>
+        <div id="resQrGrid" class="res-qr-grid"></div>
+      </div>
+
+      <div class="web-card">
+        <p class="web-card-title">Reseñas recibidas</p>
+        <div id="resResumen" class="res-resumen"></div>
+        <div id="resLista"></div>
+      </div>
+    </div>
+
+    <!-- ══ PERSONALIZAR WEB ══ -->
+    <div id="webView" style="display:none">
+
+      <div id="webNotice" class="web-notice" style="display:none"></div>
+
+      <!-- Secciones -->
+      <div class="web-card">
+        <p class="web-card-title">Secciones de la web</p>
+        <p class="web-card-sub">Apaga una sección y desaparece de la página junto con su enlace del menú. Las visibles se renumeran solas.</p>
+        <div id="webSections" class="web-toggles"></div>
+      </div>
+
+      <!-- Foto del local -->
+      <div class="web-card">
+        <p class="web-card-title">Foto del local</p>
+        <p class="web-card-sub">Es la imagen grande de la sección "Sobre nosotros". Mientras no haya foto, la web muestra un marcador gris.</p>
+        <div class="web-local-wrap">
+          <div class="web-local-preview" id="webLocalPreview"></div>
+          <div class="web-local-side">
+            <label class="web-add-btn web-upload-label">
+              + Subir foto del local
+              <input type="file" id="webLocalFile" accept="image/*" style="display:none" onchange="webUploadLocal(this)">
+            </label>
+            <button class="web-del-btn" id="webLocalDel" onclick="webDelLocal()" style="display:none">Quitar foto</button>
+            <label class="web-field" style="margin-top:4px">
+              <span>O ruta de archivo</span>
+              <input type="text" id="webLocalPath" placeholder="assets/local.jpg" onchange="webLocalPathChanged(this)">
+            </label>
+            <p class="web-gal-status" id="webLocalStatus"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barberos -->
+      <div class="web-card">
+        <p class="web-card-title">Barberos</p>
+        <p class="web-card-sub">Aparecen como opción al reservar. La foto es una ruta dentro de assets, por ejemplo assets/barber3.jpg</p>
+        <div id="webBarbers"></div>
+        <button class="web-add-btn" onclick="webAddBarber()">+ Añadir barbero</button>
+      </div>
+
+      <!-- Servicios -->
+      <div class="web-card">
+        <p class="web-card-title">Servicios y precios</p>
+        <p class="web-card-sub">La duración se reparte en turnos de 45 minutos. Un servicio de 50 minutos ocupa dos turnos.</p>
+        <div id="webServices"></div>
+        <button class="web-add-btn" onclick="webAddService()">+ Añadir servicio</button>
+      </div>
+
+      <!-- Galería -->
+      <div class="web-card">
+        <p class="web-card-title">Galería</p>
+        <p class="web-card-sub">Estas son las fotos que se ven ahora en la web. Se reparten en las 5 celdas de la rejilla; las celdas con varias fotos las alternan con fundido.</p>
+
+        <div id="webGalleryGrid" class="web-gal-grid"></div>
+
+        <div class="web-gal-actions">
+          <label class="web-add-btn web-upload-label">
+            + Subir fotos desde tu equipo
+            <input type="file" id="webGalleryFile" accept="image/*" multiple style="display:none" onchange="webUploadPhotos(this)">
+          </label>
+          <button class="web-add-btn" onclick="webToggleGalleryPaths()" id="webPathsBtn">Editar rutas a mano</button>
+        </div>
+        <p class="web-gal-status" id="webGalleryStatus"></p>
+
+        <div id="webGalleryPathsWrap" style="display:none;margin-top:14px">
+          <p class="web-card-sub" style="margin-bottom:8px">Una ruta por línea. Las fotos subidas aparecen como <code>db:...</code> y es mejor no tocarlas desde aquí.</p>
+          <textarea id="webGallery" class="web-textarea" rows="7" placeholder="assets/g01.jpg"></textarea>
+        </div>
+      </div>
+
+      <!-- Datos del negocio -->
+      <div class="web-card">
+        <p class="web-card-title">Datos del negocio</p>
+        <div class="web-grid">
+          <label class="web-field"><span>Dirección</span><input id="webAddress" type="text" placeholder="Calle 00 #00-00, Medellín"></label>
+          <label class="web-field"><span>Teléfono</span><input id="webPhone" type="text" placeholder="+57 300 000 0000"></label>
+          <label class="web-field web-field--wide"><span>Horario</span><input id="webHours" type="text" placeholder="Lun–Jue 10:00–20:00 · Vie 07:00–21:00"></label>
+          <label class="web-field web-field--wide"><span>Redes (texto que se muestra)</span><input id="webSocials" type="text" placeholder="@9smnexo"></label>
+          <label class="web-field"><span>Enlace Instagram</span><input id="webInstagram" type="text" placeholder="https://instagram.com/..."></label>
+          <label class="web-field"><span>Enlace TikTok</span><input id="webTiktok" type="text" placeholder="https://tiktok.com/@..."></label>
+          <label class="web-field"><span>Enlace WhatsApp</span><input id="webWhatsapp" type="text" placeholder="https://wa.me/57300..."></label>
+          <label class="web-field"><span>Texto del pie</span><input id="webFooter" type="text" placeholder="© 2026 9SM NEXO"></label>
+        </div>
+      </div>
+
+      <div class="web-actions">
+        <button class="web-save-btn" id="webSaveBtn" onclick="webSave()">Guardar y publicar</button>
+        <button class="web-reload-btn" onclick="webLoad(true)">Descartar cambios</button>
+        <span id="webSaveMsg" class="web-save-msg"></span>
+      </div>
+
+    </div>
+
       </div>
     </div>
   </div>
@@ -821,11 +1568,11 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       <span>Hoy</span>
     </button>
-    <button class="mbn-btn" id="mbnSemana" onclick="mbnGo('semana',this)">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-      <span>Semana</span>
+    <button class="mbn-btn mbn-barbero" id="mbnNuevaCita" onclick="mbnGo('nuevacita',this)" style="display:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg>
+      <span>Nueva cita</span>
     </button>
-    <button class="mbn-btn mbn-admin" id="mbnBalance" onclick="mbnGo('balance',this)" style="display:none">
+    <button class="mbn-btn mbn-barbero" id="mbnBalance" onclick="mbnGo('balance',this)" style="display:none">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       <span>Balance</span>
     </button>
@@ -838,26 +1585,31 @@
   <!-- Overlay + hoja "Más" -->
   <div class="mbn-more-overlay" id="mbnMoreOverlay" onclick="mbnCloseMore()"></div>
   <div class="mbn-more-sheet" id="mbnMoreSheet">
-    <button class="mbn-more-item" onclick="mbnGo('todas',null);mbnCloseMore()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-      Todas las citas
-    </button>
-    <button class="mbn-more-item mbn-admin" id="mmiClientes" onclick="mbnGo('clientes',null);mbnCloseMore()" style="display:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Clientes
-    </button>
-    <button class="mbn-more-item mbn-admin" id="mmiInventario" onclick="mbnGo('inventario',null);mbnCloseMore()" style="display:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-      Inventario
-    </button>
-    <button class="mbn-more-item mbn-admin" id="mmiBloquear" onclick="mbnGo('bloquear',null);mbnCloseMore()" style="display:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      Bloquear espacios
-    </button>
-    <button class="mbn-more-item danger" onclick="doLogout();mbnCloseMore()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Cerrar sesión
-    </button>
+    <div class="mbn-sheet-grip"></div>
+
+    <span class="mbn-group-label">Agenda</span>
+    <div class="mbn-group">
+      <button class="mbn-more-item" id="mmiSemana" onclick="mbnGo('semana',null);mbnCloseMore()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Esta semana</button>
+      <button class="mbn-more-item" onclick="mbnGo('todas',null);mbnCloseMore()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Todas las citas</button>
+    </div>
+
+    <span class="mbn-group-label mbn-barbero" style="display:none">Mi trabajo</span>
+    <div class="mbn-group mbn-barbero" style="display:none">
+      <button class="mbn-more-item mbn-barbero" id="mmiHorario" onclick="mbnGo('horario',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Mi horario</button>
+      <button class="mbn-more-item mbn-barbero" id="mmiBloquear" onclick="mbnGo('bloquear',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Bloquear espacios</button>
+      <button class="mbn-more-item mbn-barbero" id="mmiResenas" onclick="mbnGo('resenas',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg> Reseñas</button>
+    </div>
+
+    <span class="mbn-group-label mbn-admin" style="display:none">Administración</span>
+    <div class="mbn-group mbn-admin" style="display:none">
+      <button class="mbn-more-item mbn-admin" id="mmiClientes" onclick="mbnGo('clientes',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Clientes</button>
+      <button class="mbn-more-item mbn-admin" id="mmiInventario" onclick="mbnGo('inventario',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Inventario</button>
+      <button class="mbn-more-item mbn-admin" id="mmiWeb" onclick="mbnGo('web',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Personalizar web</button>
+    </div>
+
+    <div class="mbn-group">
+      <button class="mbn-more-item danger" onclick="doLogout();mbnCloseMore()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Cerrar sesión</button>
+    </div>
   </div>
 
 </div>
@@ -889,25 +1641,235 @@ const auth = firebase.auth();
 const db   = firebase.database();
 
 /* ── Colores de barbero ── */
-const BARBER_COLORS = { b1:'#3b82f6', b2:'#a855f7', any:'#6b7280' };
-const BARBER_COLOR_CLS = { b1:'barber-b1', b2:'barber-b2', any:'barber-any' };
+const BARBER_COLORS = { b1:'#3b82f6', b2:'#a855f7', b3:'#10b981', any:'#6b7280' };
+const BARBER_COLOR_CLS = { b1:'barber-b1', b2:'barber-b2', b3:'barber-b3', any:'barber-any' };
 
 /* ── Horarios por día (mismos que la página pública, cada 45 min) ── */
-function getSlotsForDate(dateKey) {
+/* ══════════════════════════════════════════
+   CONFIGURACIÓN COMPARTIDA CON LA WEB
+   El panel la lee para saber horarios y permisos.
+══════════════════════════════════════════ */
+
+let PANEL_CFG = null;
+
+function loadPanelConfig() {
+  return db.ref('siteConfig/config').once('value')
+    .then(function(snap) { PANEL_CFG = snap.val() || null; return PANEL_CFG; })
+    .catch(function() { PANEL_CFG = null; return null; });
+}
+
+/* Busca al barbero en la configuración por correo, y si no por id.
+   Lo que diga la configuración pisa a lo que hay en el código. */
+function mergeBarberFromConfig(info) {
+  if (!PANEL_CFG || !Array.isArray(PANEL_CFG.barbers)) return info;
+  var c = PANEL_CFG.barbers.find(function(b) {
+    return b && info.email && b.email && b.email.toLowerCase() === info.email.toLowerCase();
+  }) || PANEL_CFG.barbers.find(function(b) { return b && b.id === info.id; });
+  if (!c) return info;
+  return Object.assign({}, info, {
+    name:  c.name  || info.name,
+    role:  c.role  || info.role,
+    init:  c.init  || info.init,
+    admin: c.admin === true ? true : (c.admin === false ? false : info.admin)
+  });
+}
+
+/* ══════════════════════════════════════════
+   HORARIOS POR BARBERO
+══════════════════════════════════════════ */
+
+const DIAS_SEMANA = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+/* Horario histórico de la barbería, usado cuando un barbero
+   todavía no ha definido el suyo */
+const DEFAULT_SCHEDULE = {
+  0: { active: true, start: '07:00', end: '13:00' },
+  1: { active: true, start: '10:00', end: '19:00' },
+  2: { active: true, start: '10:00', end: '19:00' },
+  3: { active: true, start: '10:00', end: '19:00' },
+  4: { active: true, start: '10:00', end: '19:00' },
+  5: { active: true, start: '07:00', end: '19:45' },
+  6: { active: true, start: '07:00', end: '19:00' }
+};
+
+/* Duración de turno por defecto, si un barbero no ha elegido la suya */
+const SLOT_DEFAULT = 45;
+/* Opciones que ofrece el panel */
+const SLOT_OPCIONES = [15, 20, 30, 45, 60, 90];
+
+/* Turnos entre dos horas, extremos incluidos.
+   El paso lo decide cada barbero. */
+function genSlotRange(start, end, paso) {
+  var out = [];
+  var step = parseInt(paso, 10) || SLOT_DEFAULT;
+  var a = String(start).split(':').map(Number);
+  var b = String(end).split(':').map(Number);
+  var t = a[0] * 60 + a[1], fin = b[0] * 60 + b[1];
+  if (isNaN(t) || isNaN(fin)) return out;
+  var guard = 0;
+  while (t <= fin && guard++ < 200) {
+    out.push(String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'));
+    t += step;
+  }
+  return out;
+}
+
+/* ── Agenda por duración real (misma lógica que la web) ── */
+
+function minToHHMM(m) {
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+
+/* Duración de un servicio para un barbero: su ajuste propio o el catálogo */
+function panelSvcMins(bid, name) {
+  var cat = (PANEL_CFG && Array.isArray(PANEL_CFG.services)) ? PANEL_CFG.services : [];
+  var s = cat.find(function(x) { return x && x.name === name; });
+  var base = s ? (parseInt(s.mins, 10) || 45) : 45;
+  var lista = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers)) ? PANEL_CFG.barbers : [];
+  var b = lista.find(function(x) { return x && x.id === bid; });
+  if (s && b && b.svc && b.svc[s.id]) return parseInt(b.svc[s.id].mins, 10) || base;
+  return base;
+}
+
+/* Tramos ocupados [inicio, fin] en minutos: citas por su duración real
+   (las antiguas sin duración, por su servicio) y bloqueos por turno */
+function ncBusy(bid, dateKey) {
+  var out = [];
+  allAppointments.forEach(function(a) {
+    if (a.date !== dateKey || a.status === 'cancelled') return;
+    if (a.barber !== bid && a.barber !== 'any') return;
+    var ini = toMinutes(a.time);
+    var dur = parseInt(a.mins, 10) || panelSvcMins(a.barber === 'any' ? bid : a.barber, a.service);
+    out.push([ini, ini + dur]);
+  });
+  var bl = (blockedData[bid] && blockedData[bid][dateKey]) || {};
+  var paso = barberSlotMinutes(bid);
+  Object.keys(bl).forEach(function(k) {
+    if (!bl[k]) return;
+    var m = toMinutes(k.replace('_', ':'));
+    out.push([m, m + paso]);
+  });
+  return out;
+}
+
+/* Jornada en minutos; el cierre es el final del último turno */
+function ncWindow(bid, dateKey) {
+  var p = dateKey.split('-').map(Number);
+  var d = barberDay(bid, new Date(p[0], p[1] - 1, p[2]).getDay());
+  if (!d.active) return null;
+  var paso = parseInt(d.slotMinutes, 10) || SLOT_DEFAULT;
+  // ult: hora más tardía a la que puede EMPEZAR una cita (el cierre configurado)
+  var w = { ini: toMinutes(d.start), ult: toMinutes(d.end), fin: toMinutes(d.end) + paso, paso: paso, desc: null };
+  if (d.breakActive && d.breakStart && d.breakEnd && toMinutes(d.breakEnd) > toMinutes(d.breakStart)) {
+    w.desc = [toMinutes(d.breakStart), toMinutes(d.breakEnd)];
+  }
+  return w;
+}
+
+function ncSolapa(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
+
+function ncFits(bid, dateKey, c, m) {
+  var w = ncWindow(bid, dateKey);
+  if (!w || c < w.ini || c > w.ult || c + m > w.fin) return false;
+  if (w.desc && ncSolapa(c, c + m, w.desc[0], w.desc[1])) return false;
+  return ncBusy(bid, dateKey).every(function(x) { return !ncSolapa(c, c + m, x[0], x[1]); });
+}
+
+/* Horas de inicio: la rejilla avanza lo que dura el servicio y se
+   reinicia justo al terminar cada cita o el descanso, para que la
+   siguiente empiece sin huecos muertos */
+function ncStarts(bid, dateKey, paso) {
+  var w = ncWindow(bid, dateKey);
+  if (!w) return [];
+  var step = parseInt(paso, 10) || w.paso;
+  var obst = ncBusy(bid, dateKey);
+  if (w.desc) obst.push(w.desc);
+  var set = {}, t = w.ini, guard = 0;
+  while (t <= w.ult && guard++ < 1000) {
+    var dentro = null;
+    for (var i = 0; i < obst.length; i++) {
+      if (t >= obst[i][0] && t < obst[i][1]) { dentro = obst[i]; break; }
+    }
+    if (dentro) { t = dentro[1]; continue; }
+    set[t] = true;
+    t += step;
+  }
+  obst.forEach(function(x) { if (x[1] >= w.ini && x[1] <= w.ult) set[x[1]] = true; });
+  return Object.keys(set).map(Number).sort(function(a, b) { return a - b; });
+}
+
+/* Minutos que dura cada turno de un barbero */
+function barberSlotMinutes(barberId) {
+  if (!barberId || barberId === 'any' || barberId === 'admin') return SLOT_DEFAULT;
+  var lista = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers)) ? PANEL_CFG.barbers : [];
+  var b = lista.find(function(x) { return x && x.id === barberId; });
+  return (b && parseInt(b.slotMinutes, 10)) || SLOT_DEFAULT;
+}
+
+function barberDay(barberId, dow) {
+  var def = DEFAULT_SCHEDULE[dow];
+  if (!PANEL_CFG || !Array.isArray(PANEL_CFG.barbers)) return def;
+  var b = PANEL_CFG.barbers.find(function(x) { return x && x.id === barberId; });
+  if (!b || !b.schedule || !b.schedule[dow]) return def;
+  var d = b.schedule[dow];
+  return {
+    active:      d.active !== false,
+    start:       d.start || def.start,
+    end:         d.end   || def.end,
+    breakActive: d.breakActive === true,
+    breakStart:  d.breakStart || '',
+    breakEnd:    d.breakEnd   || '',
+    slotMinutes: parseInt(b.slotMinutes, 10) || SLOT_DEFAULT
+  };
+}
+
+function toMinutes(t) {
+  var p = String(t).split(':').map(Number);
+  return (p[0] * 60) + (p[1] || 0);
+}
+
+/* Quita los turnos que se solapen con el descanso, contando la
+   duración real del turno de ese barbero */
+function filterBreak(slots, d) {
+  if (!d || !d.breakActive || !d.breakStart || !d.breakEnd) return slots;
+  var bs = toMinutes(d.breakStart), be = toMinutes(d.breakEnd);
+  if (isNaN(bs) || isNaN(be) || be <= bs) return slots;
+  var dur = parseInt(d.slotMinutes, 10) || SLOT_DEFAULT;
+  return slots.filter(function(t) {
+    var ini = toMinutes(t), fin = ini + dur;
+    return fin <= bs || ini >= be;   // termina antes, o empieza después
+  });
+}
+
+/* Turnos efectivos de un barbero ese día: jornada menos descanso */
+function slotsOfDay(barberId, dow) {
+  var d = barberDay(barberId, dow);
+  if (!d.active) return [];
+  return filterBreak(genSlotRange(d.start, d.end, d.slotMinutes), d);
+}
+
+/* Turnos de un día. Sin barbero concreto se unen los de todos,
+   que es lo que corresponde a una cita asignada a "Cualquiera". */
+function getSlotsForDate(dateKey, barberId) {
   if (!dateKey) return [];
   const parts = dateKey.split('-').map(Number);
   const dow = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
-  if (dow === 0)
-    return ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15','13:00'];
-  if (dow >= 1 && dow <= 4)
-    return ['10:00','10:45','11:30','12:15','13:00','13:45',
-            '14:30','15:15','16:00','16:45','17:30','18:15','19:00'];
-  if (dow === 5)
-    return ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15',
-            '13:00','13:45','14:30','15:15','16:00','16:45','17:30','18:15',
-            '19:00','19:45'];
-  return ['07:00','07:45','08:30','09:15','10:00','10:45','11:30','12:15',
-          '13:00','13:45','14:30','15:15','16:00','16:45','17:30','18:15','19:00'];
+
+  if (barberId && barberId !== 'any' && barberId !== 'admin') {
+    return slotsOfDay(barberId, dow);
+  }
+
+  var ids = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers) ? PANEL_CFG.barbers : [])
+    .map(function(b) { return b && b.id; }).filter(Boolean);
+  if (!ids.length) {
+    var def = DEFAULT_SCHEDULE[dow];
+    return def.active ? genSlotRange(def.start, def.end) : [];
+  }
+  var union = {};
+  ids.forEach(function(id) {
+    slotsOfDay(id, dow).forEach(function(t) { union[t] = true; });
+  });
+  return Object.keys(union).sort();
 }
 function slotKey(time) { return time.replace(':', '_'); }
 function fmt12(time) {
@@ -921,10 +1883,13 @@ function fmt12(time) {
 
 /* ── Mapa email → barbero ── (actualiza con los correos reales que creaste) */
 const BARBER_MAP = {
-  'barbero1@9smnexo.com': { id: 'b1', name: 'Sebastian Montoya Garcia', role: 'Head Barber', init: 'SM' },
+  'barbero1@9smnexo.com': { id: 'b1', name: 'Sebastian Montoya Garcia', role: 'Head Barber', init: 'SM', admin: true },
   'barbero2@9smnexo.com': { id: 'b2', name: 'Miguel Angel Zuluaga',    role: 'Barber',      init: 'MA' },
+  'barbero3@9smnexo.com': { id: 'b3', name: 'James David Mosquera',   role: 'Barber',      init: 'JD' },
   'admin@9smnexo.com':    { id: 'admin', name: 'Administrador', role: 'Admin',  init: 'AD' },
 };
+/* Un usuario tiene permisos de admin si es la cuenta admin o si su ficha lleva admin:true */
+function hasAdminRights(info) { return !!(info && (info.id === 'admin' || info.admin === true)); }
 
 /* Precios por servicio, para estimar ingresos (NEXO Experience usa el punto medio de su rango $60.000–$70.000) */
 const SERVICE_PRICES = {
@@ -935,7 +1900,14 @@ const SERVICE_PRICES = {
   'PRIME Ritual':    50000,
   'NEXO Experience': 65000,
 };
-function servicePrice(name) { return SERVICE_PRICES[name] || 0; }
+/* Precio del catálogo publicado; la lista de arriba queda como respaldo
+   para instalaciones que todavía no han guardado configuración */
+function servicePrice(name) {
+  var cat = (PANEL_CFG && Array.isArray(PANEL_CFG.services)) ? PANEL_CFG.services : [];
+  var s = cat.find(function(x) { return x && x.name === name; });
+  if (s && Number(s.price) > 0) return Number(s.price);
+  return SERVICE_PRICES[name] || 0;
+}
 function formatCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
 
 let currentBarber   = null;
@@ -947,32 +1919,65 @@ let calSelectedDate = null;
 let blockedData     = {};
 let blockListener   = null;
 let balanceFilter   = 'mes';
+let balanceScope    = 'all';   // 'all' o el id de un barbero (solo el admin alterna)
+let agendaScope     = 'all';   // mismo criterio para el calendario y las listas de citas
 
 /* ── Auth ── */
+/* Pinta cabecera y navegación según los permisos del usuario.
+   Se llama dos veces: al entrar con los datos del código, y otra vez
+   cuando llega la configuración, que puede haber cambiado el rol. */
+function applyBarberUI(info) {
+  document.getElementById('pName').textContent   = info.name;
+  document.getElementById('pRole').textContent   = info.role + (info.admin === true ? ' · Admin' : '');
+  document.getElementById('pAvatar').textContent = info.init;
+
+  var esAdmin = hasAdminRights(info);
+  ['navClientes','navInventario','navWeb','adminSep','adminNavLabel']
+    .forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = esAdmin ? '' : 'none';
+    });
+  document.querySelectorAll('.mbn-admin').forEach(function(el) {
+    el.style.display = esAdmin ? '' : 'none';
+  });
+  // El panel de bloqueos ya no es solo de administradores: cada barbero
+  // gestiona el suyo, así que se prepara para cualquiera identificado
+  if (esAdmin || (info.id && info.id !== 'any')) initBlockPanel();
+
+  // "Mi horario" y "Nueva cita" las ve cualquier barbero identificado,
+  // tanto en la barra lateral como en el menú móvil
+  var propio = info.id && info.id !== 'any';
+  var verPropias = (propio || esAdmin) ? '' : 'none';
+  ['navHorario','navNuevaCita','navBloquear','navResenas','navBalance','propioSep','propioNavLabel'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = verPropias;
+  });
+  document.querySelectorAll('.mbn-barbero').forEach(function(el) {
+    el.style.display = verPropias;
+  });
+}
+
 auth.onAuthStateChanged(function(user) {
   if (user) {
     const info = BARBER_MAP[user.email] || { id: 'any', name: user.email, role: 'Barbero', init: '?' };
-    currentBarber = info;
+    currentBarber = Object.assign({}, info, { email: user.email });
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('panelScreen').style.display = 'block';
-    document.getElementById('pName').textContent   = info.name;
-    document.getElementById('pRole').textContent   = info.role;
-    document.getElementById('pAvatar').textContent = info.init;
-    if (info.id === 'admin') {
-      document.getElementById('navBloquear').style.display = '';
-      document.getElementById('navClientes').style.display = '';
-      document.getElementById('navInventario').style.display = '';
-      document.getElementById('navBalance').style.display = '';
-      document.getElementById('adminSep').style.display = '';
-      document.getElementById('adminNavLabel').style.display = '';
-      // Nav móvil: mostrar items admin
-      document.querySelectorAll('.mbn-admin').forEach(function(el){ el.style.display = ''; });
-      initBlockPanel();
-    }
+    applyBarberUI(currentBarber);
+
     // Mostrar nav inferior móvil
     document.getElementById('mobileBottomNav').style.display = 'flex';
     loadAppointments();
     setTab('calendario', document.getElementById('navCalendario'));
+
+    // La configuración manda sobre el código: puede haber dado o quitado
+    // el rol de admin, o cambiado nombre y horario del barbero
+    loadPanelConfig().then(function() {
+      currentBarber = mergeBarberFromConfig(currentBarber);
+      applyBarberUI(currentBarber);
+      renderTab();
+      renderCalendar();
+    });
   } else {
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('panelScreen').style.display = 'none';
@@ -980,9 +1985,15 @@ auth.onAuthStateChanged(function(user) {
     document.getElementById('navClientes').style.display = 'none';
     document.getElementById('navInventario').style.display = 'none';
     document.getElementById('navBalance').style.display = 'none';
+    document.getElementById('navWeb').style.display = 'none';
     document.getElementById('adminSep').style.display = 'none';
     document.getElementById('adminNavLabel').style.display = 'none';
+    ['navHorario','navNuevaCita','navResenas'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
     document.querySelectorAll('.mbn-admin').forEach(function(el){ el.style.display = 'none'; });
+    document.querySelectorAll('.mbn-barbero').forEach(function(el){ el.style.display = 'none'; });
     document.getElementById('mobileBottomNav').style.display = 'none';
     if (dbListener)  { db.ref('bookings').off('value', dbListener); dbListener = null; }
     if (invListener) { db.ref('inventory').off('value', invListener); invListener = null; }
@@ -1030,7 +2041,7 @@ function loadAppointments() {
           return;
         }
         if (val.status === 'overflow') return;
-        if (currentBarber.id === 'admin' || val.barber === currentBarber.id || val.barber === 'any') {
+        if (hasAdminRights(currentBarber) || val.barber === currentBarber.id || val.barber === 'any') {
           allAppointments.push(Object.assign({ _key: key }, val));
         }
       });
@@ -1040,6 +2051,10 @@ function loadAppointments() {
       return a.time.localeCompare(b.time);
     });
     updateStats();
+    notifRender();
+    renderNavCounts();
+    renderResumen();
+    renderAgendaScopeChips();
     renderTab();
     renderCalendar();
     renderBlockPanel();
@@ -1068,6 +2083,23 @@ function weekKeys() {
   }
   return keys;
 }
+/* Semana natural que contiene hoy, de lunes a domingo.
+   La usa el balance: el dinero ya cobrado está en el pasado, no en los
+   próximos 7 días. */
+function weekKeysActual() {
+  const keys = [];
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));   // getDay(): 0 = domingo
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(lunes); d.setDate(lunes.getDate() + i);
+    keys.push(d.getFullYear() + '-'
+      + String(d.getMonth() + 1).padStart(2, '0') + '-'
+      + String(d.getDate()).padStart(2, '0'));
+  }
+  return keys;
+}
+
 function monthKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
@@ -1082,47 +2114,399 @@ function setTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
-  const titles = { calendario:'Calendario', hoy:'Hoy', semana:'Esta semana', todas:'Todas las citas', bloquear:'Bloquear espacios', clientes:'Clientes', inventario:'Inventario', balance:'Balance' };
+  const titles = { calendario:'Calendario', hoy:'Hoy', semana:'Esta semana', todas:'Todas las citas', bloquear:'Bloquear espacios', clientes:'Clientes', inventario:'Inventario', balance:'Balance', web:'Personalizar web', horario:'Mi horario', nuevacita:'Nueva cita', resenas:'Reseñas' };
   var titleEl = document.getElementById('mainTitle');
   if (titleEl) titleEl.textContent = titles[tab] || tab;
+  // Una frase corta por pantalla, para no tener que adivinar qué hace cada una
+  var subs = {
+    calendario: 'El mes completo. Pulsa un día para ver sus citas.',
+    hoy:        'Las citas de hoy, en orden.',
+    semana:     'Las citas de esta semana, día a día.',
+    todas:      'Todo el histórico de citas.',
+    nuevacita:  'Agenda una cita a mano, por teléfono o en el local.',
+    horario:    'Tu jornada, descansos y duración de los turnos.',
+    bloquear:   'Cierra turnos sueltos en los que no vas a atender.',
+    balance:    'Ingresos de las citas marcadas como completadas.',
+    resenas:    'Tu código QR y las reseñas que han dejado tus clientes.',
+    clientes:   'Clientes que han reservado, con su última visita.',
+    inventario: 'Productos del local y sus existencias.',
+    web:        'Cambia textos, fotos, precios y secciones de la web.'
+  };
+  var subEl = document.getElementById('mainSub');
+  if (subEl) subEl.textContent = subs[tab] || '';
   const isCal     = tab === 'calendario';
   const isBlock   = tab === 'bloquear';
   const isClients = tab === 'clientes';
   const isInv     = tab === 'inventario';
   const isBal     = tab === 'balance';
-  const isAppts   = !isCal && !isBlock && !isClients && !isInv && !isBal;
+  const isWeb     = tab === 'web';
+  const isHor     = tab === 'horario';
+  const isNC      = tab === 'nuevacita';
+  const isRes     = tab === 'resenas';
+  const isAppts   = !isCal && !isBlock && !isClients && !isInv && !isBal && !isWeb && !isHor && !isNC && !isRes;
   document.getElementById('appointmentsList').style.display = isAppts  ? 'block' : 'none';
   document.getElementById('calendarView').style.display     = isCal    ? 'block' : 'none';
   document.getElementById('blockView').style.display        = isBlock  ? 'block' : 'none';
   document.getElementById('clientsView').style.display      = isClients ? 'block' : 'none';
   document.getElementById('inventoryView').style.display    = isInv    ? 'block' : 'none';
   document.getElementById('balanceView').style.display      = isBal    ? 'block' : 'none';
+  document.getElementById('webView').style.display          = isWeb    ? 'block' : 'none';
+  document.getElementById('horarioView').style.display      = isHor    ? 'block' : 'none';
+  document.getElementById('nuevaCitaView').style.display    = isNC     ? 'block' : 'none';
+  document.getElementById('resenasView').style.display      = isRes    ? 'block' : 'none';
+  renderAgendaScopeChips();
+  const barraRes = document.getElementById('resumenBar');
+  if (barraRes) {
+    const verResumen = ['calendario','hoy','semana','todas'].indexOf(tab) >= 0;
+    barraRes.style.display = verResumen ? 'flex' : 'none';
+    if (verResumen) renderResumen();
+  }
   if (isCal)          renderCalendar();
   else if (isBlock)   renderBlockPanel();
   else if (isClients) renderClientsView();
   else if (isInv)     renderInventoryView();
   else if (isBal)     renderBalanceView();
+  else if (isWeb)     webLoad();
+  else if (isHor)     horarioLoad();
+  else if (isNC)      ncInit();
+  else if (isRes)     resInit();
   else                renderTab();
 }
 
+/* Cuántas citas pendientes hay hoy y esta semana, junto al nombre
+   del menú, para saber de un vistazo qué toca sin entrar a mirar */
+function renderNavCounts() {
+  const hoy = todayKey();
+  const semana = new Set(weekKeys());
+  const citas = agendaCitas().filter(function(a){ return a.status === 'pending'; });
+  const pon = function(id, n) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = n ? String(n) : '';
+    el.style.display = n ? 'inline-block' : 'none';
+  };
+  pon('navHoyCount',    citas.filter(function(a){ return a.date === hoy; }).length);
+  pon('navSemanaCount', citas.filter(function(a){ return semana.has(a.date); }).length);
+}
+
+/* ══════════════════════════════════════════
+   APP INSTALABLE
+   El service worker es lo que permite instalar el panel en el móvil.
+   No cachea el HTML: la comprobación de versión sigue mandando.
+══════════════════════════════════════════ */
+let swReg = null;
+
+function registrarSW() {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js')
+    .then(function(reg) { swReg = reg; })
+    .catch(function(err) { console.warn('service worker no registrado:', err && err.message); });
+}
+registrarSW();
+
+/* ── Resumen al abrir el panel ──
+   Una línea con lo que importa ahora mismo, para no tener que recorrer
+   las pestañas al entrar. */
+function renderResumen() {
+  const el = document.getElementById('resumenBar');
+  if (!el || !currentBarber) return;
+
+  const hoy = todayKey();
+  const citas = agendaCitas();
+  const hoyPend = citas.filter(function(a) { return a.date === hoy && a.status === 'pending'; });
+  const sinLeer = notifNoLeidos().length;
+
+  // Próxima cita de hoy que todavía no ha pasado
+  const ahora = new Date();
+  const ahoraMin = ahora.getHours() * 60 + ahora.getMinutes();
+  const siguiente = hoyPend
+    .filter(function(a) { return toMinutes(a.time) >= ahoraMin; })
+    .sort(function(a, b) { return a.time.localeCompare(b.time); })[0];
+
+  const trozos = [];
+  trozos.push('<strong>' + hoyPend.length + '</strong> cita' + (hoyPend.length === 1 ? '' : 's') + ' hoy');
+  if (siguiente) {
+    trozos.push('la próxima a las <strong>' + fmt12(siguiente.time) + '</strong> con '
+      + escHtml(siguiente.nombre || 'cliente'));
+  } else if (hoyPend.length) {
+    trozos.push('ya pasaron todas');
+  }
+  if (sinLeer) {
+    trozos.push('<strong>' + sinLeer + '</strong> aviso' + (sinLeer === 1 ? '' : 's') + ' sin leer');
+  }
+
+  el.innerHTML = '<span class="resumen-punto"></span>' + trozos.join(' · ');
+  el.style.display = 'flex';
+}
+
+/* ══════════════════════════════════════════
+   CENTRO DE AVISOS
+   Los avisos se derivan de los propios datos: 'ts' marca cuándo se
+   creó la cita y 'cancelledAt' cuándo se canceló. No hace falta
+   guardar nada aparte. Lo único que se recuerda en el navegador es
+   hasta qué momento ya los vio este usuario.
+══════════════════════════════════════════ */
+
+let notifAvisados = {};     // claves ya anunciadas en esta sesión, para no repetir
+let notifArranque = true;   // en la primera carga no se avisa de lo viejo
+
+function notifClave() {
+  return 'nexoAvisos_' + ((currentBarber && currentBarber.email) || 'anon');
+}
+
+function notifVisto() {
+  try {
+    const v = parseInt(localStorage.getItem(notifClave()), 10);
+    if (v) return v;
+    // Primera vez en este navegador: se parte de ahora, para no empezar
+    // con decenas de avisos sin leer del histórico
+    const ahora = Date.now();
+    notifGuardarVisto(ahora);
+    return ahora;
+  } catch (e) { return Date.now(); }
+}
+
+function notifGuardarVisto(ms) {
+  try { localStorage.setItem(notifClave(), String(ms)); } catch (e) {}
+}
+
+/* Lista de avisos, lo más reciente primero. Solo de los últimos 30 días
+   para que no crezca sin fin. */
+function notifEventos() {
+  const limite = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const out = [];
+  allAppointments.forEach(function(a) {
+    if (a.status === 'cancelled') {
+      if (a.cancelledAt && a.cancelledAt >= limite) {
+        out.push({
+          clave: 'c_' + a._key, ms: a.cancelledAt, tipo: 'baja', cita: a,
+          titulo: 'Cita cancelada' + (a.cancelledBy === 'cliente' ? ' por el cliente' : '')
+        });
+      }
+      return;   // una cita cancelada ya no se anuncia como nueva
+    }
+    if (a.ts && a.ts >= limite) {
+      out.push({ clave: 'n_' + a._key, ms: a.ts, tipo: 'alta', cita: a, titulo: 'Cita nueva' });
+    }
+  });
+  return out.sort(function(x, y) { return y.ms - x.ms; }).slice(0, 40);
+}
+
+function notifNoLeidos() {
+  const visto = notifVisto();
+  return notifEventos().filter(function(e) { return e.ms > visto; });
+}
+
+/* Fecha corta de la cita y cuánto hace que llegó el aviso */
+function notifHace(ms) {
+  const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (s < 60)    return 'hace un momento';
+  if (s < 3600)  return 'hace ' + Math.floor(s / 60) + ' min';
+  if (s < 86400) return 'hace ' + Math.floor(s / 3600) + ' h';
+  return 'hace ' + Math.floor(s / 86400) + ' d';
+}
+
+function notifRender() {
+  const dot = document.getElementById('notifDot');
+  const lista = document.getElementById('notifLista');
+  if (!dot || !lista) return;
+
+  const eventos = notifEventos();
+  const visto = notifVisto();
+  const sinLeer = eventos.filter(function(e) { return e.ms > visto; }).length;
+
+  dot.style.display = sinLeer ? 'block' : 'none';
+  dot.textContent = sinLeer > 9 ? '9+' : String(sinLeer);
+
+  if (!eventos.length) {
+    lista.innerHTML = '<p class="notif-vacio">No hay avisos todavía.</p>';
+  } else {
+    lista.innerHTML = eventos.map(function(e) {
+      const a = e.cita;
+      const quien = hasAdminRights(currentBarber) && a.barberName ? ' · ' + escHtml(a.barberName) : '';
+      const p = (a.date || '').split('-');
+      const fecha = p.length === 3 ? p[2] + '/' + p[1] : (a.date || '');
+      return '<button class="notif-item' + (e.ms > visto ? ' nueva' : '') + '"'
+        + ' onclick="notifIr(&quot;' + a.date + '&quot;)">'
+        + '<span class="notif-ico ' + e.tipo + '">' + (e.tipo === 'alta' ? '✓' : '✕') + '</span>'
+        + '<span class="notif-txt">'
+        +   '<span class="notif-t1">' + e.titulo + ': ' + escHtml(a.nombre || 'cliente') + '</span>'
+        +   '<span class="notif-t2">' + fecha + ' a las ' + fmt12(a.time) + ' · ' + escHtml(a.service || '') + quien + ' · ' + notifHace(e.ms) + '</span>'
+        + '</span></button>';
+    }).join('');
+  }
+
+  // Aviso del navegador y pitido para lo que acaba de entrar
+  if (notifArranque) {
+    eventos.forEach(function(e) { notifAvisados[e.clave] = true; });
+    notifArranque = false;
+  } else {
+    eventos.filter(function(e) { return e.ms > visto && !notifAvisados[e.clave]; })
+      .forEach(function(e) {
+        notifAvisados[e.clave] = true;
+        notifPitido();
+        notifNavegador(e);
+      });
+  }
+
+  const permBtn = document.getElementById('notifPermBtn');
+  if (permBtn) {
+    const p = (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
+    if (p === 'granted')      { permBtn.textContent = 'Avisos del navegador activados'; permBtn.disabled = true; permBtn.style.opacity = '0.6'; }
+    else if (p === 'denied')  { permBtn.textContent = 'Avisos bloqueados en el navegador'; permBtn.disabled = true; permBtn.style.opacity = '0.6'; }
+    else if (p === 'unsupported') { permBtn.style.display = 'none'; }
+  }
+}
+
+/* Pitido corto, sin archivos de sonido */
+function notifPitido() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.14, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.32);
+    setTimeout(function() { try { ctx.close(); } catch (e) {} }, 600);
+  } catch (e) {}
+}
+
+function notifNavegador(e) {
+  try {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const a = e.cita;
+    new Notification('9SM NEXO · ' + e.titulo, {
+      body: (a.nombre || 'Cliente') + ' — ' + (a.date || '') + ' ' + fmt12(a.time) + ' · ' + (a.service || ''),
+      tag: e.clave
+    });
+  } catch (err) {}
+}
+
+function notifPedirPermiso() {
+  if (typeof Notification === 'undefined') return;
+  Notification.requestPermission().then(function() { notifRender(); });
+}
+
+function notifToggle() {
+  const p = document.getElementById('notifPanel');
+  if (!p) return;
+  const abrir = !p.classList.contains('open');
+  p.classList.toggle('open', abrir);
+  if (abrir) notifRender();
+}
+
+function notifMarcarLeidos() {
+  notifGuardarVisto(Date.now());
+  notifRender();
+}
+
+/* Al pulsar un aviso se abre ese día en el calendario */
+function notifIr(dateKey) {
+  const p = document.getElementById('notifPanel');
+  if (p) p.classList.remove('open');
+  notifGuardarVisto(Date.now());
+  notifRender();
+  if (!dateKey) return;
+  setTab('calendario', document.getElementById('navCalendario'));
+  openDayModal(dateKey);
+}
+
+/* Cerrar al pulsar fuera */
+document.addEventListener('click', function(ev) {
+  const p = document.getElementById('notifPanel');
+  const b = document.getElementById('notifBtn');
+  if (!p || !p.classList.contains('open')) return;
+  if (p.contains(ev.target) || (b && b.contains(ev.target))) return;
+  p.classList.remove('open');
+});
+
+/* ── Agenda por barbero ──
+   Un barbero normal solo recibe sus propias citas del listener, así que
+   el filtro no le cambia nada; el administrador sí alterna entre todos. */
+function agendaScopeId() {
+  if (!hasAdminRights(currentBarber)) return 'all';
+  return agendaScope;
+}
+
+/* Citas que deben verse ahora mismo */
+function agendaCitas() {
+  const scope = agendaScopeId();
+  if (scope === 'all') return allAppointments;
+  return allAppointments.filter(function(a){ return a.barber === scope; });
+}
+
+function setAgendaScope(id) {
+  agendaScope = id;
+  renderAgendaScopeChips();
+  renderNavCounts();
+  renderResumen();
+  if (currentTab === 'calendario') renderCalendar();
+  else if (['hoy','semana','todas'].indexOf(currentTab) >= 0) renderTab();
+}
+
+/* Pinta los chips y decide si la barra se muestra en esta pestaña */
+function renderAgendaScopeChips() {
+  const wrap = document.getElementById('agendaScopeWrap');
+  if (!wrap) return;
+  const visible = hasAdminRights(currentBarber)
+    && ['calendario','hoy','semana','todas'].indexOf(currentTab) >= 0;
+  wrap.style.display = visible ? 'block' : 'none';
+  if (!visible) return;
+  const scope = agendaScopeId();
+  const opciones = [{ id:'all', name:'Todo el local' }].concat(barberList());
+  document.getElementById('agendaScopeChips').innerHTML = opciones.map(function(o) {
+    const color = o.id === 'all' ? '' : (BARBER_COLORS[o.id] || '#6b7280');
+    const punto = color
+      ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:6px"></span>'
+      : '';
+    return '<button class="bal-filter-btn' + (o.id === scope ? ' active' : '') + '" onclick="setAgendaScope(&quot;' + o.id + '&quot;)">'
+      + punto + escHtml(o.name || o.id) + '</button>';
+  }).join('');
+}
+
 /* Tarjeta de una cita — la usan tanto la lista (Hoy/Semana/Todas) como el detalle del día en el calendario */
+/* Fecha de mañana en formato YYYY-MM-DD */
+function manianaKey() {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* Distintivo para citas que forman parte de una serie recurrente */
+function seriesBadge(a) {
+  if (!a || !a.seriesId) return '';
+  var every = { week: 'semanal', '2weeks': 'quincenal', month: 'mensual' }[a.seriesEvery] || 'recurrente';
+  var pos = (a.seriesIndex && a.seriesTotal) ? ' ' + a.seriesIndex + '/' + a.seriesTotal : '';
+  return '<span class="appt-series" title="Cita recurrente ' + every + '">↻ ' + every + pos + '</span>';
+}
+
 function apptCardHtml(a) {
   const statusLabel = { pending:'Pendiente', done:'Completada', cancelled:'Cancelada' }[a.status] || 'Pendiente';
   const statusClass = { pending:'pending',   done:'done',       cancelled:'cancelled'  }[a.status] || 'pending';
-  const isAdmin = currentBarber && currentBarber.id === 'admin';
+  const isAdmin = hasAdminRights(currentBarber);
   const wl = waLink(a);
   let html = '<div class="appt-card" id="appt-' + a._key + '">';
   html += '  <div class="appt-time">' + fmt12(a.time) + '<small>' + (a.service || '') + '</small></div>';
   html += '  <div class="appt-info">';
-  html += '    <div class="appt-client">' + (a.nombre || '—') + '</div>';
+  html += '    <div class="appt-client">' + (a.nombre || '—') + seriesBadge(a) + '</div>';
   html += '    <div class="appt-service">' + (a.service || '') + (isAdmin ? ' · ' + (a.barberName || 'Cualquiera') : '') + '</div>';
   html += '  </div>';
   html += '  <div class="appt-actions">';
   html += '    <span class="appt-badge ' + statusClass + '">' + statusLabel + '</span>';
 
   if (a.status === 'pending') {
+    // Recordatorio a un toque para las citas de hoy y de mañana
+    const wr = (a.date === todayKey() || a.date === manianaKey()) ? waLink(a, 'recordatorio') : null;
+    if (wr) html += '    <a class="appt-action-btn wa-btn" href="' + wr + '" target="_blank" rel="noopener">Recordar</a>';
     html += '    <button class="appt-action-btn done-btn"   onclick="updateStatus(\'' + a._key + '\',\'done\')">Completar</button>';
     html += '    <button class="appt-action-btn cancel-btn" onclick="updateStatus(\'' + a._key + '\',\'cancelled\')">Cancelar</button>';
+  } else if (a.status === 'cancelled') {
+    // Avisar al cliente de que su cita quedó cancelada
+    const wc = waLink(a, 'cancelacion');
+    if (wc) html += '    <a class="appt-action-btn wa-btn" href="' + wc + '" target="_blank" rel="noopener">Avisar</a>';
   }
   html += '  </div>';
   html += '</div>';
@@ -1132,13 +2516,14 @@ function apptCardHtml(a) {
 function renderTab() {
   const today = todayKey();
   const week  = new Set(weekKeys());
-  let items = allAppointments;
+  let items = agendaCitas();
   if (currentTab === 'hoy')    items = items.filter(function(a){ return a.date === today; });
   if (currentTab === 'semana') items = items.filter(function(a){ return week.has(a.date); });
 
   const list = document.getElementById('appointmentsList');
   if (!items.length) {
-    list.innerHTML = '<p class="appt-empty">No hay citas para este período.</p>';
+    const quien = agendaScopeId() === 'all' ? '' : ' de ' + escHtml(barberNameById(agendaScopeId()));
+    list.innerHTML = '<p class="appt-empty">No hay citas' + quien + ' para este período.</p>';
     return;
   }
 
@@ -1189,7 +2574,7 @@ function calSelectDay(dateKey) {
 
 function renderCalendar() {
   if (currentTab !== 'calendario') return;
-  const isAdmin = currentBarber && currentBarber.id === 'admin';
+  const isAdmin = hasAdminRights(currentBarber);
 
   const base = new Date();
   base.setDate(1);
@@ -1202,8 +2587,8 @@ function renderCalendar() {
 
   /* Leyenda de colores (solo admin) */
   const legendEl = document.getElementById('calLegend');
-  if (isAdmin) {
-    const nonAdminBarbers = Object.values(BARBER_MAP).filter(function(b){ return b.id !== 'admin'; });
+  if (isAdmin && agendaScopeId() === 'all') {
+    const nonAdminBarbers = barberList();
     legendEl.innerHTML = nonAdminBarbers.map(function(b) {
       return '<div class="cal-legend-item"><div class="cal-legend-dot" style="background:' + (BARBER_COLORS[b.id] || '#6b7280') + '"></div>' + b.name + '</div>';
     }).join('')
@@ -1214,9 +2599,9 @@ function renderCalendar() {
     legendEl.style.display = 'none';
   }
 
-  /* Citas agrupadas por día */
+  /* Citas agrupadas por día, según el barbero elegido */
   const byDay = {};
-  allAppointments.forEach(function(a) {
+  agendaCitas().forEach(function(a) {
     if (!byDay[a.date]) byDay[a.date] = [];
     byDay[a.date].push(a);
   });
@@ -1224,8 +2609,10 @@ function renderCalendar() {
   /* Bloqueados agrupados por día (suma de todos los barberos para el indicador visual) */
   const blockedCountByDay = {};
   if (isAdmin) {
+    const soloBarbero = agendaScopeId();
     Object.entries(blockedData).forEach(function([barberId, dates]) {
       if (!dates) return;
+      if (soloBarbero !== 'all' && barberId !== soloBarbero) return;
       Object.entries(dates).forEach(function([dateKey, slots]) {
         if (!slots) return;
         blockedCountByDay[dateKey] = (blockedCountByDay[dateKey] || 0)
@@ -1281,18 +2668,20 @@ function openDayModal(dateKey) {
   document.getElementById('dayModalTitle').textContent =
     CAL_DAYS_FULL[date.getDay()] + ' ' + d + ' de ' + CAL_MONTHS_FULL[m - 1];
 
-  const items = allAppointments
+  const items = agendaCitas()
     .filter(function(a) { return a.date === dateKey && a.status !== 'cancelled'; })
     .sort(function(a, b) { return a.time.localeCompare(b.time); });
 
   // Recoger espacios bloqueados del día
   const blockedItems = [];
-  if (currentBarber && currentBarber.id === 'admin') {
+  if (hasAdminRights(currentBarber)) {
+    const soloBarbero = agendaScopeId();
     Object.entries(blockedData).forEach(function([barberId, dates]) {
       if (!dates || !dates[dateKey]) return;
+      if (soloBarbero !== 'all' && barberId !== soloBarbero) return;
       Object.keys(dates[dateKey]).forEach(function(timeKey) {
         if (dates[dateKey][timeKey]) {
-          const bm = Object.values(BARBER_MAP).find(function(x) { return x.id === barberId; });
+          const bm = barberList().find(function(x) { return x.id === barberId; });
           blockedItems.push({ time: timeKey.replace('_', ':'), barberName: bm ? bm.name : barberId });
         }
       });
@@ -1334,6 +2723,15 @@ document.addEventListener('keydown', function(e) {
 });
 
 function updateStatus(key, status) {
+  // Al cancelar se deja constancia de quién y cuándo, para los avisos
+  if (status === 'cancelled') {
+    db.ref('bookings/' + key).update({
+      status: 'cancelled',
+      cancelledAt: Date.now(),
+      cancelledBy: (currentBarber && currentBarber.id) || 'barbero'
+    });
+    return;
+  }
   db.ref('bookings/' + key + '/status').set(status);
 }
 
@@ -1483,59 +2881,124 @@ function escHtml(str) {
 }
 
 /* ── Bloqueo de espacios (solo admin) ── */
+/* Lista de barberos para los selectores. Sale de la configuración,
+   que es donde el administrador los da de alta, y cae al mapa del
+   código si todavía no se ha guardado nada. */
+function barberList() {
+  if (PANEL_CFG && Array.isArray(PANEL_CFG.barbers) && PANEL_CFG.barbers.length) {
+    return PANEL_CFG.barbers.filter(function(b){ return b && b.id && b.id !== 'admin'; });
+  }
+  return Object.values(BARBER_MAP).filter(function(b){ return b.id !== 'admin'; });
+}
+
+function barberNameById(id) {
+  var b = barberList().find(function(x){ return x.id === id; });
+  return b ? (b.name || b.id) : id;
+}
+
+/* Un barbero normal solo gestiona su propia agenda; el administrador
+   puede elegir la de cualquiera. */
 function initBlockPanel() {
   const sel = document.getElementById('blockBarberSel');
+  const field = document.getElementById('blockBarberField');
+  const intro = document.getElementById('blockIntro');
+  const esAdmin = hasAdminRights(currentBarber);
+
   sel.innerHTML = '';
-  Object.values(BARBER_MAP)
-    .filter(function(b){ return b.id !== 'admin'; })
-    .forEach(function(b) {
-      const opt = document.createElement('option');
-      opt.value = b.id;
-      opt.textContent = b.name;
-      sel.appendChild(opt);
-    });
+  const lista = esAdmin
+    ? barberList()
+    : barberList().filter(function(b){ return b.id === (currentBarber && currentBarber.id); });
+
+  // Si el barbero aún no está en la configuración, se ofrece a sí mismo
+  if (!lista.length && currentBarber && currentBarber.id && currentBarber.id !== 'any') {
+    lista.push({ id: currentBarber.id, name: currentBarber.name });
+  }
+
+  lista.forEach(function(b) {
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = b.name || b.id;
+    sel.appendChild(opt);
+  });
+
+  if (field) field.style.display = esAdmin ? '' : 'none';
+  if (intro) {
+    intro.textContent = esAdmin
+      ? 'Selecciona un barbero y una fecha para gestionar los espacios bloqueados'
+      : 'Elige una fecha y bloquea los turnos en los que no vas a atender';
+  }
+
   document.getElementById('blockDateSel').value = todayKey();
 }
 
 function renderBlockPanel() {
   if (currentTab !== 'bloquear') return;
-  const barberId = document.getElementById('blockBarberSel').value;
+  // Un barbero normal siempre opera sobre su propia agenda, aunque el
+  // selector esté oculto y pudiera quedar con otro valor
+  const esAdmin  = hasAdminRights(currentBarber);
+  const barberId = esAdmin
+    ? document.getElementById('blockBarberSel').value
+    : (currentBarber ? currentBarber.id : '');
   const dateKey  = document.getElementById('blockDateSel').value;
   const grid     = document.getElementById('blockSlotsGrid');
   const titleEl  = document.getElementById('blockSlotsTitle');
   const legendRow = document.getElementById('blockLegendRow');
 
-  if (!dateKey) { grid.innerHTML = ''; titleEl.style.display = 'none'; legendRow.style.display = 'none'; return; }
+  if (!dateKey || !barberId) { grid.innerHTML = ''; titleEl.style.display = 'none'; legendRow.style.display = 'none'; return; }
 
-  const barberEntry = Object.values(BARBER_MAP).find(function(b){ return b.id === barberId; });
-  titleEl.textContent = 'Horarios del ' + dateKey + ' — ' + (barberEntry ? barberEntry.name : barberId);
+  titleEl.textContent = 'Horarios del ' + dateKey
+    + (esAdmin ? ' — ' + barberNameById(barberId) : '');
   titleEl.style.display  = 'block';
   legendRow.style.display = 'flex';
 
-  const apptTimes = new Set(
-    allAppointments.filter(function(a) {
-      return a.date === dateKey && a.status !== 'cancelled'
-        && (a.barber === barberId || a.barber === 'any');
-    }).map(function(a){ return a.time; })
-  );
-
   const barberBlocked = (blockedData[barberId] && blockedData[barberId][dateKey]) || {};
+  const paso = barberSlotMinutes(barberId);
 
-  const freeSlots = getSlotsForDate(dateKey).filter(function(time) {
-    return !apptTimes.has(time);
-  });
+  // Tramos que realmente ocupan las citas de ese día, con su duración.
+  // Antes solo se comparaba la hora de inicio, así que una cita de 11:40 a
+  // 12:30 dejaba los turnos de 11:00 y 12:00 como si estuvieran libres.
+  const citas = allAppointments.filter(function(a) {
+    return a.date === dateKey && a.status !== 'cancelled' && a.status !== 'blocked'
+      && (a.barber === barberId || a.barber === 'any');
+  }).map(function(a) {
+    const ini = toMinutes(a.time);
+    const dur = parseInt(a.mins, 10) || panelSvcMins(a.barber === 'any' ? barberId : a.barber, a.service);
+    return { ini: ini, fin: ini + dur, nombre: a.nombre || 'Cita', hora: a.time };
+  }).sort(function(x, y) { return x.ini - y.ini; });   // el turno muestra la primera cita que lo pisa
 
-  if (!freeSlots.length) {
-    grid.innerHTML = '<p style="color:var(--text-muted);font-style:italic;grid-column:1/-1">No hay espacios libres este día para este barbero.</p>';
+  // Los turnos que se pueden bloquear son los de la jornada de ese barbero
+  const slots = getSlotsForDate(dateKey, barberId);
+
+  if (!slots.length) {
+    grid.innerHTML = '<p style="color:var(--text-muted);font-style:italic;grid-column:1/-1">Este barbero no atiende ese día.</p>';
     return;
   }
 
-  grid.innerHTML = freeSlots.map(function(time) {
+  grid.innerHTML = slots.map(function(time) {
+    const ini = toMinutes(time);
+    const fin = ini + paso;
+    const cita = citas.find(function(c) { return ini < c.fin && c.ini < fin; });
+
+    if (cita) {
+      // Ocupado por una cita: no se puede bloquear encima. Si además quedó
+      // un bloqueo antiguo de cuando solo se comparaba la hora de inicio,
+      // se deja quitarlo para no desperdiciar el turno.
+      const kc = slotKey(time);
+      if (barberBlocked[kc]) {
+        return '<button class="slot-btn has-appt" style="cursor:pointer;opacity:1"'
+          + ' title="' + escHtml(cita.nombre) + ' a las ' + fmt12(cita.hora) + '. Además está bloqueado: clic para quitar el bloqueo."'
+          + ' onclick="toggleBlockSlot(&quot;' + barberId + '&quot;,&quot;' + dateKey + '&quot;,&quot;' + time + '&quot;)">'
+          + '<strong>' + fmt12(time) + '</strong><br><small>Cita + bloqueo ✕</small></button>';
+      }
+      return '<button class="slot-btn has-appt" disabled title="' + escHtml(cita.nombre) + ' a las ' + fmt12(cita.hora) + '">'
+        + '<strong>' + fmt12(time) + '</strong><br><small>' + escHtml(cita.nombre) + '</small></button>';
+    }
+
     const k         = slotKey(time);
     const isBlocked = !!(barberBlocked[k]);
     const cls       = 'slot-btn' + (isBlocked ? ' blocked' : '');
     const label     = '<strong>' + fmt12(time) + '</strong>' + (isBlocked ? '<br><small>Bloqueado</small>' : '');
-    return '<button class="' + cls + '" onclick="toggleBlockSlot(\'' + barberId + '\',\'' + dateKey + '\',\'' + time + '\')">' + label + '</button>';
+    return '<button class="' + cls + '" onclick="toggleBlockSlot(&quot;' + barberId + '&quot;,&quot;' + dateKey + '&quot;,&quot;' + time + '&quot;)">' + label + '</button>';
   }).join('');
 }
 
@@ -1571,12 +3034,23 @@ function toggleBlockSlot(barberId, dateKey, time) {
 }
 
 /* ── Nav móvil inferior ── */
-var MBN_MAP = { calendario:'mbnCalendario', hoy:'mbnHoy', semana:'mbnSemana', balance:'mbnBalance' };
+/* Pestaña -> botón de la barra inferior. Las que no están aquí
+   viven en la hoja "Más" y dejan ese botón como activo. */
+var MBN_MAP = { calendario:'mbnCalendario', hoy:'mbnHoy', nuevacita:'mbnNuevaCita', balance:'mbnBalance' };
+
+/* Pestaña -> botón de la barra lateral. Hace falta un mapa porque no
+   todos los ids se derivan capitalizando la primera letra (nuevacita). */
+var NAV_MAP = {
+  calendario:'navCalendario', hoy:'navHoy', semana:'navSemana', todas:'navTodas',
+  nuevacita:'navNuevaCita', horario:'navHorario', bloquear:'navBloquear',
+  clientes:'navClientes', inventario:'navInventario', balance:'navBalance', web:'navWeb', resenas:'navResenas'
+};
 function mbnGo(tab, btn) {
-  setTab(tab, document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1)));
+  setTab(tab, document.getElementById(NAV_MAP[tab] || ''));
   document.querySelectorAll('.mbn-btn').forEach(function(b){ b.classList.remove('active'); });
   var id = MBN_MAP[tab];
-  if (id) document.getElementById(id).classList.add('active');
+  var el = id ? document.getElementById(id) : null;
+  if (el) el.classList.add('active');
   else document.getElementById('mbnMas').classList.add('active');
 }
 function mbnOpenMore() {
@@ -1588,6 +3062,32 @@ function mbnCloseMore() {
   document.getElementById('mbnMoreSheet').classList.remove('open');
 }
 
+/* ── Fecha de corte del balance ──
+   Guardada en la configuración, para que todos los barberos vean
+   las mismas cifras. Sin fecha se cuenta todo el histórico. */
+function balanceDesde() {
+  return (PANEL_CFG && PANEL_CFG.balanceDesde) || '';
+}
+
+function balDesdeGuardar(valor) {
+  if (PANEL_CFG) PANEL_CFG.balanceDesde = valor;
+  db.ref('siteConfig/config/balanceDesde').set(valor || null)
+    .then(function() { renderBalanceView(); })
+    .catch(function(err) {
+      const nota = document.getElementById('balNota');
+      if (nota) nota.textContent = 'No se pudo guardar la fecha: ' + (err && err.message ? err.message : 'error');
+    });
+}
+
+function balDesdeChanged() {
+  balDesdeGuardar(document.getElementById('balDesde').value || '');
+}
+
+function balDesdeLimpiar() {
+  document.getElementById('balDesde').value = '';
+  balDesdeGuardar('');
+}
+
 /* ── Balance / Ingresos (solo admin) ── */
 function setBalanceFilter(filter, btn) {
   balanceFilter = filter;
@@ -1596,13 +3096,43 @@ function setBalanceFilter(filter, btn) {
   renderBalanceView();
 }
 
+/* El administrador alterna entre el total del local y el de cada barbero */
+function setBalanceScope(id) {
+  balanceScope = id;
+  renderBalanceView();
+}
+
+/* Barbero cuyas cifras se están mirando: el admin elige, el resto solo se ve a sí mismo */
+function balanceScopeId() {
+  if (!hasAdminRights(currentBarber)) return (currentBarber && currentBarber.id) || 'all';
+  return balanceScope;
+}
+
 function renderBalanceView() {
   if (currentTab !== 'balance') return;
 
   const today  = todayKey();
-  const week   = new Set(weekKeys());
+  const week   = new Set(weekKeysActual());   // semana natural, no los próximos 7 días
   const month  = monthKey();
-  const completed = allAppointments.filter(function(a){ return a.status !== 'cancelled'; });
+  // Solo las marcadas como Completada: una cita agendada todavía no es ingreso.
+  // Y solo desde la fecha de corte, para dejar fuera las pruebas previas a la entrega.
+  const desde = balanceDesde();
+  const completed = allAppointments.filter(function(a) {
+    return a.status === 'done' && (!desde || a.date >= desde);
+  });
+
+  // Estado del control de fecha
+  const desdeWrap = document.getElementById('balDesdeWrap');
+  if (desdeWrap) desdeWrap.style.display = hasAdminRights(currentBarber) ? 'flex' : 'none';
+  const inp = document.getElementById('balDesde');
+  if (inp && inp.value !== (desde || '')) inp.value = desde || '';
+  const nota = document.getElementById('balNota');
+  if (nota) {
+    nota.textContent = (desde
+      ? 'Solo suman las citas marcadas como Completada desde el ' + desde + '.'
+      : 'Solo suman las citas marcadas como Completada.')
+      + (hasAdminRights(currentBarber) ? '' : ' Estas son tus cifras.');
+  }
 
   let filtered;
   if      (balanceFilter === 'hoy')    filtered = completed.filter(function(a){ return a.date === today; });
@@ -1610,19 +3140,61 @@ function renderBalanceView() {
   else if (balanceFilter === 'mes')    filtered = completed.filter(function(a){ return a.date.slice(0,7) === month; });
   else                                 filtered = completed;
 
-  // ── Por barbero ──
-  const barbers = [
-    { id:'b1', name:'Sebastian Montoya Garcia', role:'Head Barber', init:'SM', color:'#3b82f6' },
-    { id:'b2', name:'Miguel Angel Zuluaga',    role:'Barber',      init:'MA', color:'#a855f7' },
-  ];
+  // ── Ámbito: todo el local o un solo barbero ──
+  const todos = barberList().map(function(b){ return { id:b.id, name:b.name, role:b.role, init:b.init, color: BARBER_COLORS[b.id] || '#6b7280' }; });
+  const scope = balanceScopeId();
+  const esAdminBal = hasAdminRights(currentBarber);
+
+  // Chips de selección: solo el administrador puede cambiar de barbero
+  const scopeWrap = document.getElementById('balScopeWrap');
+  if (scopeWrap) {
+    scopeWrap.style.display = esAdminBal ? 'block' : 'none';
+    if (esAdminBal) {
+      const opciones = [{ id: 'all', name: 'Todo el local' }].concat(todos);
+      document.getElementById('balScopeChips').innerHTML = opciones.map(function(o) {
+        return '<button class="bal-filter-btn' + (o.id === scope ? ' active' : '') + '" onclick="setBalanceScope(&quot;' + o.id + '&quot;)">'
+          + escHtml(o.name) + '</button>';
+      }).join('');
+    }
+  }
+
+  // Un barbero concreto: se queda solo con sus citas
+  if (scope !== 'all') filtered = filtered.filter(function(a){ return a.barber === scope; });
+  const barbers = scope === 'all' ? todos : todos.filter(function(b){ return b.id === scope; });
+
+  // Si el barbero todavía no está en la configuración, se representa a sí mismo
+  if (!barbers.length && scope !== 'all' && currentBarber) {
+    barbers.push({ id: scope, name: currentBarber.name || scope, role: currentBarber.role || 'Barbero',
+                   init: currentBarber.init || '?', color: BARBER_COLORS[scope] || '#6b7280' });
+  }
+
+  // ── Totales del período ──
+  const totIng   = filtered.reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
+  const totCitas = filtered.length;
+  const prom     = totCitas ? Math.round(totIng / totCitas) : 0;
+  const totEl = document.getElementById('balTotales');
+  if (totEl) {
+    const kpi = function(label, valor) {
+      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px">' +
+        '<div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin-bottom:6px">' + label + '</div>' +
+        '<div style="font-size:1.25rem;font-weight:700;color:var(--white)">' + valor + '</div>' +
+      '</div>';
+    };
+    totEl.innerHTML = kpi('Ingresos', formatCOP(totIng))
+      + kpi('Citas completadas', String(totCitas))
+      + kpi('Promedio por cita', formatCOP(prom));
+  }
   const totals = {};
   barbers.forEach(function(b) {
-    const citas = filtered.filter(function(a){ return a.barber === b.id || a.barber === 'any'; });
+    // Sin '|| any': una cita antigua sin barbero asignado sumaba a los tres
+    const citas = filtered.filter(function(a){ return a.barber === b.id; });
     totals[b.id] = { citas: citas.length, ingresos: citas.reduce(function(s,a){ return s+servicePrice(a.service); },0) };
   });
   const maxIng = Math.max(1, Math.max.apply(null, barbers.map(function(b){ return totals[b.id].ingresos; })));
 
+  // Con un solo barbero el desglose por barbero no aporta: ya está en los totales
   const cardsEl = document.getElementById('balBarberCards');
+  cardsEl.style.display = (scope === 'all') ? 'grid' : 'none';
   cardsEl.innerHTML = barbers.map(function(b) {
     const d = totals[b.id];
     const pct = Math.round(d.ingresos / maxIng * 100);
@@ -1646,7 +3218,8 @@ function renderBalanceView() {
   filtered.forEach(function(a) {
     if (!a.date) return;
     barbers.forEach(function(b) {
-      if (a.barber === b.id || a.barber === 'any') {
+      // Sin '|| any': una cita sin barbero asignado sumaba a todos a la vez
+      if (a.barber === b.id) {
         if (!daySet[a.date]) daySet[a.date] = {};
         daySet[a.date][b.id] = (daySet[a.date][b.id] || 0) + servicePrice(a.service);
       }
@@ -1740,7 +3313,7 @@ function renderBalanceView() {
 }
 
 /* Abre WhatsApp con el mensaje de confirmación ya escrito al número del cliente */
-function waLink(a) {
+function waLink(a, tipo) {
   if (!a.telefono) return null;
   let digits = String(a.telefono).replace(/\D/g, '');
   if (!digits) return null;
@@ -1751,10 +3324,1501 @@ function waLink(a) {
   const [y, m, d] = a.date.split('-').map(Number);
   const fecha = DAYS_FULL[new Date(y, m-1, d).getDay()] + ' ' + d + ' de ' + MONTHS_FULL[m-1];
 
-  const msg = 'Hola ' + (a.nombre || '') + ', te confirmamos tu cita en 9SM NEXO: '
-    + (a.service || '') + ' el ' + fecha + ' a las ' + fmt12(a.time) + '. ¡Te esperamos!';
+  let msg;
+  if (tipo === 'recordatorio') {
+    msg = 'Hola ' + (a.nombre || '') + ', te recordamos tu cita en 9SM NEXO: '
+      + (a.service || '') + ' el ' + fecha + ' a las ' + fmt12(a.time) + '. Si no puedes venir, avísanos.';
+  } else if (tipo === 'cancelacion') {
+    msg = 'Hola ' + (a.nombre || '') + ', tu cita en 9SM NEXO del ' + fecha + ' a las '
+      + fmt12(a.time) + ' (' + (a.service || '') + ') ha quedado cancelada. '
+      + 'Escríbenos y te buscamos otro horario.';
+  } else {
+    msg = 'Hola ' + (a.nombre || '') + ', te confirmamos tu cita en 9SM NEXO: '
+      + (a.service || '') + ' el ' + fecha + ' a las ' + fmt12(a.time) + '. ¡Te esperamos!';
+  }
   return 'https://wa.me/' + digits + '?text=' + encodeURIComponent(msg);
 }
+
+/* ══════════════════════════════════════════
+   MI HORARIO
+   Cada barbero edita su jornada. El administrador puede
+   además elegir a quién se la edita.
+══════════════════════════════════════════ */
+
+let horCfg = null;       // copia de trabajo de la configuración
+let horBarberId = null;  // barbero que se está editando
+
+function horarioLoad(force) {
+  const msg = document.getElementById('horarioMsg');
+  if (msg) { msg.textContent = ''; msg.className = 'web-save-msg'; }
+
+  const pintar = function() {
+    horCfg = PANEL_CFG ? JSON.parse(JSON.stringify(PANEL_CFG)) : { barbers: [] };
+    if (!Array.isArray(horCfg.barbers)) horCfg.barbers = [];
+
+    // Si el barbero no está en la configuración se añade, para poder guardarle horario
+    if (currentBarber && currentBarber.id && currentBarber.id !== 'any'
+        && !horCfg.barbers.some(function(b){ return b.id === currentBarber.id; })) {
+      horCfg.barbers.push({
+        id: currentBarber.id, name: currentBarber.name,
+        role: currentBarber.role, init: currentBarber.init, active: true
+      });
+    }
+
+    const esAdmin = hasAdminRights(currentBarber);
+    const sel = document.getElementById('horarioBarberSel');
+    if (sel) sel.style.display = esAdmin ? 'block' : 'none';
+
+    if (esAdmin) {
+      const dd = document.getElementById('horarioBarber');
+      dd.innerHTML = horCfg.barbers.map(function(b) {
+        return '<option value="' + b.id + '">' + (b.name || b.id) + '</option>';
+      }).join('');
+      if (!horBarberId || !horCfg.barbers.some(function(b){ return b.id === horBarberId; })) {
+        horBarberId = (currentBarber && currentBarber.id !== 'any' && currentBarber.id !== 'admin')
+          ? currentBarber.id
+          : (horCfg.barbers[0] ? horCfg.barbers[0].id : null);
+      }
+      dd.value = horBarberId;
+    } else {
+      horBarberId = currentBarber ? currentBarber.id : null;
+    }
+
+    horarioRenderTodo();
+  };
+
+  if (!PANEL_CFG || force) loadPanelConfig().then(pintar);
+  else pintar();
+}
+
+function horarioSwitchBarber() {
+  horarioCollect();   // no perder lo editado del barbero anterior
+  horBarberId = document.getElementById('horarioBarber').value;
+  horarioRenderTodo();
+}
+
+/* Repinta todas las secciones de la vista */
+function horarioRenderTodo() {
+  horarioRenderPaso();
+  horarioRender();
+  horarioRenderMax();
+  horarioRenderServicios();
+  horarioRenderPropias();
+  horarioRenderRevision();
+}
+
+function horBarberObj() {
+  if (!horCfg) return null;
+  return horCfg.barbers.find(function(b) { return b.id === horBarberId; }) || null;
+}
+
+function horarioRender() {
+  const host = document.getElementById('horarioDias');
+  const b = horBarberObj();
+  if (!b) { host.innerHTML = '<p class="web-card-sub">No se encontró tu ficha de barbero en la configuración.</p>'; return; }
+
+  const sub = document.getElementById('horarioSub');
+  if (sub && hasAdminRights(currentBarber)) {
+    sub.textContent = 'Editando la jornada de ' + (b.name || b.id)
+      + '. Los turnos usan la duración configurada arriba.';
+  }
+
+  const sch = b.schedule || {};
+  host.innerHTML = [1,2,3,4,5,6,0].map(function(dow) {   // semana empezando en lunes
+    const def = DEFAULT_SCHEDULE[dow];
+    const d = sch[dow] || def;
+    const on = d.active !== false;
+    const ini = d.start || def.start;
+    const fin = d.end   || def.end;
+    const brOn  = d.breakActive === true;
+    const brIni = d.breakStart || '13:00';
+    const brFin = d.breakEnd   || '14:00';
+    const paso = horPasoActual();
+    const n = on ? filterBreak(genSlotRange(ini, fin, paso), {
+      breakActive: brOn, breakStart: brIni, breakEnd: brFin, slotMinutes: paso
+    }).length : 0;
+
+    return '<div class="hor-bloque' + (on ? '' : ' off') + '" data-dow="' + dow + '">'
+      + '<div class="hor-dia">'
+      +   '<input type="checkbox" data-k="active"' + (on ? ' checked' : '') + ' onchange="horarioToggleDia(this)">'
+      +   '<div><span class="hor-nombre">' + DIAS_SEMANA[dow] + '</span>'
+      +     '<span class="hor-turnos">' + (on ? n + ' turnos de ' + paso + ' min' : 'Cerrado') + '</span></div>'
+      +   (on
+            ? '<input type="time" data-k="start" value="' + ini + '" onchange="horarioRecount(this)">'
+              + '<input type="time" data-k="end" value="' + fin + '" onchange="horarioRecount(this)">'
+            : '<span class="hor-cerrado">No se atiende este día</span>')
+      + '</div>'
+      + (on
+          ? '<div class="hor-descanso' + (brOn ? ' on' : '') + '">'
+            + '<label class="hor-desc-check">'
+            +   '<input type="checkbox" data-k="breakActive"' + (brOn ? ' checked' : '')
+            +   ' onchange="horarioToggleDescanso(this)">'
+            +   '<span>Descanso</span>'
+            + '</label>'
+            + (brOn
+                ? '<input type="time" data-k="breakStart" value="' + brIni + '" onchange="horarioRecount(this)">'
+                  + '<span class="hor-desc-sep">a</span>'
+                  + '<input type="time" data-k="breakEnd" value="' + brFin + '" onchange="horarioRecount(this)">'
+                : '<span class="hor-desc-hint">Sin descanso: se atiende toda la jornada</span>')
+          + '</div>'
+          : '')
+      + '</div>';
+  }).join('');
+}
+
+function horarioToggleDescanso(input) {
+  horarioCollect();
+  horarioRender();
+}
+
+/* ── Duración del turno ── */
+
+/* Paso del barbero que se está editando, leyendo primero el
+   selector para que los recuentos reaccionen antes de guardar */
+function horPasoActual() {
+  const sel = document.getElementById('horPaso');
+  if (sel && sel.value) return parseInt(sel.value, 10) || SLOT_DEFAULT;
+  const b = horBarberObj();
+  return (b && parseInt(b.slotMinutes, 10)) || SLOT_DEFAULT;
+}
+
+function horarioRenderPaso() {
+  const b = horBarberObj();
+  if (!b) return;
+  const actual = parseInt(b.slotMinutes, 10) || SLOT_DEFAULT;
+  const sel = document.getElementById('horPaso');
+  sel.innerHTML = SLOT_OPCIONES.map(function(m) {
+    return '<option value="' + m + '"' + (m === actual ? ' selected' : '') + '>'
+      + (m >= 60 && m % 60 === 0 ? (m / 60) + (m === 60 ? ' hora' : ' horas') : m + ' minutos')
+      + '</option>';
+  }).join('');
+  horarioPasoHint();
+}
+
+function horarioPasoChanged() {
+  horarioCollect();      // guarda el paso nuevo en memoria
+  horarioRenderTodo();   // recalcula turnos, servicios y recuentos
+}
+
+function horarioPasoHint() {
+  const el = document.getElementById('horPasoHint');
+  if (!el) return;
+  const paso = horPasoActual();
+  el.textContent = 'Las horas que ve el cliente se reparten según lo que dura cada servicio. '
+    + 'Esta duración marca los espacios de Bloquear y hasta cuándo trabajas tras la última cita (' + paso + ' min).';
+}
+
+/* ── Tope de turnos diarios ── */
+
+function horarioRenderMax() {
+  const b = horBarberObj();
+  if (!b) return;
+  const tope = parseInt(b.maxDaily, 10) || 0;
+  document.getElementById('horMaxOn').checked = tope > 0;
+  document.getElementById('horMaxWrap').style.display = tope > 0 ? 'flex' : 'none';
+  if (tope > 0) document.getElementById('horMax').value = tope;
+  horarioMaxHint();
+}
+
+function horarioToggleMax() {
+  const on = document.getElementById('horMaxOn').checked;
+  document.getElementById('horMaxWrap').style.display = on ? 'flex' : 'none';
+  horarioMaxHint();
+}
+
+function horarioMaxChanged() { horarioMaxHint(); }
+
+function horarioMaxHint() {
+  const on = document.getElementById('horMaxOn').checked;
+  const n = parseInt(document.getElementById('horMax').value, 10) || 0;
+  const el = document.getElementById('horMaxHint');
+  if (!on || !n) {
+    el.textContent = 'Sin tope: se aceptan todas las que quepan en la jornada';
+    return;
+  }
+  el.textContent = 'Al llegar a ' + n + ' cita' + (n === 1 ? '' : 's')
+    + ' en un día, la web deja de ofrecerte horas esa fecha';
+}
+
+/* ── Servicios del barbero ── */
+
+/* Catálogo publicado, del que cada barbero elige los suyos */
+function horCatalogo() {
+  if (horCfg && Array.isArray(horCfg.services) && horCfg.services.length) return horCfg.services;
+  if (PANEL_CFG && Array.isArray(PANEL_CFG.services)) return PANEL_CFG.services;
+  return [];
+}
+
+/* Ajustes de un barbero para un servicio, con los valores del catálogo
+   como punto de partida si todavía no los ha tocado */
+function horSvcAjuste(b, s) {
+  var a = (b.svc && b.svc[s.id]) || {};
+  return {
+    on:   a.on !== false,
+    mins: parseInt(a.mins, 10) || parseInt(s.mins, 10) || 45
+  };
+}
+
+function horarioRenderServicios() {
+  const host = document.getElementById('horServicios');
+  const b = horBarberObj();
+  if (!b) { host.innerHTML = ''; return; }
+  const cat = horCatalogo();
+  if (!cat.length) { host.innerHTML = '<p class="web-card-sub" style="margin:0">Todavía no hay servicios en el catálogo.</p>'; return; }
+
+  host.innerHTML = cat.map(function(s) {
+    const a = horSvcAjuste(b, s);
+    const turnos = Math.ceil(a.mins / horPasoActual());
+    return '<div class="hor-svc' + (a.on ? '' : ' off') + '" data-sid="' + s.id + '">'
+      + '<input type="checkbox" data-k="on"' + (a.on ? ' checked' : '') + ' onchange="horarioToggleSvc(this)">'
+      + '<div><span class="hor-svc-name">' + String(s.name).replace(/</g,'&lt;') + '</span>'
+      +   '<span class="hor-svc-meta">Catálogo: ' + (s.mins || 45) + ' min · $'
+      +   (Number(s.price) || 0).toLocaleString('es-CO') + '</span></div>'
+      + (a.on
+          ? '<div class="hor-svc-mins"><input type="number" data-k="mins" min="15" max="240" step="5" value="'
+            + a.mins + '" onchange="horarioSvcMins(this)"><span class="hor-desc-sep">min</span></div>'
+            + '<span class="hor-svc-turnos">' + turnos + ' turno' + (turnos === 1 ? '' : 's') + '</span>'
+          : '<span class="hor-svc-turnos" style="grid-column:3 / -1">No lo ofreces</span>')
+      + '</div>';
+  }).join('');
+}
+
+function horarioToggleSvc(input) {
+  horarioCollect();
+  horarioRenderServicios();
+}
+
+/* Al cambiar la duración se recalcula cuántos turnos de 45 min ocupa */
+function horarioSvcMins(input) {
+  const fila = input.closest('.hor-svc');
+  const mins = parseInt(input.value, 10) || 45;
+  const turnos = Math.ceil(mins / horPasoActual());
+  const lbl = fila.querySelector('.hor-svc-turnos');
+  if (lbl) lbl.textContent = turnos + ' turno' + (turnos === 1 ? '' : 's');
+  horarioCollect();
+}
+
+function horarioToggleDia(input) {
+  horarioCollect();
+  horarioRender();
+}
+
+/* Recalcula los turnos al cambiar una hora, descontando el descanso,
+   y avisa si algún rango está invertido */
+function horarioRecount(input) {
+  const bloque = input.closest('.hor-bloque');
+  const ini = bloque.querySelector('[data-k="start"]').value;
+  const fin = bloque.querySelector('[data-k="end"]').value;
+  const brChk = bloque.querySelector('[data-k="breakActive"]');
+  const brIni = bloque.querySelector('[data-k="breakStart"]');
+  const brFin = bloque.querySelector('[data-k="breakEnd"]');
+  const lbl = bloque.querySelector('.hor-turnos');
+
+  const paso = horPasoActual();
+  const base = genSlotRange(ini, fin, paso);
+  if (!base.length) {
+    lbl.textContent = 'La hora de cierre debe ser posterior a la de apertura';
+    horarioCollect();
+    return;
+  }
+  if (brChk && brChk.checked && brIni && brFin && toMinutes(brFin) <= toMinutes(brIni)) {
+    lbl.textContent = 'El fin del descanso debe ser posterior a su inicio';
+    horarioCollect();
+    return;
+  }
+
+  const n = filterBreak(base, {
+    breakActive: brChk ? brChk.checked : false,
+    breakStart:  brIni ? brIni.value : '',
+    breakEnd:    brFin ? brFin.value : '',
+    slotMinutes: paso
+  }).length;
+
+  lbl.textContent = n
+    ? n + ' turnos de ' + paso + ' min' + (brChk && brChk.checked ? ' (descanso descontado)' : '')
+    : 'El descanso cubre toda la jornada';
+  horarioCollect();
+}
+
+/* Vuelca los campos al objeto en memoria */
+function horarioCollect() {
+  const b = horBarberObj();
+  if (!b) return;
+  const sch = {};
+  document.querySelectorAll('#horarioDias .hor-bloque').forEach(function(bloque) {
+    const dow = bloque.getAttribute('data-dow');
+    const def = DEFAULT_SCHEDULE[dow];
+    const prev = (b.schedule && b.schedule[dow]) || {};
+    const q = function(k) { return bloque.querySelector('[data-k="' + k + '"]'); };
+
+    const act = q('active').checked;
+    const ini = q('start'), fin = q('end');
+    const brC = q('breakActive'), brI = q('breakStart'), brF = q('breakEnd');
+
+    sch[dow] = {
+      active: act,
+      start: ini ? ini.value : (prev.start || def.start),
+      end:   fin ? fin.value : (prev.end   || def.end),
+      // Un día cerrado conserva su descanso guardado, para no perderlo
+      // si se vuelve a abrir
+      breakActive: brC ? brC.checked : (prev.breakActive === true),
+      breakStart:  brI ? brI.value : (prev.breakStart || ''),
+      breakEnd:    brF ? brF.value : (prev.breakEnd   || '')
+    };
+  });
+  b.schedule = sch;
+
+  // Duración del turno
+  const selPaso = document.getElementById('horPaso');
+  if (selPaso && selPaso.value) b.slotMinutes = parseInt(selPaso.value, 10) || SLOT_DEFAULT;
+
+  // Tope diario
+  const maxOn = document.getElementById('horMaxOn');
+  if (maxOn) {
+    const n = parseInt(document.getElementById('horMax').value, 10) || 0;
+    b.maxDaily = (maxOn.checked && n > 0) ? n : 0;
+  }
+
+  // Servicios propios: se guardan solo los que difieren o están apagados,
+  // pero se escribe el mapa completo para que quede explícito
+  const svc = {};
+  document.querySelectorAll('#horServicios .hor-svc').forEach(function(fila) {
+    const sid = fila.getAttribute('data-sid');
+    const on  = fila.querySelector('[data-k="on"]').checked;
+    const mi  = fila.querySelector('[data-k="mins"]');
+    const prevSvc = (b.svc && b.svc[sid]) || {};
+    svc[sid] = {
+      on: on,
+      mins: mi ? (parseInt(mi.value, 10) || 45) : (parseInt(prevSvc.mins, 10) || 45)
+    };
+  });
+  if (Object.keys(svc).length) b.svc = svc;
+}
+
+/* ══════════════════════════════════════════
+   PROPUESTAS DE SERVICIO
+   Un barbero propone, el administrador aprueba o rechaza.
+   Aprobar mete el servicio en el catálogo de la web.
+══════════════════════════════════════════ */
+
+const PROP_ESTADO = { pending: 'Pendiente', approved: 'Aprobada', rejected: 'Rechazada' };
+
+function horPropMsg(text, cls) {
+  const el = document.getElementById('horPropMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-gal-status' + (cls ? ' ' + cls : '');
+}
+
+function horPropEnviar() {
+  const b = horBarberObj();
+  if (!b) { horPropMsg('No se encontró tu ficha de barbero.', 'err'); return; }
+
+  const name  = document.getElementById('horPropName').value.trim();
+  const price = parseInt(document.getElementById('horPropPrice').value, 10) || 0;
+  const mins  = parseInt(document.getElementById('horPropMins').value, 10) || 45;
+  const desc  = document.getElementById('horPropDesc').value.trim();
+
+  if (!name) { horPropMsg('Ponle un nombre al servicio.', 'err'); return; }
+  if (mins < 15) { horPropMsg('La duración mínima es de 15 minutos.', 'err'); return; }
+
+  // Si ya existe con ese nombre no tiene sentido proponerlo
+  const yaExiste = horCatalogo().some(function(s) {
+    return String(s.name).toLowerCase() === name.toLowerCase();
+  });
+  if (yaExiste) { horPropMsg('Ya hay un servicio con ese nombre en el catálogo.', 'err'); return; }
+
+  if (!Array.isArray(b.proposals)) b.proposals = [];
+  if (b.proposals.some(function(p){ return p.status === 'pending' && p.name.toLowerCase() === name.toLowerCase(); })) {
+    horPropMsg('Ya tienes una propuesta pendiente con ese nombre.', 'err'); return;
+  }
+
+  b.proposals.push({
+    pid: 'p' + Date.now().toString(36),
+    name: name, price: price, mins: mins, desc: desc,
+    status: 'pending', ts: Date.now(),
+    barberId: b.id, barberName: b.name || b.id
+  });
+
+  document.getElementById('horPropName').value = '';
+  document.getElementById('horPropPrice').value = '';
+  document.getElementById('horPropDesc').value = '';
+  document.getElementById('horPropMins').value = 45;
+
+  horarioRenderPropias();
+  horPropMsg('Propuesta añadida. Pulsa Guardar configuración para enviarla.', '');
+}
+
+/* Propuestas del barbero que está editando, con su estado */
+function horarioRenderPropias() {
+  const host = document.getElementById('horPropLista');
+  const b = horBarberObj();
+  const props = (b && Array.isArray(b.proposals)) ? b.proposals : [];
+  if (!props.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = '<p class="web-card-sub" style="margin:18px 0 6px">Tus propuestas</p>'
+    + props.slice().reverse().map(function(p) {
+      return '<div class="hor-prop">'
+        + '<div class="hor-prop-main"><strong>' + String(p.name).replace(/</g,'&lt;') + '</strong>'
+        +   '<span class="hor-prop-sub">$' + (Number(p.price)||0).toLocaleString('es-CO')
+        +   ' · ' + p.mins + ' min'
+        +   (p.motivo ? ' · ' + String(p.motivo).replace(/</g,'&lt;') : '') + '</span></div>'
+        + '<span class="hor-prop-estado ' + p.status + '">' + (PROP_ESTADO[p.status] || p.status) + '</span>'
+        + (p.status === 'pending'
+            ? '<button class="hor-prop-no" onclick="horPropRetirar(\'' + p.pid + '\')">Retirar</button>'
+            : '')
+        + '</div>';
+    }).join('');
+}
+
+function horPropRetirar(pid) {
+  const b = horBarberObj();
+  if (!b || !Array.isArray(b.proposals)) return;
+  b.proposals = b.proposals.filter(function(p) { return p.pid !== pid; });
+  horarioRenderPropias();
+  horPropMsg('Propuesta retirada. Pulsa Guardar configuración.', '');
+}
+
+/* Todas las propuestas pendientes de todos los barberos (vista admin) */
+function horarioRenderRevision() {
+  const card = document.getElementById('horRevisionCard');
+  const host = document.getElementById('horRevision');
+  if (!hasAdminRights(currentBarber)) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const pend = [];
+  (horCfg.barbers || []).forEach(function(b) {
+    (b.proposals || []).forEach(function(p) {
+      if (p.status === 'pending') pend.push({ b: b, p: p });
+    });
+  });
+
+  if (!pend.length) {
+    host.innerHTML = '<p class="web-card-sub" style="margin:0">No hay propuestas pendientes.</p>';
+    return;
+  }
+
+  host.innerHTML = pend.map(function(x) {
+    return '<div class="hor-prop">'
+      + '<div class="hor-prop-main"><strong>' + String(x.p.name).replace(/</g,'&lt;') + '</strong>'
+      +   '<span class="hor-prop-sub">Propuesto por ' + String(x.b.name || x.b.id).replace(/</g,'&lt;')
+      +   ' · $' + (Number(x.p.price)||0).toLocaleString('es-CO') + ' · ' + x.p.mins + ' min'
+      +   (x.p.desc ? '<br>' + String(x.p.desc).replace(/</g,'&lt;') : '') + '</span></div>'
+      + '<div class="hor-prop-btns">'
+      +   '<button class="hor-prop-ok" onclick="horPropAprobar(\'' + x.b.id + '\',\'' + x.p.pid + '\')">Aprobar</button>'
+      +   '<button class="hor-prop-no" onclick="horPropRechazar(\'' + x.b.id + '\',\'' + x.p.pid + '\')">Rechazar</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function horBuscarProp(barberId, pid) {
+  const b = (horCfg.barbers || []).find(function(x) { return x.id === barberId; });
+  if (!b) return null;
+  const p = (b.proposals || []).find(function(x) { return x.pid === pid; });
+  return p ? { b: b, p: p } : null;
+}
+
+/* Aprobar mete el servicio en el catálogo y se lo activa a quien lo propuso */
+function horPropAprobar(barberId, pid) {
+  const r = horBuscarProp(barberId, pid);
+  if (!r) return;
+
+  if (!Array.isArray(horCfg.services)) horCfg.services = horCatalogo().slice();
+  const sid = 'svc' + Date.now().toString(36);
+  horCfg.services.push({
+    id: sid, name: r.p.name, price: r.p.price, mins: r.p.mins,
+    time: r.p.mins >= 60 ? (r.p.mins / 60 === 1 ? '1 hora' : (r.p.mins / 60) + ' horas') : r.p.mins + ' min',
+    desc: r.p.desc || '', active: true
+  });
+
+  // Lo ofrece quien lo propuso; el resto lo tendrá apagado por defecto
+  if (!r.b.svc) r.b.svc = {};
+  r.b.svc[sid] = { on: true, mins: r.p.mins };
+  (horCfg.barbers || []).forEach(function(b) {
+    if (b.id === r.b.id) return;
+    if (!b.svc) b.svc = {};
+    if (!b.svc[sid]) b.svc[sid] = { on: false, mins: r.p.mins };
+  });
+
+  r.p.status = 'approved';
+  r.p.motivo = 'Añadido al catálogo';
+  horarioRenderRevision();
+  horarioRenderServicios();
+  horarioRenderPropias();
+  horarioMsg('Servicio "' + r.p.name + '" aprobado. Pulsa Guardar configuración para publicarlo.', 'ok');
+}
+
+function horPropRechazar(barberId, pid) {
+  const r = horBuscarProp(barberId, pid);
+  if (!r) return;
+  const motivo = prompt('Motivo del rechazo (opcional), lo verá ' + (r.b.name || r.b.id) + ':', '');
+  if (motivo === null) return;   // canceló
+  r.p.status = 'rejected';
+  r.p.motivo = motivo.trim();
+  horarioRenderRevision();
+  horarioRenderPropias();
+  horarioMsg('Propuesta rechazada. Pulsa Guardar configuración.', 'ok');
+}
+
+function horarioMsg(text, cls) {
+  const el = document.getElementById('horarioMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-save-msg' + (cls ? ' ' + cls : '');
+}
+
+function horarioSave() {
+  horarioCollect();
+  const b = horBarberObj();
+  if (!b) { horarioMsg('No hay barbero que guardar.', 'err'); return; }
+
+  // Un día abierto sin turnos válidos dejaría al barbero sin agenda ese día
+  const sinTurnos = [], descansoMal = [];
+  Object.keys(b.schedule || {}).forEach(function(dow) {
+    const d = b.schedule[dow];
+    if (!d.active) return;
+    if (!genSlotRange(d.start, d.end, b.slotMinutes).length) { sinTurnos.push(dow); return; }
+    if (d.breakActive && toMinutes(d.breakEnd) <= toMinutes(d.breakStart)) { descansoMal.push(dow); return; }
+    if (!filterBreak(genSlotRange(d.start, d.end, b.slotMinutes), Object.assign({}, d, { slotMinutes: b.slotMinutes })).length) { sinTurnos.push(dow); }
+  });
+  if (descansoMal.length) {
+    horarioMsg('Revisa el descanso de ' + descansoMal.map(function(d){ return DIAS_SEMANA[d]; }).join(', ')
+      + ': la hora de fin debe ser posterior a la de inicio.', 'err');
+    return;
+  }
+  if (sinTurnos.length) {
+    horarioMsg('Revisa ' + sinTurnos.map(function(d){ return DIAS_SEMANA[d]; }).join(', ')
+      + ': la jornada no deja ningún turno disponible.', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('horarioSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+
+  // Se escriben solo las ramas tocadas, para no pisar el resto de la
+  // configuración si alguien la cambió mientras tanto
+  const escrituras = [db.ref('siteConfig/config/barbers').set(horCfg.barbers)];
+
+  // Aprobar una propuesta añade un servicio al catálogo, así que esa
+  // rama solo se toca cuando de verdad ha cambiado
+  const catOriginal = (PANEL_CFG && Array.isArray(PANEL_CFG.services)) ? PANEL_CFG.services : [];
+  if (Array.isArray(horCfg.services) && horCfg.services.length !== catOriginal.length) {
+    escrituras.push(db.ref('siteConfig/config/services').set(horCfg.services));
+  }
+
+  Promise.all(escrituras)
+    .then(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar configuración'; }
+      return loadPanelConfig();
+    })
+    .then(function() {
+      horarioMsg('Configuración guardada. Ya se aplica en la web al reservar.', 'ok');
+      webCfg = null;        // el editor de la web releerá lo nuevo
+      renderCalendar();
+    })
+    .catch(function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar configuración'; }
+      horarioMsg('No se pudo guardar: ' + (err && err.message ? err.message : 'error'), 'err');
+    });
+}
+
+/* ══════════════════════════════════════════
+   NUEVA CITA
+   Para reservas por teléfono o clientes sin cita previa.
+══════════════════════════════════════════ */
+
+function ncInit() {
+  const esAdmin = hasAdminRights(currentBarber);
+  const wrap = document.getElementById('ncBarberWrap');
+  wrap.style.display = esAdmin ? 'flex' : 'none';
+
+  if (esAdmin) {
+    const lista = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers)) ? PANEL_CFG.barbers : [];
+    document.getElementById('ncBarber').innerHTML = lista.map(function(b) {
+      return '<option value="' + b.id + '">' + (b.name || b.id) + '</option>';
+    }).join('') || '<option value="any">Cualquiera</option>';
+    if (currentBarber && currentBarber.id !== 'admin' && currentBarber.id !== 'any') {
+      document.getElementById('ncBarber').value = currentBarber.id;
+    }
+  }
+
+  // Servicios desde la configuración, con su duración real
+  const svcs = (PANEL_CFG && Array.isArray(PANEL_CFG.services) && PANEL_CFG.services.length)
+    ? PANEL_CFG.services
+    : Object.keys(SERVICE_PRICES).map(function(n){ return { name: n, mins: 45 }; });
+  document.getElementById('ncService').innerHTML = svcs.map(function(s) {
+    return '<option value="' + String(s.name).replace(/"/g,'&quot;') + '" data-mins="' + (s.mins || 45) + '">'
+      + s.name + '</option>';
+  }).join('');
+
+  const hoy = document.getElementById('ncDate');
+  if (!hoy.value) hoy.value = todayKey();
+  hoy.min = todayKey();
+
+  document.getElementById('ncNombre').value = '';
+  document.getElementById('ncTelefono').value = '';
+  ncMsg('', '');
+  ncRefreshSlots();
+}
+
+function ncBarberId() {
+  const esAdmin = hasAdminRights(currentBarber);
+  if (esAdmin) {
+    const sel = document.getElementById('ncBarber');
+    if (sel && sel.value) return sel.value;
+  }
+  return currentBarber ? currentBarber.id : 'any';
+}
+
+/* Ofrece solo turnos de la jornada que estén libres y no bloqueados,
+   y con hueco suficiente para la duración del servicio */
+function ncRefreshSlots() {
+  const dateKey = document.getElementById('ncDate').value;
+  const bid = ncBarberId();
+  const sel = document.getElementById('ncTime');
+  const info = document.getElementById('ncSlotInfo');
+  if (!dateKey) { sel.innerHTML = ''; return; }
+
+  const svcOpt = document.getElementById('ncService').selectedOptions[0];
+  const mins = panelSvcMins(bid, svcOpt ? svcOpt.value : '');
+
+  const jornada = ncWindow(bid, dateKey);
+  const horas = ncStarts(bid, dateKey, mins);
+  const disponibles = horas.filter(function(m) { return ncFits(bid, dateKey, m, mins); }).map(minToHHMM);
+
+  sel.innerHTML = disponibles.map(function(t) {
+    return '<option value="' + t + '">' + fmt12(t) + '</option>';
+  }).join('');
+
+  if (!jornada) {
+    info.textContent = 'Ese día no se atiende según la jornada configurada.';
+    info.className = 'web-gal-status err';
+  } else if (!disponibles.length) {
+    info.textContent = 'No queda hueco ese día para un servicio de ' + mins + ' minutos.';
+    info.className = 'web-gal-status err';
+  } else {
+    info.textContent = disponibles.length + ' horas disponibles para un servicio de ' + mins
+      + ' minutos. Cada hora empieza en cuanto termina la cita anterior.';
+    info.className = 'web-gal-status';
+  }
+}
+
+function ncMsg(text, cls) {
+  const el = document.getElementById('ncMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-save-msg' + (cls ? ' ' + cls : '');
+}
+
+function ncSave() {
+  const dateKey = document.getElementById('ncDate').value;
+  const time    = document.getElementById('ncTime').value;
+  const nombre  = document.getElementById('ncNombre').value.trim();
+  const tel     = document.getElementById('ncTelefono').value.trim();
+  const svcOpt  = document.getElementById('ncService').selectedOptions[0];
+  const service = svcOpt ? svcOpt.value : '';
+  const bid     = ncBarberId();
+  const mins    = panelSvcMins(bid, service);
+
+  if (!dateKey || !time) { ncMsg('Elige fecha y hora.', 'err'); return; }
+  if (!nombre)           { ncMsg('Falta el nombre del cliente.', 'err'); return; }
+
+  const bObj = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers))
+    ? PANEL_CFG.barbers.find(function(b){ return b.id === bid; }) : null;
+
+  if (!ncFits(bid, dateKey, toMinutes(time), mins)) {
+    ncMsg('El servicio no cabe a esa hora: choca con otra cita, un descanso o el cierre.', 'err'); return;
+  }
+
+  const btn = document.getElementById('ncSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Agendando…'; }
+
+  const ts = Date.now();
+  const code = 'P' + ts.toString(36).slice(-3).toUpperCase();
+
+  // Una fila por cita: la duración marca el tramo que ocupa
+  const escrituras = [db.ref('bookings').push({
+    date: dateKey, time: time, mins: mins, barber: bid,
+    barberName: bObj ? bObj.name : (currentBarber ? currentBarber.name : 'Cualquiera'),
+    service: service, nombre: nombre, telefono: tel,
+    status: 'pending', code: code, ts: ts, origen: 'panel'
+  })];
+
+  Promise.all(escrituras)
+    .then(function() {
+      if (btn) { btn.disabled = false; btn.textContent = 'Agendar cita'; }
+      ncMsg('Cita agendada para ' + nombre + ' el ' + dateKey + ' a las ' + fmt12(time)
+        + '. Código ' + code + '.', 'ok');
+      document.getElementById('ncNombre').value = '';
+      document.getElementById('ncTelefono').value = '';
+      ncRefreshSlots();
+    })
+    .catch(function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Agendar cita'; }
+      ncMsg('No se pudo agendar: ' + (err && err.message ? err.message : 'error'), 'err');
+    });
+}
+
+/* ══════════════════════════════════════════
+   RESEÑAS Y CÓDIGOS QR
+   Cada barbero tiene un QR que abre 9sm.site/?r=<id>,
+   el formulario de reseña ya asociado a él.
+══════════════════════════════════════════ */
+
+const RES_WEB = 'https://9sm.site/';
+let resData = null;
+
+function resLink(bid) { return RES_WEB + '?r=' + encodeURIComponent(bid); }
+
+function resAviso(msg) {
+  const el = document.getElementById('resAviso');
+  if (!el) return;
+  if (!msg) { el.style.display = 'none'; return; }
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+
+/* La librería de QR se carga solo al abrir esta pestaña */
+function cargarQRLib() {
+  if (window.QRCode) return Promise.resolve(true);
+  return new Promise(function(resolve) {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = function() { resolve(!!window.QRCode); };
+    s.onerror = function() { resolve(false); };
+    document.head.appendChild(s);
+  });
+}
+
+function resInit() {
+  resAviso('');
+  resPintarQR();
+  resCargar();
+}
+
+/* Un barbero normal solo ve su QR; el administrador los ve todos */
+function resBarberos() {
+  const todos = barberList();
+  if (hasAdminRights(currentBarber)) return todos;
+  return todos.filter(function(b) { return b.id === (currentBarber && currentBarber.id); });
+}
+
+function resPintarQR() {
+  const grid = document.getElementById('resQrGrid');
+  const lista = resBarberos();
+  if (!lista.length) { grid.innerHTML = '<p class="web-card-sub" style="margin:0">No hay barberos configurados.</p>'; return; }
+
+  grid.innerHTML = lista.map(function(b) {
+    return '<div class="res-qr-card">'
+      + '<div class="res-qr-lienzo" id="qr-' + b.id + '"></div>'
+      + '<p class="res-qr-nombre">' + String(b.name || b.id).replace(/</g, '&lt;') + '</p>'
+      + '<span class="res-qr-link">' + resLink(b.id) + '</span>'
+      + '<button class="res-qr-btn" onclick="resDescargarQR(\'' + b.id + '\')">Descargar PNG</button>'
+      + '</div>';
+  }).join('');
+
+  cargarQRLib().then(function(ok) {
+    if (!ok) {
+      resAviso('No se pudo cargar el generador de códigos QR (sin conexión o bloqueado). '
+        + 'Los enlaces de abajo funcionan igual: puedes generar el QR con cualquier herramienta.');
+      return;
+    }
+    lista.forEach(function(b) {
+      const host = document.getElementById('qr-' + b.id);
+      if (!host) return;
+      host.innerHTML = '';
+      new QRCode(host, { text: resLink(b.id), width: 160, height: 160,
+        colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    });
+  });
+}
+
+function resDescargarQR(bid) {
+  const host = document.getElementById('qr-' + bid);
+  const canvas = host && host.querySelector('canvas');
+  const img = host && host.querySelector('img');
+  const url = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
+  if (!url) { resAviso('El QR aún no está generado. Espera un momento y vuelve a intentarlo.'); return; }
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'qr-resena-' + bid + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function resCargar() {
+  const resumen = document.getElementById('resResumen');
+  const lista   = document.getElementById('resLista');
+  lista.innerHTML = '<p class="web-card-sub" style="margin:0">Cargando…</p>';
+
+  db.ref('reviews').once('value')
+    .then(function(snap) { resData = snap.val() || {}; resPintarResenas(); })
+    .catch(function(err) {
+      resumen.innerHTML = '';
+      lista.innerHTML = '';
+      resAviso('No se pueden leer las reseñas (' + (err && err.code ? err.code : 'error') + '). '
+        + 'Añade este nodo en Firebase Console → Realtime Database → Reglas:<br><br>'
+        + '<code>"reviews": { ".read": true, ".write": true }</code>');
+    });
+}
+
+function resEstrellas(n) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += (i <= n ? '★' : '☆');
+  return s;
+}
+
+function resPintarResenas() {
+  const resumen = document.getElementById('resResumen');
+  const lista   = document.getElementById('resLista');
+  const mios    = resBarberos().map(function(b) { return b.id; });
+
+  const todas = Object.keys(resData || {})
+    .map(function(k) { return resData[k]; })
+    .filter(function(r) { return r && r.barber && mios.indexOf(r.barber) !== -1; })
+    .sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+
+  // Media por barbero
+  const acc = {};
+  todas.forEach(function(r) {
+    if (!acc[r.barber]) acc[r.barber] = { suma: 0, n: 0 };
+    acc[r.barber].suma += Number(r.stars) || 0;
+    acc[r.barber].n++;
+  });
+  resumen.innerHTML = resBarberos().map(function(b) {
+    const a = acc[b.id];
+    return '<div class="res-res-card">'
+      + '<div class="res-res-nota">' + (a ? (a.suma / a.n).toFixed(1) : '—') + '</div>'
+      + '<p class="res-res-nombre">' + String(b.name || b.id).replace(/</g, '&lt;') + '</p>'
+      + '<span class="res-res-n">' + (a ? a.n + ' reseña' + (a.n === 1 ? '' : 's') : 'sin reseñas') + '</span>'
+      + '</div>';
+  }).join('');
+
+  if (!todas.length) {
+    lista.innerHTML = '<p class="web-card-sub" style="margin:0">Todavía no hay reseñas. Comparte el QR con los clientes al terminar el servicio.</p>';
+    return;
+  }
+  lista.innerHTML = todas.map(function(r) {
+    const f = r.ts ? new Date(r.ts) : null;
+    const fecha = f ? (f.getDate() + '/' + (f.getMonth() + 1) + '/' + f.getFullYear()) : '';
+    return '<div class="res-item">'
+      + '<div class="res-item-top">'
+      +   '<span class="res-item-stars">' + resEstrellas(Number(r.stars) || 0) + '</span>'
+      +   '<span style="font-size:0.78rem">' + (r.autor ? String(r.autor).replace(/</g, '&lt;') : 'Anónimo') + '</span>'
+      +   '<span class="res-item-meta">' + (r.barberName || r.barber) + ' · ' + fecha + '</span>'
+      + '</div>'
+      + (r.texto ? '<p class="res-item-texto">' + String(r.texto).replace(/</g, '&lt;') + '</p>' : '')
+      + '</div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   PERSONALIZAR WEB
+   Escribe en /siteConfig, que la web pública lee
+   al cargar. Requiere esta regla en Realtime Database:
+     "siteConfig": { ".read": true, ".write": "auth != null" }
+══════════════════════════════════════════ */
+
+const WEB_SECTIONS = [
+  { id: 'scroll-hero', label: 'Portada con vídeo' },
+  { id: 'nosotros',    label: '01 · Sobre nosotros' },
+  { id: 'servicios',   label: '02 · Servicios' },
+  { id: 'galeria',     label: '03 · Galería' },
+  { id: 'contacto',    label: '04 · Pide tu cita' },
+];
+
+/* Valores por defecto: reflejan la web tal y como está hoy,
+   para que la primera vez el formulario no salga vacío */
+function webDefaults() {
+  return {
+    sections: { 'scroll-hero': true, nosotros: true, servicios: true, galeria: true, contacto: true },
+    barbers: Object.keys(BARBER_MAP)
+      .filter(function(email) { return BARBER_MAP[email].id !== 'admin'; })
+      .map(function(email) {
+        var b = BARBER_MAP[email];
+        return {
+          id: b.id, name: b.name, role: b.role, init: b.init,
+          photo: 'assets/' + b.id.replace('b', 'barber') + '.jpg',
+          email: email,
+          admin: b.admin === true,
+          slotMinutes: SLOT_DEFAULT,
+          active: true
+        };
+      }),
+    services: [
+      { id: 'brow',       name: '09 brow',         price: 8000,  mins: 15, time: '15 min', active: true,
+        desc: 'Diseño y definición de cejas con técnica precisa para un acabado limpio y natural.' },
+      { id: 'classic',    name: 'NEXO Classic',    price: 25000, mins: 40, time: '40 min', active: true,
+        desc: 'Corte clásico adaptado a tu estilo y tipo de cara, con acabado prolijo y atención al detalle.' },
+      { id: 'cut',        name: 'NEXO Cut',        price: 35000, mins: 50, time: '50 min', active: true,
+        desc: 'Corte personalizado con lavado y styling incluido, para un resultado de barbería completo.' },
+      { id: 'beard',      name: '09 Beard',        price: 17000, mins: 25, time: '25 min', active: true,
+        desc: 'Perfilado y arreglo de barba con navaja, para una línea definida y un acabado impecable.' },
+      { id: 'ritual',     name: 'PRIME Ritual',    price: 50000, mins: 45, time: '45 min', active: true,
+        desc: 'Limpieza facial profunda con productos especializados para piel sana, poros limpios y aspecto luminoso.' },
+      { id: 'experience', name: 'NEXO Experience', price: 65000, mins: 60, time: '1 hora',  active: true,
+        desc: 'Tratamiento facial premium de mayor duración, pensado para una piel renovada de principio a fin.' },
+    ],
+    gallery: ['assets/g01.jpg','assets/g02.jpg','assets/g03.jpg','assets/g04.jpg','assets/g05.jpg',
+              'assets/g06.jpg','assets/g07.jpg','assets/g08.jpg','assets/g09.jpg'],
+    galleryVersion: 0,
+    localPhoto: '',
+    business: { address: '', phone: '', hours: '', socials: '', instagram: '', tiktok: '', whatsapp: '', footer: '' }
+  };
+}
+
+let webCfg = null;
+let webImages = {};        // { id: dataUrl } de las fotos subidas
+let webImagesDirty = false; // solo se reescribe el nodo de imágenes si cambió
+
+function webNotice(msg) {
+  var el = document.getElementById('webNotice');
+  if (!el) return;
+  if (!msg) { el.style.display = 'none'; return; }
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+
+/* Carga la configuración guardada; si no existe usa los valores actuales */
+function webLoad(force) {
+  if (webCfg && !force) { webRenderAll(); return; }
+  webNotice('');
+  Promise.all([
+    db.ref('siteConfig/config').once('value'),
+    db.ref('siteConfig/images').once('value')
+  ])
+    .then(function(snaps) {
+      webCfg = webMerge(webDefaults(), snaps[0].val());
+      webImages = snaps[1].val() || {};
+      webImagesDirty = false;
+      webRenderAll();
+    })
+    .catch(function(err) {
+      // Lo más habitual: falta la regla en Realtime Database
+      webCfg = webDefaults();
+      webImages = {};
+      webImagesDirty = false;
+      webRenderAll();
+      webNotice('No se pudo leer la configuración guardada (' + (err && err.code ? err.code : 'error') + ').'
+        + ' Se muestran los valores actuales de la web. Para que guardar funcione, añade esta regla en'
+        + ' Firebase Console → Realtime Database → Reglas:<br><br>'
+        + '<code>"siteConfig": { ".read": true, ".write": "auth != null" }</code>');
+    });
+}
+
+/* Mezcla lo guardado sobre los valores por defecto, sin perder claves nuevas */
+function webMerge(base, saved) {
+  if (!saved || typeof saved !== 'object') return base;
+  var out = base;
+  if (saved.sections) out.sections = Object.assign({}, base.sections, saved.sections);
+  // Los barberos se fusionan campo a campo, no se sustituyen en bloque.
+  // Una configuración guardada por una versión anterior del panel no trae
+  // correo ni rol, y reemplazar sin más los pondría a vacío y false,
+  // quitándole los permisos al administrador en el siguiente guardado.
+  if (Array.isArray(saved.barbers) && saved.barbers.length) {
+    out.barbers = saved.barbers.map(function(sb) {
+      var def = (base.barbers || []).find(function(db) {
+        return db.id === sb.id || (db.email && sb.email && db.email === sb.email);
+      });
+      if (!def) return sb;
+      var m = Object.assign({}, sb);
+      if (!sb.email)        m.email = def.email || '';
+      if (!('admin' in sb)) m.admin = def.admin === true;
+      return m;
+    });
+  }
+  if (Array.isArray(saved.services) && saved.services.length) out.services = saved.services;
+  if (Array.isArray(saved.gallery))  out.gallery  = saved.gallery;
+  if (typeof saved.localPhoto === 'string') out.localPhoto = saved.localPhoto;
+  if (saved.galleryVersion) out.galleryVersion = saved.galleryVersion;
+  if (saved.business) out.business = Object.assign({}, base.business, saved.business);
+  return out;
+}
+
+function webRenderAll() {
+  webRenderSections();
+  webRenderLocal();
+  webRenderBarbers();
+  webRenderServices();
+  webRenderGallery();
+  var b = webCfg.business || {};
+  document.getElementById('webAddress').value   = b.address   || '';
+  document.getElementById('webPhone').value     = b.phone     || '';
+  document.getElementById('webHours').value     = b.hours     || '';
+  document.getElementById('webSocials').value   = b.socials   || '';
+  document.getElementById('webInstagram').value = b.instagram || '';
+  document.getElementById('webTiktok').value    = b.tiktok    || '';
+  document.getElementById('webWhatsapp').value  = b.whatsapp  || '';
+  document.getElementById('webFooter').value    = b.footer    || '';
+  webMsg('', '');
+}
+
+function webRenderSections() {
+  var host = document.getElementById('webSections');
+  host.innerHTML = WEB_SECTIONS.map(function(s) {
+    var on = webCfg.sections[s.id] !== false;
+    return '<label class="web-toggle' + (on ? '' : ' off') + '">'
+      + '<input type="checkbox" data-sec="' + s.id + '"' + (on ? ' checked' : '')
+      + ' onchange="webToggleSection(this)">'
+      + '<span>' + s.label + '</span></label>';
+  }).join('');
+}
+
+function webToggleSection(input) {
+  webCfg.sections[input.getAttribute('data-sec')] = input.checked;
+  input.parentNode.classList.toggle('off', !input.checked);
+}
+
+function webRenderBarbers() {
+  var host = document.getElementById('webBarbers');
+  host.innerHTML = (webCfg.barbers || []).map(function(b, i) {
+    var esAdmin = b.admin === true;
+    return '<div class="web-row web-row--barber" data-i="' + i + '">'
+      + webInput('Nombre', 'name', b.name)
+      + webInput('Rol', 'role', b.role)
+      + webInput('Iniciales', 'init', b.init)
+      + webInput('Foto', 'photo', b.photo)
+      + '<button class="web-del-btn" onclick="webDelBarber(' + i + ')">Quitar</button>'
+      + '<label class="web-field web-field--email"><span>Correo de acceso al panel</span>'
+      +   '<input type="text" data-k="email" value="'
+      +   String(b.email || '').replace(/"/g,'&quot;') + '" placeholder="barbero@9smnexo.com"></label>'
+      + '<label class="web-admin-toggle' + (esAdmin ? ' on' : '') + '">'
+      +   '<input type="checkbox" data-k="admin"' + (esAdmin ? ' checked' : '')
+      +   ' onchange="webToggleAdmin(this)">'
+      +   '<span>Administrador</span>'
+      + '</label>'
+      + '</div>';
+  }).join('');
+}
+
+/* El rol se resuelve por correo, así que sin correo no hay forma
+   de saber a quién dar los permisos al iniciar sesión */
+function webToggleAdmin(input) {
+  input.parentNode.classList.toggle('on', input.checked);
+  var fila = input.closest('.web-row');
+  var email = fila.querySelector('[data-k="email"]');
+  if (input.checked && email && !email.value.trim()) {
+    email.style.borderColor = '#d9a441';
+    webMsg('Escribe el correo con el que entra ese barbero, si no no se le pueden aplicar los permisos.', 'err');
+  } else if (email) {
+    email.style.borderColor = '';
+  }
+}
+
+function webRenderServices() {
+  var host = document.getElementById('webServices');
+  host.innerHTML = (webCfg.services || []).map(function(s, i) {
+    return '<div class="web-row web-row--service" data-i="' + i + '">'
+      + webInput('Servicio', 'name', s.name)
+      + webInput('Precio (COP)', 'price', s.price)
+      + webInput('Minutos', 'mins', s.mins)
+      + '<button class="web-del-btn" onclick="webDelService(' + i + ')">Quitar</button>'
+      + '<label class="web-field web-field--desc">'
+      +   '<span>Descripción en la web'
+      +     (webDefaultDesc(s.id) ? '<button type="button" class="web-restore" onclick="webRestoreDesc(' + i + ')">restaurar original</button>' : '')
+      +   '</span>'
+      +   '<textarea data-k="desc" rows="2" class="web-textarea">'
+      +   String(s.desc || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      +   '</textarea></label>'
+      + '</div>';
+  }).join('');
+}
+
+/* Texto original de cada servicio, el que trae la web de fábrica */
+function webDefaultDesc(id) {
+  var d = webDefaults().services.find(function(s) { return s.id === id; });
+  return d ? (d.desc || '') : '';
+}
+
+/* Devuelve la descripción de un servicio a su texto original.
+   Sirve para deshacer una edición de prueba sin tener que reescribirla. */
+function webRestoreDesc(i) {
+  webCollectRows('webServices', webCfg.services);
+  var s = webCfg.services[i];
+  if (!s) return;
+  var orig = webDefaultDesc(s.id);
+  if (!orig) { webMsg('Ese servicio no tiene texto original guardado.', 'err'); return; }
+  s.desc = orig;
+  webRenderServices();
+  webMsg('Descripción de "' + s.name + '" restaurada. Pulsa Guardar y publicar.', 'ok');
+}
+
+function webInput(label, key, value) {
+  var safe = String(value === undefined || value === null ? '' : value)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return '<label class="web-field"><span>' + label + '</span>'
+    + '<input type="text" data-k="' + key + '" value="' + safe + '"></label>';
+}
+
+/* Vuelca lo escrito en los inputs al objeto de configuración */
+function webCollectRows(hostId, target) {
+  var rows = document.getElementById(hostId).querySelectorAll('.web-row');
+  for (var i = 0; i < rows.length; i++) {
+    var idx = parseInt(rows[i].getAttribute('data-i'), 10);
+    var obj = target[idx];
+    if (!obj) continue;
+    var inputs = rows[i].querySelectorAll('input[data-k], textarea[data-k]');
+    for (var j = 0; j < inputs.length; j++) {
+      var k = inputs[j].getAttribute('data-k');
+      if (inputs[j].type === 'checkbox') { obj[k] = inputs[j].checked; continue; }
+      var v = inputs[j].value.trim();
+      if (k === 'price' || k === 'mins') {
+        var n = parseInt(v.replace(/[^0-9]/g, ''), 10);
+        obj[k] = isNaN(n) ? 0 : n;
+      } else {
+        obj[k] = v;
+      }
+    }
+  }
+}
+
+function webAddBarber() {
+  webCollectRows('webBarbers', webCfg.barbers);
+  var n = webCfg.barbers.length + 1;
+  webCfg.barbers.push({ id: 'b' + n, name: '', role: 'Barber', init: '', photo: '', active: true });
+  webRenderBarbers();
+}
+function webDelBarber(i) {
+  webCollectRows('webBarbers', webCfg.barbers);
+  webCfg.barbers.splice(i, 1);
+  webRenderBarbers();
+}
+function webAddService() {
+  webCollectRows('webServices', webCfg.services);
+  webCfg.services.push({ id: 'svc' + Date.now().toString(36), name: '', price: 0, mins: 45, active: true });
+  webRenderServices();
+}
+function webDelService(i) {
+  webCollectRows('webServices', webCfg.services);
+  webCfg.services.splice(i, 1);
+  webRenderServices();
+}
+
+/* ── Galería: miniaturas de lo que hay ahora mismo en la web ── */
+
+/* Devuelve la URL mostrable de una entrada de la galería.
+   Las subidas ("db:<id>") se resuelven contra el mapa de imágenes. */
+function webPhotoSrc(entry) {
+  if (typeof entry !== 'string') return null;
+  if (entry.indexOf('db:') === 0) return webImages[entry.slice(3)] || null;
+  return entry;   // ruta estática servida por el hosting
+}
+
+function webRenderGallery() {
+  var grid = document.getElementById('webGalleryGrid');
+  var list = webCfg.gallery || [];
+  if (!list.length) {
+    grid.innerHTML = '<p class="web-card-sub" style="margin:0">Todavía no hay fotos en la galería.</p>';
+  } else {
+    grid.innerHTML = list.map(function(entry, i) {
+      var src = webPhotoSrc(entry);
+      var subida = typeof entry === 'string' && entry.indexOf('db:') === 0;
+      var etiqueta = subida ? 'Subida' : String(entry).replace(/^assets\//, '');
+      if (!src) {
+        return '<div class="web-gal-item missing">'
+          + '<button class="web-gal-del" onclick="webDelPhoto(' + i + ')" title="Quitar">×</button>'
+          + '<span>No se encuentra<br>' + String(entry).replace(/</g,'&lt;') + '</span></div>';
+      }
+      return '<div class="web-gal-item">'
+        + '<img src="' + src + '" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'missing\')">'
+        + '<button class="web-gal-del" onclick="webDelPhoto(' + i + ')" title="Quitar">×</button>'
+        + '<span class="web-gal-tag">' + etiqueta.replace(/</g,'&lt;') + '</span>'
+        + '</div>';
+    }).join('');
+  }
+  document.getElementById('webGallery').value = list.join('\n');
+}
+
+function webGalStatus(text, cls) {
+  var el = document.getElementById('webGalleryStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-gal-status' + (cls ? ' ' + cls : '');
+}
+
+function webToggleGalleryPaths() {
+  var wrap = document.getElementById('webGalleryPathsWrap');
+  var abierto = wrap.style.display !== 'none';
+  if (abierto) {
+    // Al cerrar se aplica lo escrito a mano
+    webCfg.gallery = document.getElementById('webGallery').value
+      .split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    webRenderGallery();
+  }
+  wrap.style.display = abierto ? 'none' : 'block';
+  document.getElementById('webPathsBtn').textContent = abierto ? 'Editar rutas a mano' : 'Aplicar rutas';
+}
+
+function webDelPhoto(i) {
+  var entry = (webCfg.gallery || [])[i];
+  webCfg.gallery.splice(i, 1);
+  // Si era una subida y ya no la usa nadie, se borra también el dato
+  if (typeof entry === 'string' && entry.indexOf('db:') === 0) {
+    var id = entry.slice(3);
+    var sigueEnUso = webCfg.gallery.some(function(e) { return e === entry; });
+    if (!sigueEnUso) { delete webImages[id]; webImagesDirty = true; }
+  }
+  webRenderGallery();
+  webGalStatus('Foto quitada. Pulsa Guardar y publicar para aplicarlo.', '');
+}
+
+/* Reduce la imagen en el navegador antes de guardarla.
+   Sin esto una foto de móvil de 4 MB acabaría entera en la base de datos
+   y la web tendría que descargarla en cada visita. */
+const WEB_IMG_MAX = 1200;      // lado mayor en píxeles
+const WEB_IMG_QUALITY = 0.72;  // calidad JPEG
+
+function webCompressImage(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onerror = function() { reject(new Error('No se pudo leer el archivo')); };
+    reader.onload = function() {
+      var img = new Image();
+      img.onerror = function() { reject(new Error('El archivo no es una imagen válida')); };
+      img.onload = function() {
+        var w = img.width, h = img.height;
+        if (w > WEB_IMG_MAX || h > WEB_IMG_MAX) {
+          if (w >= h) { h = Math.round(h * WEB_IMG_MAX / w); w = WEB_IMG_MAX; }
+          else        { w = Math.round(w * WEB_IMG_MAX / h); h = WEB_IMG_MAX; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);   // fondo para PNG con transparencia
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', WEB_IMG_QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function webUploadPhotos(input) {
+  var files = Array.prototype.slice.call(input.files || []);
+  input.value = '';   // permite volver a elegir el mismo archivo
+  if (!files.length) return;
+
+  var imagenes = files.filter(function(f) { return /^image\//.test(f.type); });
+  var descartados = files.length - imagenes.length;
+  if (!imagenes.length) { webGalStatus('Ninguno de los archivos es una imagen.', 'err'); return; }
+
+  webGalStatus('Procesando ' + imagenes.length + ' foto' + (imagenes.length === 1 ? '' : 's') + '…', '');
+
+  Promise.all(imagenes.map(function(f) {
+    return webCompressImage(f)
+      .then(function(dataUrl) { return { ok: true, data: dataUrl, name: f.name }; })
+      .catch(function(e) { return { ok: false, name: f.name, msg: e.message }; });
+  }))
+  .then(function(results) {
+    var añadidas = 0, fallidas = 0, pesoTotal = 0;
+    results.forEach(function(r) {
+      if (!r.ok) { fallidas++; return; }
+      var id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      webImages[id] = r.data;
+      webCfg.gallery.push('db:' + id);
+      pesoTotal += r.data.length;
+      añadidas++;
+    });
+    webImagesDirty = true;
+    webRenderGallery();
+
+    var kb = Math.round(pesoTotal * 0.75 / 1024);   // base64 abulta ~4/3
+    var msg = añadidas + ' foto' + (añadidas === 1 ? '' : 's') + ' añadida'
+      + (añadidas === 1 ? '' : 's') + ' (' + kb + ' KB). Pulsa Guardar y publicar.';
+    if (fallidas)    msg += ' ' + fallidas + ' no se pudo procesar.';
+    if (descartados) msg += ' ' + descartados + ' no era imagen.';
+    webGalStatus(msg, fallidas ? 'err' : '');
+  });
+}
+
+/* ── Foto del local (sección 01) ── */
+
+function webRenderLocal() {
+  var entry = webCfg.localPhoto || '';
+  var src = webPhotoSrc(entry);
+  var prev = document.getElementById('webLocalPreview');
+  var del  = document.getElementById('webLocalDel');
+  var path = document.getElementById('webLocalPath');
+
+  if (src) {
+    prev.innerHTML = '<img src="' + src + '" alt="" '
+      + 'onerror="this.parentNode.textContent=\'No se encuentra la imagen\'">';
+    del.style.display = '';
+  } else {
+    prev.textContent = 'Sin foto. La web muestra el marcador gris.';
+    del.style.display = 'none';
+  }
+
+  // El campo de ruta solo refleja rutas, no las subidas
+  if (path) path.value = (typeof entry === 'string' && entry.indexOf('db:') === 0) ? '' : entry;
+}
+
+function webLocalStatus(text, cls) {
+  var el = document.getElementById('webLocalStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-gal-status' + (cls ? ' ' + cls : '');
+}
+
+/* Escribir una ruta a mano sustituye a la subida que hubiera */
+function webLocalPathChanged(input) {
+  var v = input.value.trim();
+  webDropLocalUpload();
+  webCfg.localPhoto = v;
+  webRenderLocal();
+  webLocalStatus(v ? 'Ruta aplicada. Pulsa Guardar y publicar.' : 'Foto quitada.', '');
+}
+
+/* Si la foto actual era una subida, se elimina su dato para no dejar
+   imágenes huérfanas ocupando sitio en la base de datos */
+function webDropLocalUpload() {
+  var entry = webCfg.localPhoto || '';
+  if (typeof entry === 'string' && entry.indexOf('db:') === 0) {
+    delete webImages[entry.slice(3)];
+    webImagesDirty = true;
+  }
+}
+
+function webDelLocal() {
+  webDropLocalUpload();
+  webCfg.localPhoto = '';
+  webRenderLocal();
+  webLocalStatus('Foto quitada. Pulsa Guardar y publicar para aplicarlo.', '');
+}
+
+function webUploadLocal(input) {
+  var file = (input.files || [])[0];
+  input.value = '';
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { webLocalStatus('El archivo no es una imagen.', 'err'); return; }
+
+  webLocalStatus('Procesando…', '');
+  webCompressImage(file)
+    .then(function(dataUrl) {
+      webDropLocalUpload();                 // fuera la anterior, si la había
+      var id = 'local' + Date.now().toString(36);
+      webImages[id] = dataUrl;
+      webCfg.localPhoto = 'db:' + id;
+      webImagesDirty = true;
+      webRenderLocal();
+      var kb = Math.round(dataUrl.length * 0.75 / 1024);
+      webLocalStatus('Foto lista (' + kb + ' KB). Pulsa Guardar y publicar.', '');
+    })
+    .catch(function(e) {
+      webLocalStatus('No se pudo procesar: ' + e.message, 'err');
+    });
+}
+
+function webMsg(text, cls) {
+  var el = document.getElementById('webSaveMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'web-save-msg' + (cls ? ' ' + cls : '');
+}
+
+function webSave() {
+  webCollectRows('webBarbers', webCfg.barbers);
+  webCollectRows('webServices', webCfg.services);
+
+  // Descarta filas sin nombre, que serían basura para la web
+  webCfg.barbers  = webCfg.barbers.filter(function(b){ return b.name; });
+  webCfg.services = webCfg.services.filter(function(s){ return s.name; });
+
+  // Cada barbero necesita id estable; se genera si falta
+  var usados = {};
+  webCfg.barbers.forEach(function(b, i) {
+    if (!b.id || usados[b.id]) b.id = 'b' + (i + 1);
+    usados[b.id] = true;
+    if (!b.init) b.init = b.name.split(/\s+/).map(function(w){ return w.charAt(0); }).join('').slice(0,2).toUpperCase();
+    if (b.email) b.email = b.email.trim().toLowerCase();
+    // Sin correo no se puede resolver quién es al entrar, así que
+    // un admin sin correo quedaría sin efecto: mejor no marcarlo
+    if (b.admin === true && !b.email) b.admin = false;
+  });
+  webCfg.services.forEach(function(s) {
+    if (!s.mins || s.mins < 5) s.mins = 45;
+    s.time = s.mins >= 60 ? (s.mins / 60 === 1 ? '1 hora' : (s.mins / 60) + ' horas') : s.mins + ' min';
+  });
+
+  // Si el editor de rutas está abierto, lo escrito a mano manda
+  var pathsWrap = document.getElementById('webGalleryPathsWrap');
+  if (pathsWrap && pathsWrap.style.display !== 'none') {
+    webCfg.gallery = document.getElementById('webGallery').value
+      .split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  }
+
+  // Al cambiar las fotos subidas se sube la versión, que la web usa
+  // para invalidar la caché del nodo de imágenes
+  if (webImagesDirty) webCfg.galleryVersion = Date.now();
+
+  webCfg.business = {
+    address:   document.getElementById('webAddress').value.trim(),
+    phone:     document.getElementById('webPhone').value.trim(),
+    hours:     document.getElementById('webHours').value.trim(),
+    socials:   document.getElementById('webSocials').value.trim(),
+    instagram: document.getElementById('webInstagram').value.trim(),
+    tiktok:    document.getElementById('webTiktok').value.trim(),
+    whatsapp:  document.getElementById('webWhatsapp').value.trim(),
+    footer:    document.getElementById('webFooter').value.trim()
+  };
+
+  var btn = document.getElementById('webSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  webMsg('', '');
+
+  // El nodo de imágenes solo se reescribe si cambió: puede pesar bastante
+  var escrituras = [db.ref('siteConfig/config').set(webCfg)];
+  if (webImagesDirty) escrituras.push(db.ref('siteConfig/images').set(webImages));
+
+  Promise.all(escrituras)
+    .then(function() {
+      webImagesDirty = false;
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar y publicar'; }
+      webRenderAll();   // repinta con ids y duraciones ya normalizados
+      webMsg('Guardado. La web ya muestra los cambios al recargarla.', 'ok');
+      // Los permisos y horarios recién guardados deben aplicarse ya,
+      // sin obligar a cerrar sesión
+      return loadPanelConfig().then(function() {
+        currentBarber = mergeBarberFromConfig(currentBarber);
+        applyBarberUI(currentBarber);
+      });
+    })
+    .catch(function(err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar y publicar'; }
+      webMsg('No se pudo guardar: ' + (err && err.message ? err.message : 'error'), 'err');
+      webNotice('El guardado fue rechazado por las reglas de la base de datos.'
+        + ' Añade esto en Firebase Console → Realtime Database → Reglas:<br><br>'
+        + '<code>"siteConfig": { ".read": true, ".write": "auth != null" }</code>');
+    });
+}
+/* Si se ha publicado una versión nueva, la página se recarga sola.
+   Cubre las pestañas de móvil que quedan abiertas en segundo plano: al
+   volver a ellas el navegador reanuda la copia vieja sin pedirla de nuevo.
+   Solo una recarga por versión, para no entrar en bucle si el servidor
+   aún sirve la anterior. */
+(function () {
+  var BUILD = '20261009a';
+  function comprobar() {
+    fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (v) {
+        v = String(v).trim();
+        if (!v || v === BUILD) return;
+        try {
+          if (sessionStorage.getItem('9sm_reload') === v) return;
+          sessionStorage.setItem('9sm_reload', v);
+        } catch (e) {}
+        location.reload();
+      })
+      .catch(function () {});
+  }
+  comprobar();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) comprobar(); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) comprobar(); });
+})();
 </script>
 </body>
 </html>

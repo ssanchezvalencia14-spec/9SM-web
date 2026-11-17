@@ -1,0 +1,4608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // Aplica el tema guardado antes de pintar la página, para que no haya parpadeo.
+    if (localStorage.getItem('9sm_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9SM NEXO — Barbería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0c;
+      --surface: #131313;
+      --surface2: #1c1c1c;
+      --surface3: #252525;
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --text-soft: #999;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.18);
+      --white: #ffffff;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Playfair Display', serif;
+      --max: 1160px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    /* ── Modo claro: invierte toda la página (funciona porque el diseño es monocromo —
+       cada gris/blanco/negro y cada glow se reacoplan solos, manteniendo el mismo contraste
+       relativo que en oscuro). hue-rotate(180deg) además preserva el matiz de cualquier color
+       (ej. el rojo de "cancelar cita"), solo invirtiendo su luminosidad.
+       Las fotos y el video reales se "desinvierten" aparte para no verse en negativo. */
+    html[data-theme="light"] {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    html[data-theme="light"] #heroVideo {
+      filter: invert(1) hue-rotate(180deg);
+    }
+    /* .gallery-photo ya tiene su propio filter (brightness) en reposo y al hover; como "filter"
+       no se combina entre reglas distintas, la desinversión se incluye aquí junto con cada
+       brightness, en reglas más específicas, para que ambos efectos convivan sin pisarse. */
+    html[data-theme="light"] .gallery-item .gallery-photo {
+      filter: invert(1) hue-rotate(180deg) brightness(0.88);
+    }
+    html[data-theme="light"] .gallery-item:hover .gallery-photo.gp-active {
+      filter: invert(1) hue-rotate(180deg) brightness(1.05);
+    }
+    /* Fotos de barberos: contra-inversión igual que galería */
+    html[data-theme="light"] .barber-avatar img {
+      filter: invert(1) hue-rotate(180deg);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ═══════════════════════════
+       NAV
+    ═══════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 68px;
+      padding: 0 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.5s var(--ease), border-color 0.5s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(12,12,12,0.88);
+      backdrop-filter: blur(20px) saturate(1.5);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-logo { display: flex; align-items: center; text-decoration: none; }
+    .nav-logo img {
+      height: 36px; width: auto;
+      filter: invert(1);
+      transition: opacity 0.2s;
+    }
+    .nav-logo:hover img { opacity: 0.8; }
+
+    .nav-links {
+      display: flex; gap: 40px; list-style: none;
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      position: relative;
+      padding-bottom: 3px;
+      transition: color 0.25s;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0%; height: 1px;
+      background: var(--white);
+      transition: width 0.3s var(--ease);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { width: 100%; }
+    .nav-links a.active { color: var(--white); }
+
+    .nav-cta {
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.55);
+      background: transparent;
+      padding: 9px 24px;
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer;
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+    }
+    /* ── Configuración (engranaje flotante + panel desplegable) ── */
+    .settings-wrap {
+      position: fixed; bottom: 32px; left: 32px;
+      z-index: 190;
+    }
+    .settings-btn {
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      width: 46px; height: 46px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      transition: border-color 0.25s, color 0.25s, background 0.25s, transform 0.35s var(--ease);
+    }
+    .settings-btn:hover {
+      border-color: rgba(255,255,255,0.6); color: var(--white);
+      background: var(--surface2);
+    }
+    .settings-btn.open { transform: rotate(45deg); }
+
+    .settings-panel {
+      position: absolute; bottom: calc(100% + 14px); left: 0;
+      background: var(--surface); border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      padding: 18px 20px; min-width: 230px;
+      opacity: 0; visibility: hidden; transform: translateY(8px);
+      transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), visibility 0.25s;
+      z-index: 250;
+    }
+    @media (max-width: 768px) {
+      .settings-wrap { display: none; }
+    }
+    .settings-panel.open { opacity: 1; visibility: visible; transform: none; }
+    .settings-panel-title {
+      display: block; font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.82rem; color: var(--text-soft); font-weight: 300;
+    }
+    .theme-switch {
+      width: 46px; height: 26px; border-radius: 999px; flex-shrink: 0;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      position: relative; cursor: pointer; padding: 0;
+    }
+    .theme-switch-knob {
+      position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--white); color: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s var(--ease);
+    }
+    html[data-theme="light"] .theme-switch-knob { transform: translateX(20px); }
+    .theme-switch-knob .icon-moon { display: none; }
+    html[data-theme="light"] .theme-switch-knob .icon-sun { display: none; }
+    html[data-theme="light"] .theme-switch-knob .icon-moon { display: block; }
+
+    .nav-cancel-link {
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-right: 18px; text-decoration: none;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .nav-cancel-link:hover { color: var(--white); }
+    .nav-cta:hover {
+      border-color: var(--white);
+      color: var(--bg);
+      background: var(--white);
+    }
+
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 1px; background: var(--text); transition: all 0.35s var(--ease); }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed; top: 68px; left: 0; right: 0; z-index: 199;
+      background: rgba(12,12,12,0.97);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s var(--ease), padding 0.4s var(--ease);
+    }
+    .mobile-menu.open { max-height: 400px; padding: 32px 48px; }
+    .mobile-menu a,
+    .mobile-menu .mobile-link {
+      display: block; width: 100%;
+      background: none; border: none; text-align: left; cursor: pointer;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      font-family: inherit;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s, padding-left 0.2s;
+    }
+    .mobile-menu a:last-child,
+    .mobile-menu .mobile-link:last-child { border-bottom: none; }
+    .mobile-menu a:hover,
+    .mobile-menu .mobile-link:hover { color: var(--white); padding-left: 8px; }
+    .mobile-menu-divider {
+      display: block; font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════
+       FLOATING CTA
+    ═══════════════════════════ */
+    .float-cta {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      z-index: 190;
+      background: var(--white);
+      color: var(--bg);
+      padding: 14px 28px;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      text-decoration: none;
+      opacity: 0; pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.35s, transform 0.35s var(--ease), background 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .float-cta.visible { opacity: 1; pointer-events: auto; transform: none; }
+    .float-cta:hover { background: #e0e0e0; }
+
+    /* ═══════════════════════════
+       HERO SCROLL-VIDEO
+    ═══════════════════════════ */
+    .scroll-video-hero {
+      height: 300vh; position: relative;
+      overflow: clip;
+    }
+    /* En móvil el hero se recorre en poco más de una pantalla y media,
+       y los reveals van más rápido: con 300vh había que arrastrar tres
+       pantallas antes de llegar al contenido. */
+    @media (max-width: 820px) {
+      .scroll-video-hero { height: 165vh; }
+      .reveal, .reveal-left, .reveal-right { transition-duration: 0.45s; }
+      .stagger > * { transition-duration: 0.4s; }
+      .stagger.visible > *:nth-child(2) { transition-delay: 0.05s; }
+      .stagger.visible > *:nth-child(3) { transition-delay: 0.10s; }
+      .stagger.visible > *:nth-child(4) { transition-delay: 0.15s; }
+      .stagger.visible > *:nth-child(5) { transition-delay: 0.20s; }
+      .stagger.visible > *:nth-child(6) { transition-delay: 0.25s; }
+    }
+    .scroll-video-sticky {
+      position: sticky; top: 0;
+      height: 100vh; width: 100%; overflow: hidden;
+      background: #000;
+    }
+    .scroll-video-sticky video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    /* Logo: zona superior, bien separado del texto */
+    .hero-logo {
+      position: absolute;
+      top: 96px;
+      left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      opacity: 0; animation: fadeUp 0.9s 0.15s forwards;
+    }
+    .hero-logo img {
+      height: 80px; width: auto;
+      filter: invert(1);
+      display: block;
+    }
+    /* Texto: zona central-baja, bien separado del logo */
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.44);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 2; text-align: center;
+      padding: 0 24px;
+    }
+    .hero-eyebrow {
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 16px;
+      opacity: 0; animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7.5vw, 6.5rem);
+      font-weight: 400; line-height: 1.02;
+      color: #fff;
+      opacity: 0; animation: fadeUp 0.9s 0.65s forwards;
+    }
+    .hero-title em { font-style: italic; color: rgba(255,255,255,0.6); }
+    .hero-sub {
+      margin-top: 18px;
+      font-size: 0.9rem; font-weight: 300;
+      color: rgba(255,255,255,0.45);
+      max-width: 400px;
+      opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+    }
+    .hero-actions {
+      margin-top: 36px;
+      display: flex; gap: 14px; justify-content: center;
+      opacity: 0; animation: fadeUp 0.9s 0.95s forwards;
+    }
+    @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    /* ═══════════════════════════
+       BUTTONS
+    ═══════════════════════════ */
+    .btn-primary {
+      background: var(--white);
+      color: var(--bg);
+      padding: 13px 34px;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      text-decoration: none; display: inline-block;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s var(--ease);
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:hover::before { left: 100%; }
+
+    .btn-ghost {
+      background: none; cursor: pointer;
+      font-family: var(--font-body);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.75);
+      padding: 13px 34px;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.13em; text-transform: uppercase;
+      text-decoration: none; display: inline-block;
+      transition: border-color 0.25s, color 0.25s, transform 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.6); color: var(--white); transform: translateY(-2px); }
+
+    /* ═══════════════════════════
+       SHARED / LAYOUT
+    ═══════════════════════════ */
+    section { padding: 120px 48px; }
+    .container { max-width: var(--max); margin: 0 auto; }
+
+    .section-num {
+      font-family: var(--font-display);
+      font-size: clamp(5rem, 10vw, 8rem);
+      font-weight: 400; color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.06);
+      line-height: 1; margin-bottom: -24px;
+      display: block; user-select: none;
+    }
+    .section-label {
+      font-size: 0.63rem; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 500; display: block; margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      font-weight: 400; line-height: 1.08; color: var(--text);
+    }
+    .divider { width: 32px; height: 1px; background: rgba(255,255,255,0.2); margin: 28px 0; }
+
+    /* Scroll reveals */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal.visible { opacity: 1; transform: none; }
+    .reveal-left { opacity: 0; transform: translateX(-36px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal-left.visible { opacity: 1; transform: none; }
+    .reveal-right { opacity: 0; transform: translateX(36px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+    .reveal-right.visible { opacity: 1; transform: none; }
+    .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+    .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
+    .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
+    .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
+    .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
+    .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+
+    /* ── Clientes glow ── */
+    .clients-glow {
+      margin-top: 40px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .clients-number {
+      font-family: var(--font-body);
+      font-size: 3.8rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1;
+      position: relative;
+      display: inline-block;
+      text-shadow:
+        0 0 20px rgba(255,255,255,0.35),
+        0 0 50px rgba(255,255,255,0.15),
+        0 0 90px rgba(255,255,255,0.08);
+      animation: glowPulse 3.5s ease-in-out infinite;
+    }
+    .clients-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    @keyframes glowPulse {
+      0%, 100% {
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.3),
+          0 0 45px rgba(255,255,255,0.12),
+          0 0 80px rgba(255,255,255,0.06);
+      }
+      50% {
+        text-shadow:
+          0 0 28px rgba(255,255,255,0.55),
+          0 0 65px rgba(255,255,255,0.25),
+          0 0 120px rgba(255,255,255,0.12);
+      }
+    }
+
+    /* ═══════════════════════════
+       MARQUEE
+    ═══════════════════════════ */
+    .parallax-line {
+      overflow: hidden; padding: 22px 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .parallax-text {
+      font-family: var(--font-body);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: flex; gap: 32px; align-items: center;
+      width: 100%; justify-content: space-between;
+    }
+    .parallax-text span {
+      color: rgba(255,255,255,0.2);
+      font-size: 0.45rem;
+    }
+
+    /* ═══════════════════════════
+       ABOUT
+    ═══════════════════════════ */
+    .about { background: var(--surface); }
+    .about-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 88px; align-items: center;
+    }
+    .about-text p {
+      color: var(--text-muted); font-weight: 300;
+      font-size: 1rem; line-height: 1.9; margin-bottom: 20px;
+    }
+    .about-highlight {
+      font-family: var(--font-display);
+      font-size: 1.25rem; font-style: italic;
+      color: var(--text-soft); line-height: 1.5;
+      border-left: 2px solid rgba(255,255,255,0.15);
+      padding-left: 24px; margin: 32px 0;
+    }
+    .about-img {
+      aspect-ratio: 3/4; background: var(--surface2);
+      position: relative; overflow: hidden;
+    }
+    .about-img::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    }
+    .about-img-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+      color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.1em;
+    }
+    .about-img-placeholder svg { opacity: 0.2; }
+    /* Foto real del local, cuando se ha subido desde el panel.
+       Se pone por encima del degradado ::before para que no la apague. */
+    .about-img-photo {
+      position: absolute; inset: 0; z-index: 1;
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 28px; margin-top: 52px; padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 2.6rem; font-weight: 400;
+      color: var(--text); line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.68rem; color: var(--text-muted);
+      letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
+    }
+
+    /* ═══════════════════════════
+       SERVICES
+    ═══════════════════════════ */
+    .services-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 56px;
+    }
+    .service-category { margin-bottom: 64px; }
+    .service-category:last-child { margin-bottom: 0; }
+    .service-category-title {
+      display: flex; align-items: center; gap: 14px;
+      font-family: var(--font-display);
+      font-size: 1.35rem; font-weight: 400;
+      letter-spacing: 0.01em; color: var(--text);
+      margin-bottom: 26px; padding-bottom: 0;
+      border-bottom: none;
+    }
+    /* Punto luminoso que marca el inicio de cada bloque */
+    .service-category-title::before {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--white); flex-shrink: 0;
+      box-shadow: 0 0 14px rgba(255,255,255,0.8), 0 0 28px rgba(255,255,255,0.35);
+      animation: svcDot 3.5s ease-in-out infinite;
+    }
+    @keyframes svcDot {
+      0%, 100% { opacity: 0.55; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+      50%      { opacity: 1;    box-shadow: 0 0 18px rgba(255,255,255,0.9), 0 0 34px rgba(255,255,255,0.4); }
+    }
+    /* Tarjetas sueltas con aire entre ellas. Antes iban pegadas con una
+       línea de 1px sobre fondo de borde, lo que las fundía en una sola
+       losa gris y era la causa de que la sección se viera plana. */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px; background: none;
+    }
+    .services-grid.cols-1,
+    .services-grid.cols-2,
+    .services-grid.cols-3 {
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      max-width: none;
+    }
+    /* Con una sola tarjeta, no se estira a todo el ancho */
+    .services-grid.cols-1 { grid-template-columns: repeat(auto-fit, minmax(290px, 340px)); }
+
+    .service-card {
+      background: linear-gradient(165deg, var(--surface) 0%, var(--bg) 100%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 28px 28px;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      cursor: default;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.35);
+      transition: transform 0.4s var(--ease), border-color 0.4s var(--ease),
+                  box-shadow 0.4s var(--ease), background 0.4s var(--ease);
+    }
+    /* Filo superior iluminado: da sensación de volumen real */
+    .service-card::before {
+      content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+      opacity: 0.6; transition: opacity 0.4s var(--ease);
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 16px 44px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.05);
+      background: linear-gradient(165deg, var(--surface2) 0%, var(--surface) 100%);
+    }
+    .service-card:hover::before { opacity: 1; }
+
+    /* La destacada se distingue sin necesidad de pasar el ratón */
+    .service-card.featured {
+      border-color: rgba(255,255,255,0.2);
+      background: linear-gradient(165deg, var(--surface2) 0%, var(--surface) 100%);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.45), 0 0 50px rgba(255,255,255,0.04);
+    }
+    .service-card.featured::before { opacity: 1; }
+
+    .service-badge {
+      display: inline-block; align-self: flex-start;
+      font-size: 0.55rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--text-soft);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 4px 11px; margin-bottom: 18px;
+    }
+    .service-badge.hot {
+      color: var(--white);
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+    }
+    /* Icono dentro de un medallón: antes era un trazo suelto casi invisible */
+    .service-icon {
+      width: 26px; height: 26px; color: var(--text); flex-shrink: 0;
+      transition: transform 0.4s var(--ease), color 0.2s;
+    }
+    .service-icon-wrap {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-bottom: 18px;
+      transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    }
+    .service-card:hover .service-icon-wrap {
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 0 26px rgba(255,255,255,0.14), inset 0 0 18px rgba(255,255,255,0.06);
+    }
+    .service-card:hover .service-icon { transform: scale(1.12); color: var(--white); }
+
+    .service-name {
+      font-family: var(--font-display);
+      font-size: 1.32rem; font-weight: 400;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .service-desc {
+      font-size: 0.82rem; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 20px;
+      flex: 1;   /* empuja precio y botón al fondo: todas las tarjetas alinean */
+    }
+
+    /* Pie de tarjeta: precio grande a la izquierda, duración a la derecha */
+    .service-foot {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 12px; padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .service-price {
+      font-family: var(--font-display);
+      font-size: 1.75rem; font-weight: 400; color: var(--text);
+      line-height: 1; letter-spacing: -0.01em;
+      text-shadow: 0 0 24px rgba(255,255,255,0.2);
+      transition: text-shadow 0.4s var(--ease);
+    }
+    .service-time-chip {
+      font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-muted); white-space: nowrap;
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 5px 11px;
+    }
+    .service-price small {
+      font-size: 0.68rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-left: 6px; font-weight: 400;
+    }
+    .service-cta-link {
+      display: block; width: 100%; margin-top: 16px;
+      font-size: 0.63rem; letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-family: var(--font-body); font-weight: 500;
+      color: var(--text-soft); text-align: center;
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; cursor: pointer;
+      text-decoration: none;
+      transition: color 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    }
+    .service-cta-link:hover {
+      color: var(--bg);
+      background: var(--white);
+      border-color: var(--white);
+      box-shadow: 0 0 26px rgba(255,255,255,0.3);
+    }
+    /* La destacada invita desde el principio */
+    .service-card.featured .service-cta-link {
+      color: var(--text); border-color: rgba(255,255,255,0.3);
+    }
+
+    /* Añadir la cita al calendario del cliente */
+    .cal-btns { display: flex; gap: 10px; margin: 20px 0 4px; flex-wrap: wrap; justify-content: center; }
+    .cal-btn {
+      flex: 1; min-width: 150px; text-align: center; text-decoration: none;
+      font-family: var(--font-body); font-size: 0.66rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text); background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .cal-btn:hover { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.05); }
+
+    /* ═══════════════════════════
+       RESEÑAS
+    ═══════════════════════════ */
+    .res-barbero { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+    .res-avatar {
+      width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.2); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; letter-spacing: 0.05em; color: var(--text);
+      background: rgba(255,255,255,0.05);
+    }
+    .res-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .res-nombre { font-family: var(--font-display); font-size: 1.15rem; margin: 0; }
+    .res-sub { font-size: 0.76rem; color: var(--text-muted); margin: 3px 0 0; }
+
+    .res-stars { display: flex; gap: 8px; justify-content: center; margin: 6px 0 4px; }
+    .res-star {
+      background: none; border: none; padding: 4px; cursor: pointer; line-height: 1;
+      color: rgba(255,255,255,0.22); transition: color 0.18s, transform 0.18s var(--ease);
+    }
+    .res-star svg { width: 34px; height: 34px; display: block; }
+    .res-star.on { color: #e7c04a; }
+    .res-star:hover { transform: scale(1.12); }
+    .res-hint { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin: 0 0 22px; }
+
+    .res-textarea, .res-input {
+      width: 100%; background: rgba(255,255,255,0.04); color: var(--text);
+      border: 1px solid var(--border); border-radius: 9px;
+      padding: 11px 13px; font-family: var(--font-body); font-size: 0.85rem;
+      font-weight: 300; outline: none; resize: vertical;
+    }
+    .res-textarea:focus, .res-input:focus { border-color: rgba(255,255,255,0.3); }
+    .res-error { color: #e05555; font-size: 0.74rem; margin: 12px 0 0; display: none; }
+
+    /* Nota media en la ficha del barbero al reservar */
+    .barber-rating {
+      display: block; font-size: 0.6rem; letter-spacing: 0.04em;
+      color: #e7c04a; margin-top: 3px;
+    }
+    .barber-chip.selected .barber-rating { color: #9a7b14; }
+
+    /* ═══════════════════════════
+       SECCIÓN 02 — AMBIENTE Y GLOW
+       La sección era muy plana: luz de fondo que respira,
+       títulos con halo y tarjetas que reaccionan.
+    ═══════════════════════════ */
+    #servicios { position: relative; overflow: hidden; }
+
+    /* Halo ambiental detrás de la cabecera, en movimiento lento */
+    #servicios::before {
+      content: ''; position: absolute; z-index: 0; pointer-events: none;
+      top: -14%; left: 50%; width: min(1000px, 130%); height: 70%;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse at center,
+        rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 38%, transparent 72%);
+      animation: svcAura 11s ease-in-out infinite;
+    }
+    @keyframes svcAura {
+      0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+      50%      { opacity: 1;   transform: translateX(-50%) scale(1.1); }
+    }
+    #servicios .container { position: relative; z-index: 1; }
+
+    /* Título de sección con halo que late suavemente */
+    #servicios .section-title {
+      text-shadow: 0 0 34px rgba(255,255,255,0.4), 0 0 80px rgba(255,255,255,0.14);
+      animation: svcTitleGlow 5.5s ease-in-out infinite;
+    }
+    @keyframes svcTitleGlow {
+      0%, 100% { text-shadow: 0 0 30px rgba(255,255,255,0.26), 0 0 68px rgba(255,255,255,0.09); }
+      50%      { text-shadow: 0 0 52px rgba(255,255,255,0.55), 0 0 110px rgba(255,255,255,0.22); }
+    }
+    #servicios .section-num {
+      text-shadow: 0 0 24px rgba(255,255,255,0.45);
+    }
+    #servicios .section-label {
+      text-shadow: 0 0 18px rgba(255,255,255,0.22);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #servicios::before,
+      #servicios .section-title,
+      .service-card.featured .service-badge.hot,
+      .service-card:hover > .service-sheen { animation: none; }
+      .service-category-title::after { transition: none; width: 120px; }
+    }
+
+    /* ═══════════════════════════
+       GALLERY
+    ═══════════════════════════ */
+    .gallery { background: var(--surface); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px; margin-top: 56px;
+      border: 2px solid rgba(255,255,255,0.95);
+      animation: galleryFrameGlow 3.2s ease-in-out infinite;
+    }
+    @keyframes galleryFrameGlow {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255,255,255,0.7),
+                    0 0 24px rgba(255,255,255,0.4),
+                    inset 0 0 10px rgba(255,255,255,0.15);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255,255,255,1),
+                    0 0 44px rgba(255,255,255,0.7),
+                    inset 0 0 16px rgba(255,255,255,0.3);
+      }
+    }
+    /* fila 1 — 3 cuadrados */
+    .gallery-item {
+      grid-column: span 2;
+      aspect-ratio: 1 / 1;
+      background: var(--surface2); overflow: hidden;
+      position: relative; cursor: zoom-in;
+    }
+    /* fila 2 — 2 fotos panorámicas a media pantalla */
+    .gallery-item--half {
+      grid-column: span 3;
+      aspect-ratio: 4 / 3;
+    }
+
+    /* Fotos apiladas — fade entre ellas */
+    .gallery-photo {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.5s ease, transform 0.65s var(--ease), filter 0.4s;
+      filter: brightness(0.88);
+      transform: scale(1);
+    }
+    .gallery-photo.gp-active {
+      opacity: 1;
+    }
+    .gallery-item:hover .gallery-photo.gp-active {
+      transform: scale(1.06);
+      filter: brightness(1.05);
+    }
+
+    /* ═══════════════════════════
+       CITA — formulario simplificado
+    ═══════════════════════════ */
+    .cita-section { background: var(--bg); }
+    .cita-inner {
+      display: grid; grid-template-columns: 1fr 1.1fr;
+      gap: 80px; align-items: start;
+    }
+
+    /* Info lado izquierdo */
+    .cita-info p {
+      color: var(--text-muted); font-weight: 300;
+      font-size: 0.95rem; line-height: 1.85; margin-bottom: 48px;
+    }
+    .info-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .info-item {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .info-item:first-child { border-top: 1px solid var(--border); }
+    .info-item:hover { border-bottom-color: var(--border-hover); }
+    .info-label {
+      font-size: 0.6rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 600; min-width: 72px; padding-top: 2px;
+    }
+    .info-value { color: var(--text-muted); font-size: 0.9rem; font-weight: 300; }
+
+    /* Formulario lado derecho — minimalista */
+    .cita-form-wrap {
+      background: var(--surface);
+      padding: 52px 48px;
+      border: 1px solid var(--border);
+    }
+    .cita-form-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem; font-weight: 400;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .cita-form-sub {
+      font-size: 0.82rem; color: var(--text-muted);
+      font-weight: 300; margin-bottom: 40px;
+    }
+
+    /* ── Booking panel rediseñado ── */
+    .cita-book-panel {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 56px 44px 48px;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+    .cita-book-panel:hover {
+      border-color: rgba(255,255,255,0.13);
+      box-shadow: 0 0 60px rgba(255,255,255,0.04), inset 0 0 80px rgba(255,255,255,0.02);
+    }
+    /* radial glow halo de fondo */
+    .cita-book-panel::before {
+      content: '';
+      position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+      width: 280px; height: 220px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .cita-book-panel > * { position: relative; z-index: 1; }
+
+    .cbp-eyebrow {
+      font-size: 0.56rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 600; margin-bottom: 20px;
+    }
+
+    /* número 30 con glow animado */
+    .cbp-hero {
+      display: flex; align-items: baseline; gap: 8px;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .cbp-thirty {
+      font-family: var(--font-body);
+      font-size: 8.5rem; font-weight: 100;
+      letter-spacing: -0.07em; color: var(--white);
+      display: inline-block; position: relative;
+      text-shadow:
+        0 0 18px rgba(255,255,255,0.55),
+        0 0 50px rgba(255,255,255,0.22),
+        0 0 110px rgba(255,255,255,0.10);
+      animation: cbp-glow 4s ease-in-out infinite;
+    }
+    @keyframes cbp-glow {
+      0%, 100% {
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.55),
+          0 0 50px rgba(255,255,255,0.22),
+          0 0 110px rgba(255,255,255,0.10);
+      }
+      50% {
+        text-shadow:
+          0 0 28px rgba(255,255,255,0.95),
+          0 0 75px rgba(255,255,255,0.45),
+          0 0 160px rgba(255,255,255,0.22);
+      }
+    }
+    /* shimmer sweep */
+    .cbp-thirty::after {
+      content: '';
+      position: absolute; inset: -8px -24px;
+      background: linear-gradient(
+        108deg,
+        transparent 38%, rgba(255,255,255,0.28) 50%, transparent 62%
+      );
+      animation: cbp-shimmer 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes cbp-shimmer {
+      0%    { transform: translateX(-120%) skewX(-12deg); }
+      22%, 100% { transform: translateX(220%) skewX(-12deg); }
+    }
+    .cbp-unit {
+      font-family: var(--font-body);
+      font-size: 2.2rem; font-weight: 200;
+      color: var(--white); letter-spacing: -0.02em;
+      opacity: 0.65;
+    }
+
+    /* línea decorativa */
+    .cbp-rule {
+      width: 40px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+      margin: 22px auto 22px;
+    }
+
+    .cbp-desc {
+      font-size: 0.82rem; color: var(--text-muted);
+      font-weight: 300; line-height: 1.85;
+      max-width: 280px;
+    }
+
+    /* chips de beneficios */
+    .cbp-chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin: 28px 0 36px;
+    }
+    .cbp-chip {
+      font-size: 0.63rem; letter-spacing: 0.1em;
+      font-weight: 400; color: var(--text-soft);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .cbp-chip:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .cbp-sched {
+      font-size: 0.63rem; color: var(--text-muted);
+      font-weight: 300; letter-spacing: 0.07em;
+      margin-top: 16px;
+    }
+    .cita-form {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .field-wrap {
+      position: relative;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+      margin-bottom: 0;
+    }
+    .field-wrap:focus-within { border-bottom-color: var(--white); }
+    .field-wrap:first-of-type { border-top: 1px solid var(--border); }
+
+    .field-wrap input,
+    .field-wrap select {
+      width: 100%;
+      background: transparent;
+      border: none; outline: none;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem; font-weight: 300;
+      padding: 20px 0 8px 0;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer;
+    }
+    .field-wrap select option { background: var(--surface2); color: var(--text); }
+    .field-wrap label {
+      position: absolute; top: 8px; left: 0;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--text-muted);
+      font-weight: 500; pointer-events: none;
+      transition: color 0.2s;
+    }
+    .field-wrap:focus-within label { color: var(--text-soft); }
+    .field-wrap .select-arrow {
+      position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--text-muted);
+    }
+
+    .cita-submit {
+      margin-top: 40px;
+      background: var(--white);
+      color: var(--bg);
+      border: none; width: 100%;
+      padding: 18px;
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.2s var(--ease);
+      position: relative; overflow: hidden;
+    }
+    .cita-submit::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.08);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s var(--ease);
+    }
+    .cita-submit:hover { transform: translateY(-1px); }
+    .cita-submit:hover::before { transform: scaleX(1); }
+    .cita-submit:active { transform: translateY(0); }
+
+    /* ═══════════════════════════
+       FOOTER
+    ═══════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 44px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-logo img {
+      height: 30px; width: auto;
+      filter: invert(1); opacity: 0.55;
+      transition: opacity 0.2s;
+    }
+    .footer-logo:hover img { opacity: 0.8; }
+    .footer-copy { font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.06em; }
+    .footer-socials { display: flex; gap: 24px; }
+    .footer-socials a {
+      color: var(--text-muted); font-size: 0.68rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      text-decoration: none; transition: color 0.2s;
+      position: relative;
+    }
+    .footer-socials a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0%; height: 1px; background: var(--white);
+      transition: width 0.25s var(--ease);
+    }
+    .footer-socials a:hover { color: var(--white); }
+    .footer-socials a:hover::after { width: 100%; }
+
+    /* ═══════════════════════════
+       ANIMATIONS
+    ═══════════════════════════ */
+    @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+    /* ═══════════════════════════
+       TRANSICIONES SUAVES GLOBALES
+    ═══════════════════════════ */
+
+    /* Entrada de página — SOLO opacidad, sin transform (el transform en body rompe position:fixed) */
+    body { opacity: 0; transition: opacity 0.55s ease; }
+    body.page-ready { opacity: 1; }
+
+    /* Reveals mejorados — más suaves y profundos */
+    .reveal        { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .reveal-left   { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .reveal-right  { transition: opacity 1s var(--ease), transform 1s var(--ease); }
+    .stagger > *   { transition: opacity 0.75s var(--ease), transform 0.75s var(--ease); }
+
+    /* Botón primario — glow al pasar */
+    .btn-primary {
+      transition: transform 0.25s var(--ease), box-shadow 0.4s var(--ease);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 32px rgba(255,255,255,0.18), 0 6px 24px rgba(0,0,0,0.45);
+    }
+
+    /* Botón ghost — glow sutil */
+    .btn-ghost {
+      transition: border-color 0.3s, color 0.3s, transform 0.3s var(--ease), box-shadow 0.3s;
+    }
+    .btn-ghost:hover {
+      box-shadow: 0 0 20px rgba(255,255,255,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Float CTA — elevación */
+    .float-cta {
+      transition: background 0.25s, transform 0.35s var(--ease),
+                  box-shadow 0.35s var(--ease), opacity 0.35s var(--ease);
+    }
+    .float-cta:hover {
+      background: #e8e8e8;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+    }
+
+    /* Service card — shimmer en hover */
+    .service-card {
+      transition: background 0.4s var(--ease), transform 0.4s var(--ease),
+                  box-shadow 0.4s var(--ease);
+    }
+    .service-card::after {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 55%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+      transition: left 0.7s var(--ease);
+      pointer-events: none; /* no bloquea clicks */
+    }
+    .service-card:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07); }
+    .service-card:hover::after { left: 160%; }
+
+    /* Service CTA link — glow */
+    .service-cta-link {
+      transition: color 0.25s, border-color 0.25s, background 0.25s,
+                  box-shadow 0.3s, transform 0.25s;
+    }
+    .service-cta-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255,255,255,0.08);
+    }
+
+    /* Galería — marco brillante solo en el contorno exterior del collage, con pulso animado
+       IMPORTANTE: incluye opacity para no anular el stagger de scroll */
+    .gallery-item {
+      transition: opacity 0.75s var(--ease), transform 0.45s var(--ease);
+    }
+    .gallery-item:hover {
+      transform: scale(1.012);
+    }
+
+    /* About highlight — borde con glow */
+    .about-highlight {
+      transition: border-color 0.4s, padding-left 0.4s var(--ease);
+    }
+    .about-highlight:hover {
+      border-color: rgba(255,255,255,0.35);
+      padding-left: 32px;
+    }
+
+    /* Número de clientes — count-up listo */
+    .clients-number {
+      transition: text-shadow 0.5s;
+    }
+
+    /* Nav logo */
+    .nav-logo { transition: opacity 0.2s, transform 0.3s var(--ease); }
+    .nav-logo:hover { opacity: 0.85; transform: scale(1.04); }
+
+    /* Booking panel button glow
+       Sin transform: el padre tiene overflow:hidden y cliparía el movimiento */
+    .cita-book-panel .open-booking {
+      transition: background 0.2s, box-shadow 0.4s var(--ease);
+    }
+    .cita-book-panel .open-booking:hover {
+      box-shadow: 0 0 40px rgba(255,255,255,0.22), 0 8px 28px rgba(0,0,0,0.4);
+    }
+
+    /* ═══════════════════════════
+       RESPONSIVE
+    ═══════════════════════════ */
+    @media (max-width: 960px) {
+      nav { padding: 0 24px; }
+      .nav-links, .nav-cta-wrap { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { padding-left: 24px; padding-right: 24px; }
+      .mobile-menu.open { padding: 24px; }
+      section { padding: 80px 24px; }
+      .about-inner { grid-template-columns: 1fr; gap: 48px; }
+      .about-img { aspect-ratio: 16/9; }
+      .services-grid,
+      .services-grid.cols-1,
+      .services-grid.cols-2,
+      .services-grid.cols-3 { grid-template-columns: 1fr !important; max-width: none !important; gap: 1px; }
+      .service-card { padding: 32px 24px; }
+      .services-header { flex-direction: column; align-items: flex-start; gap: 20px; margin-bottom: 32px; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; gap: 3px; }
+      .gallery-item,
+      .gallery-item--half { grid-column: span 1 !important; aspect-ratio: 1/1 !important; }
+      .cita-inner { grid-template-columns: 1fr; gap: 56px; }
+      .cita-form-wrap { padding: 36px 28px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; padding: 32px 24px; }
+      .float-cta { display: none; }
+    }
+
+    /* ═══════════════════════════
+       BOOKING MODAL v2
+    ═══════════════════════════ */
+    .booking-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0);
+      display: flex; align-items: flex-end; justify-content: center;
+      pointer-events: none;
+      transition: background 0.4s var(--ease), backdrop-filter 0.4s;
+    }
+    .booking-overlay.open {
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: all;
+    }
+    .booking-sheet {
+      width: 100%; max-width: 540px;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      transform: translateY(105%);
+      transition: transform 0.55s var(--ease);
+      max-height: 90vh;
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin; scrollbar-color: #2a2a2a transparent;
+    }
+    .booking-overlay.open .booking-sheet { transform: translateY(0); }
+    @media (min-width: 600px) {
+      .booking-overlay { align-items: center; }
+      .booking-sheet {
+        border-radius: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        max-height: 88vh;
+        transform: translateY(24px) scale(0.97);
+        opacity: 0;
+        transition: transform 0.5s var(--ease), opacity 0.4s var(--ease);
+      }
+      .booking-overlay.open .booking-sheet { transform: none; opacity: 1; }
+    }
+
+    /* Header */
+    .booking-header {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 28px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .booking-back {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-family: var(--font-body);
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0;
+      transition: color 0.2s;
+    }
+    .booking-back:hover { color: var(--white); }
+    .booking-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: color 0.2s, background 0.2s;
+      width: 32px; height: 32px;
+    }
+    .booking-close:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+    .booking-steps { display: flex; align-items: center; gap: 6px; }
+    .bstep {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-muted); font-size: 0.6rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s var(--ease);
+    }
+    .bstep.active { border-color: var(--white); background: var(--white); color: var(--bg); }
+    .bstep.done { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.3); }
+    .bstep-line { width: 18px; height: 1px; background: rgba(255,255,255,0.12); }
+
+    /* View body */
+    .booking-view { padding: 28px 28px 0; }
+    .booking-section-label {
+      font-size: 0.6rem; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--text-soft);
+      font-weight: 500; display: block; margin-bottom: 10px;
+    }
+    .booking-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 400; color: var(--text); line-height: 1.1; margin-bottom: 28px;
+    }
+    .booking-title em { font-style: italic; color: var(--text-soft); }
+
+    /* Week nav */
+    .week-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; padding: 11px 16px;
+      background: var(--bg); border: 1px solid var(--border);
+    }
+    .week-label {
+      font-size: 0.78rem; font-weight: 500; color: var(--text); letter-spacing: 0.04em;
+    }
+    .week-arrow {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); padding: 4px;
+      display: flex; align-items: center; transition: color 0.2s;
+    }
+    .week-arrow:hover:not(:disabled) { color: var(--white); }
+    .week-arrow:disabled { color: rgba(255,255,255,0.15); cursor: default; }
+
+    /* Days strip */
+    .days-strip {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 24px;
+    }
+    .day-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 4px; background: none; border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-muted); transition: all 0.2s var(--ease);
+      font-family: var(--font-body);
+    }
+    .day-chip:hover:not(.disabled):not(.selected) {
+      border-color: rgba(255,255,255,0.25); color: var(--text);
+    }
+    .day-chip.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .day-chip.disabled { opacity: 0.22; cursor: default; pointer-events: none; }
+    .day-name-label {
+      font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+    }
+    .day-num-label { font-size: 1rem; font-weight: 300; line-height: 1; }
+    .day-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+
+    /* Time slots */
+    .slots-wrap { min-height: 100px; }
+    .slots-title {
+      font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-soft); font-weight: 500; margin-bottom: 14px;
+    }
+    .slots-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
+    .slot-btn {
+      padding: 8px 15px; background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-body);
+      font-size: 0.78rem; font-weight: 400; letter-spacing: 0.03em;
+      cursor: pointer; transition: all 0.2s var(--ease);
+    }
+    .slot-btn:hover:not(.unavailable):not(.selected) {
+      border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04);
+    }
+    .slot-btn.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .slot-btn.unavailable { opacity: 0.18; cursor: not-allowed; text-decoration: line-through; }
+    .slot-btn.booked { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; color: #e05555; border-color: rgba(224,85,85,0.25); }
+    .slots-empty {
+      color: var(--text-muted); font-size: 0.82rem; font-weight: 300; font-style: italic; padding: 12px 0;
+    }
+
+    /* Footer */
+    .booking-footer {
+      display: flex; justify-content: flex-end;
+      padding: 18px 0 4px; border-top: 1px solid var(--border); margin-top: 4px;
+    }
+    .booking-next-btn {
+      background: var(--white); color: var(--bg); border: none; padding: 14px 32px;
+      font-family: var(--font-body); font-size: 0.75rem;
+      font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+      cursor: pointer; display: flex; align-items: center; gap: 10px;
+      transition: background 0.2s, transform 0.2s var(--ease), opacity 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .booking-next-btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .booking-next-btn:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+    .booking-next-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: translateX(-100%); transition: transform 0.45s;
+    }
+    .booking-next-btn:hover:not(:disabled)::before { transform: translateX(100%); }
+
+    /* ── Block labels ── */
+    .bblock-label {
+      font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 600; margin-bottom: 12px; display: block;
+    }
+
+    /* ── Barbers (view 1) ── */
+    .barbers-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 28px;
+    }
+    .barber-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      padding: 16px 10px; border-radius: 11px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%);
+      border: 1px solid var(--border);
+      cursor: pointer; color: var(--text); font-family: var(--font-body);
+      text-align: center;
+      transition: transform 0.28s var(--ease), border-color 0.28s var(--ease),
+                  box-shadow 0.28s var(--ease), background 0.28s var(--ease);
+    }
+    .barber-chip:hover:not(.selected) {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.28);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4), 0 0 26px rgba(255,255,255,0.045);
+      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
+    }
+    .barber-chip.selected {
+      background: var(--white); border-color: var(--white); color: var(--bg);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45), 0 0 34px rgba(255,255,255,0.28);
+    }
+    .barber-chip:hover:not(.selected) .barber-avatar { border-color: rgba(255,255,255,0.4); }
+    .barber-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.04); transition: all 0.22s;
+      overflow: hidden;
+    }
+    .barber-avatar img {
+      width: 100%; height: 100%; object-fit: cover; object-position: top center;
+      border-radius: 50%;
+    }
+    .barber-chip.selected .barber-avatar { background: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.2); }
+    .barber-name { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; }
+    .barber-role { font-size: 0.57rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+
+    /* ── Services (view 1) ── */
+    .bsvc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px;
+    }
+    /* Fichas de servicio con cuerpo propio. Antes usaban fondo
+       transparente y se fundían con el modal, sin jerarquía entre
+       nombre, precio y duración. */
+    .bsvc-chip {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: stretch; gap: 10px;
+      padding: 15px 16px 14px 19px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%);
+      border: 1px solid var(--border); border-radius: 11px;
+      cursor: pointer; color: var(--text); font-family: var(--font-body);
+      text-align: left;
+      transition: transform 0.28s var(--ease), border-color 0.28s var(--ease),
+                  box-shadow 0.28s var(--ease), background 0.28s var(--ease);
+    }
+    /* Barra de acento a la izquierda: marca cuál está activo de un vistazo */
+    .bsvc-chip::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 0; transform: translateY(-50%);
+      background: var(--white); border-radius: 0 3px 3px 0;
+      transition: height 0.3s var(--ease);
+    }
+    .bsvc-chip:hover:not(.selected) {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.28);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4), 0 0 26px rgba(255,255,255,0.045);
+      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
+    }
+    .bsvc-chip:hover:not(.selected)::before { height: 42%; }
+
+    .bsvc-chip.selected {
+      background: var(--white); border-color: var(--white); color: var(--bg);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45), 0 0 34px rgba(255,255,255,0.28);
+    }
+    .bsvc-chip.selected::before { height: 62%; background: var(--bg); opacity: 0.25; }
+
+    .bsvc-chip-name {
+      font-size: 0.88rem; font-weight: 500; display: block;
+      line-height: 1.25; letter-spacing: 0.005em;
+    }
+    /* Precio a la izquierda, duración en pastilla a la derecha */
+    .bsvc-chip-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding-top: 9px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .bsvc-chip.selected .bsvc-chip-meta { border-top-color: rgba(0,0,0,0.12); }
+    .bsvc-chip-price {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 400; line-height: 1;
+      letter-spacing: -0.01em; white-space: nowrap;
+    }
+    .bsvc-chip-dot { display: none; }   /* el separador ya no hace falta */
+    .bsvc-chip-time {
+      font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+      white-space: nowrap; opacity: 0.6;
+      border: 1px solid rgba(255,255,255,0.14); border-radius: 20px;
+      padding: 3px 8px;
+    }
+    .bsvc-chip.selected .bsvc-chip-time {
+      opacity: 0.55; border-color: rgba(0,0,0,0.18);
+    }
+    @media (max-width: 420px) {
+      .bsvc-chip { padding: 13px 13px 12px 16px; }
+      .bsvc-chip-name  { font-size: 0.82rem; }
+      .bsvc-chip-price { font-size: 0.95rem; }
+    }
+
+    /* ── Selection pill (view 2) ── */
+    .bsel-pill {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 10px 16px; margin-bottom: 20px;
+      font-size: 0.78rem; color: var(--text-soft); font-weight: 300;
+    }
+    .bsel-pill strong { color: var(--text); font-weight: 500; }
+    .bsel-pill-dot { opacity: 0.3; }
+    .bsel-sep { opacity: 0.3; padding: 0 2px; }
+    .bsel-pill span { color: var(--text); }
+
+    /* ── Time slots — grouped Mañana / Tarde ── */
+    .time-group { margin-bottom: 18px; }
+    .time-group-label {
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-soft); font-weight: 600; margin-bottom: 10px;
+    }
+    .slots-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .slot-btn {
+      padding: 10px 16px; background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: var(--font-body); font-size: 0.82rem;
+      font-weight: 400; min-width: 68px; text-align: center;
+      cursor: pointer; transition: all 0.2s var(--ease);
+    }
+    .slot-btn:hover:not(.unavailable):not(.selected) {
+      border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04);
+    }
+    .slot-btn.selected { background: var(--white); border-color: var(--white); color: var(--bg); }
+    .slot-btn.unavailable { opacity: 0.15; cursor: not-allowed; text-decoration: line-through; }
+    .slots-empty { color: var(--text-muted); font-size: 0.82rem; font-weight: 300; font-style: italic; padding: 10px 0; }
+    .slots-retry {
+      display: inline-block; margin-top: 12px; font-style: normal;
+      background: none; border: 1px solid var(--border);
+      color: var(--text); font-family: inherit; font-size: 0.78rem;
+      padding: 9px 20px; border-radius: 8px; cursor: pointer;
+    }
+    .slots-retry:hover { border-color: var(--text-muted); }
+
+    /* ── Appointment card (view 3) ── */
+    .bappt-card {
+      background: var(--bg); border: 1px solid var(--border); padding: 0 20px; margin-bottom: 28px;
+    }
+    .bappt-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+    }
+    .bappt-row:last-child { border-bottom: none; }
+    .bappt-lbl { color: var(--text-muted); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; }
+    .bappt-row span:last-child { color: var(--text); }
+
+    /* ── Form field (view 3) ── */
+    .bfield-wrap {
+      position: relative; border-bottom: 1px solid var(--border); transition: border-color 0.25s;
+    }
+    .bfield-wrap:focus-within { border-bottom-color: var(--white); }
+    .bfield-wrap:first-of-type { border-top: 1px solid var(--border); }
+    .bfield-label {
+      display: block; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-muted); font-weight: 500; padding-top: 10px; transition: color 0.2s;
+    }
+    .bfield-wrap:focus-within .bfield-label { color: var(--text-soft); }
+    .bfield-input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: var(--font-body);
+      font-size: 0.95rem; font-weight: 300; padding: 6px 0 12px 0;
+    }
+
+    /* ── Cita recurrente ── */
+    .brecur-wrap {
+      margin-bottom: 22px; padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px;
+    }
+    .brecur-label {
+      display: block; font-size: 0.6rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+    }
+    .brecur-label--2 { margin-top: 18px; }
+
+    /* Opciones siempre a la vista: se elige de un toque, sin desplegar nada */
+    .brecur-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .brecur-chip {
+      padding: 9px 14px; background: none; border: 1px solid var(--border);
+      border-radius: 7px; cursor: pointer; color: var(--text-muted);
+      font-family: var(--font-body); font-size: 0.78rem; font-weight: 300;
+      transition: all 0.2s var(--ease); white-space: nowrap;
+    }
+    .brecur-chip:hover:not(.selected) { border-color: rgba(255,255,255,0.25); color: var(--text); }
+    .brecur-chip.selected {
+      background: var(--white); border-color: var(--white);
+      color: var(--bg); font-weight: 500;
+    }
+    .brecur-chip--num { min-width: 46px; text-align: center; padding: 9px 10px; }
+
+    /* Lista de las fechas reales que se van a reservar */
+    .brecur-preview { margin-top: 16px; }
+    .brecur-prev-title {
+      font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-muted); margin: 0 0 8px;
+    }
+    .brecur-date {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 0; font-size: 0.78rem; font-weight: 300;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .brecur-date:last-child { border-bottom: none; }
+    .brecur-date-mark {
+      width: 16px; flex-shrink: 0; text-align: center;
+      font-size: 0.72rem; line-height: 1;
+    }
+    .brecur-date.ok   .brecur-date-mark { color: var(--green, #22c55e); }
+    .brecur-date.busy .brecur-date-mark { color: #d9a441; }
+    .brecur-date.busy { color: var(--text-muted); }
+    .brecur-date-why {
+      margin-left: auto; font-size: 0.64rem;
+      color: #d9a441; letter-spacing: 0.04em;
+    }
+    .brecur-total {
+      margin: 12px 0 0; font-size: 0.72rem;
+      color: var(--text); line-height: 1.55;
+    }
+    .brecur-total.warn { color: #d9a441; }
+
+    /* ── Success (view 3 after submit) ── */
+    .booking-success {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 48px 28px 40px;
+    }
+    .success-check {
+      width: 68px; height: 68px; border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px; color: var(--white);
+      animation: checkReveal 0.65s var(--ease) forwards;
+    }
+    @keyframes checkReveal { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title { font-family: var(--font-display); font-size: 2rem; font-weight: 400; color: var(--text); margin-bottom: 10px; }
+    .success-sub { font-size: 0.9rem; color: var(--text-muted); font-weight: 300; margin-bottom: 28px; }
+    .success-details {
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 0 22px; width: 100%; max-width: 340px; text-align: left; margin-bottom: 24px;
+    }
+    .success-detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted);
+    }
+    .success-detail-row:last-child { border-bottom: none; }
+    .success-detail-row span:last-child { color: var(--text); }
+    .success-note { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 32px; font-weight: 300; }
+    .success-detail-row .success-code {
+      font-family: var(--font-display); letter-spacing: 0.18em; font-weight: 500;
+    }
+
+    /* ── Cancelar cita ── */
+    .cancel-hint { font-size: 0.82rem; color: var(--text-muted); font-weight: 300; margin: -16px 0 24px; }
+    .cancel-code-input { text-align: center; letter-spacing: 0.3em; font-size: 1.2rem; text-transform: uppercase; }
+    .booking-footer.split { justify-content: space-between; align-items: center; }
+    .booking-next-btn.danger { background: #e05555; color: #fff; }
+
+    .booking-close-full {
+      background: none; border: 1px solid rgba(255,255,255,0.18); color: var(--text-muted);
+      padding: 12px 40px; font-family: var(--font-body); font-size: 0.72rem;
+      letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+      transition: border-color 0.25s, color 0.25s;
+    }
+    .booking-close-full:hover { border-color: var(--white); color: var(--white); }
+
+    .open-booking { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#top" class="nav-logo">
+    <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#nosotros" data-section="nosotros">Nosotros</a></li>
+    <li><a href="#servicios" data-section="servicios">Servicios</a></li>
+    <li><a href="#galeria" data-section="galeria">Galería</a></li>
+    <li><a href="#contacto" data-section="contacto">Contacto</a></li>
+  </ul>
+  <div class="nav-cta-wrap">
+    <a href="javascript:void(0)" onclick="openMyCitas()" class="nav-cancel-link">Mis citas</a>
+    <button onclick="openBooking()" class="nav-cta open-booking">Reservar cita</button>
+  </div>
+  <div class="hamburger" id="hamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#nosotros" class="mobile-link">Nosotros</a>
+  <a href="#servicios" class="mobile-link">Servicios</a>
+  <a href="#galeria" class="mobile-link">Galería</a>
+  <button onclick="openBooking(); closeMobileMenu()" class="mobile-link open-booking">Reservar cita</button>
+  <button onclick="openMyCitas()" class="mobile-link">Mis citas</button>
+  <span class="mobile-menu-divider">Configuración</span>
+  <button onclick="toggleTheme()" class="mobile-link" id="mobileThemeLabel">Modo claro</button>
+</div>
+
+<!-- FLOATING CTA -->
+<button onclick="openBooking()" class="float-cta open-booking" id="floatCta">Reservar cita</button>
+
+<!-- CONFIGURACIÓN (flotante) -->
+<div class="settings-wrap">
+  <button class="settings-btn" onclick="toggleSettingsPanel()" id="settingsBtn" aria-label="Configuración" title="Configuración">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a8 8 0 0 0-1.7-1L14.9 2h-3.8l-.4 2.9a8 8 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.97 7.97 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a8 8 0 0 0 1.7 1l.4 2.9h3.8l.4-2.9a8 8 0 0 0 1.7-1l2.5 1 2-3.5-2.1-1.6Z"/></svg>
+  </button>
+  <div class="settings-panel" id="settingsPanel">
+    <span class="settings-panel-title">Configuración</span>
+    <div class="settings-row">
+      <span>Apariencia</span>
+      <button class="theme-switch" onclick="toggleTheme()" id="themeSwitch" aria-label="Cambiar a modo claro">
+        <span class="theme-switch-knob">
+          <svg class="icon-sun" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="icon-moon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO SCROLL-VIDEO -->
+<section class="scroll-video-hero" id="scroll-hero">
+  <div class="scroll-video-sticky">
+    <video id="heroVideo" src="assets/9sm-video.mp4" playsinline muted preload="auto"></video>
+    <div class="hero-logo">
+      <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+    </div>
+    <div class="hero-overlay">
+<h1 class="hero-title">El corte<br/>que te <em>define</em></h1>
+      <p class="hero-sub">Precisión, estilo y cuidado personal.<br/>En 9SM NEXO cada visita es una experiencia.</p>
+      <div class="hero-actions">
+        <button onclick="openBooking()" class="btn-primary open-booking">Reservar cita</button>
+        <a href="#servicios" class="btn-ghost">Ver servicios</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="parallax-line" id="marquee">
+  <div class="parallax-text" id="marqueeInner">
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+    <span>9SM</span> NEXO <span>·</span> BARBERÍA <span>·</span> ESTILO <span>·</span> PRECISIÓN <span>·</span>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section class="about" id="nosotros">
+  <div class="container">
+    <div class="about-inner">
+
+      <div class="about-text reveal-left">
+        <span class="section-num">01</span>
+        <span class="section-label">Sobre nosotros</span>
+        <h2 class="section-title">Artesanía<br/>en cada detalle</h2>
+        <div class="divider"></div>
+        <p>En 9SM NEXO somos más que una barbería — somos un espacio donde el cuidado personal se convierte en ritual. Cada cliente recibe atención personalizada y el mejor resultado.</p>
+        <blockquote class="about-highlight">
+          "El corte perfecto no es solo técnica.<br/>Es conocerte."
+        </blockquote>
+        <div class="clients-glow reveal">
+          <span class="clients-number">+1800</span>
+          <span class="clients-label">clientes satisfechos</span>
+        </div>
+      </div>
+
+      <div class="about-img reveal-right" id="aboutImg">
+        <div class="about-img-placeholder" id="aboutImgPlaceholder">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>[FOTO DEL LOCAL]</span>
+          <span style="font-size:0.62rem;opacity:0.4;">assets/local.jpg</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="container">
+    <div class="services-header">
+      <div class="reveal">
+        <span class="section-num">02</span>
+        <span class="section-label">Lo que ofrecemos</span>
+        <h2 class="section-title">Servicios</h2>
+      </div>
+      <button onclick="openBooking()" class="btn-ghost reveal open-booking" style="transition-delay:0.15s;">Reservar →</button>
+    </div>
+
+    
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Cejas</h3>
+      <div class="services-grid cols-1 stagger">
+
+        <div class="service-card" data-svc="brow">
+          <span class="service-badge">Express</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 10 Q12 4 20 10"/><path d="M6 10 Q12 6 18 10"/><circle cx="8" cy="11" r="1.5"/><circle cx="16" cy="11" r="1.5"/></svg>
+          <div class="service-name">09 brow</div>
+          <p class="service-desc">Diseño y definición de cejas con técnica precisa para un acabado limpio y natural.</p>
+          <div class="service-price">$8.000</div>
+          <button onclick="openBooking('09 brow')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Cortes</h3>
+      <div class="services-grid cols-3 stagger">
+
+        <div class="service-card" data-svc="classic">
+          <span class="service-badge">Clásico</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 9 C7.5 6 10 4 12 4 C14 4 16.5 6 18 9"/><path d="M6 15 C7.5 18 10 20 12 20 C14 20 16.5 18 18 15"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="6" y1="12" x2="18" y2="12"/></svg>
+          <div class="service-name">NEXO Classic</div>
+          <p class="service-desc">Corte clásico adaptado a tu estilo y tipo de cara, con acabado prolijo y atención al detalle.</p>
+          <div class="service-price">$25.000</div>
+          <button onclick="openBooking('NEXO Classic')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card featured" data-svc="cut">
+          <span class="service-badge hot">★ Más solicitado</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9"/></svg>
+          <div class="service-name">NEXO Cut</div>
+          <p class="service-desc">Corte personalizado con lavado y styling incluido, para un resultado de barbería completo.</p>
+          <div class="service-price">$35.000</div>
+          <button onclick="openBooking('NEXO Cut')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card" data-svc="beard">
+          <span class="service-badge">Barbería</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M7 8 C7 5 9 3 12 3 C15 3 17 5 17 8 C17 12 15 15 12 16 C9 15 7 12 7 8Z"/><path d="M9 16 C7 18 6 20 6 22"/><path d="M15 16 C17 18 18 20 18 22"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+          <div class="service-name">09 Beard</div>
+          <p class="service-desc">Perfilado y arreglo de barba con navaja, para una línea definida y un acabado impecable.</p>
+          <div class="service-price">$17.000</div>
+          <button onclick="openBooking('09 Beard')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="service-category">
+      <h3 class="service-category-title reveal">Limpieza facial</h3>
+      <div class="services-grid cols-2 stagger">
+
+        <div class="service-card" data-svc="ritual">
+          <span class="service-badge">Ritual</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="10" r="5"/><path d="M7 10 Q7 16 12 18 Q17 16 17 10"/><path d="M9 5 Q10 3 12 3 Q14 3 15 5"/><circle cx="12" cy="10" r="2"/></svg>
+          <div class="service-name">PRIME Ritual</div>
+          <p class="service-desc">Limpieza facial profunda con productos especializados para piel sana, poros limpios y aspecto luminoso.</p>
+          <div class="service-price">$50.000</div>
+          <button onclick="openBooking('PRIME Ritual')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+        <div class="service-card" data-svc="experience">
+          <span class="service-badge">Premium</span>
+          <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3 C8 3 4 6 4 10 C4 15 8 18 12 19 C16 18 20 15 20 10 C20 6 16 3 12 3Z"/><path d="M9 10 Q12 7 15 10"/><path d="M8 13 Q12 10 16 13"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          <div class="service-name">NEXO Experience</div>
+          <p class="service-desc">Tratamiento facial premium de mayor duración, pensado para una piel renovada de principio a fin.</p>
+          <div class="service-price">$60.000<small>– $70.000</small></div>
+          <button onclick="openBooking('NEXO Experience')" class="service-cta-link open-booking">Reservar este servicio →</button>
+        </div>
+
+      </div>
+    </div>
+
+    
+  </div>
+</section>
+
+<!-- GALERÍA -->
+<section class="gallery" id="galeria">
+  <div class="container">
+    <div class="reveal">
+      <span class="section-num">03</span>
+      <span class="section-label">Nuestro trabajo</span>
+      <h2 class="section-title">Galería</h2>
+    </div>
+    <div class="gallery-grid stagger" id="galleryGrid">
+      <!-- Celda 1: g01 ↔ g06 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g01.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g06.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 2: g02 ↔ g07 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g02.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g07.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 3: g03 ↔ g08 -->
+      <div class="gallery-item">
+        <img class="gallery-photo gp-active" src="assets/g03.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g08.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 4 (panorámica): g04 ↔ g09 -->
+      <div class="gallery-item gallery-item--half">
+        <img class="gallery-photo gp-active" src="assets/g04.jpg" alt="Corte" loading="lazy">
+        <img class="gallery-photo" src="assets/g09.jpg" alt="Corte" loading="lazy">
+      </div>
+      <!-- Celda 5 (panorámica): g05 fija -->
+      <div class="gallery-item gallery-item--half">
+        <img class="gallery-photo gp-active" src="assets/g05.jpg" alt="Corte" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVAR CITA -->
+<section class="cita-section" id="contacto">
+  <div class="container">
+
+    <div class="reveal" style="margin-bottom:72px;">
+      <span class="section-num">04</span>
+      <span class="section-label">Reserva</span>
+      <h2 class="section-title">Pide tu cita</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="cita-inner">
+
+      <!-- Info -->
+      <div class="cita-info reveal-left">
+        <p>Elige tu servicio, dinos tu nombre y nosotros nos encargamos del resto. Sin complicaciones.</p>
+        <ul class="info-list">
+          <li class="info-item" id="infoItemAddress">
+            <span class="info-label">Dirección</span>
+            <span class="info-value" id="cfgAddress">[TU DIRECCIÓN AQUÍ]</span>
+          </li>
+          <li class="info-item" id="infoItemPhone">
+            <span class="info-label">Teléfono</span>
+            <span class="info-value" id="cfgPhone">[TU TELÉFONO AQUÍ]</span>
+          </li>
+          <li class="info-item" id="infoItemHours">
+            <span class="info-label">Horario</span>
+            <span class="info-value" id="cfgHours">Lun–Jue 10:00–20:00 · Vie 07:00–21:00 · Sáb 07:00–20:00 · Dom 07:00–14:00</span>
+          </li>
+          <li class="info-item" id="infoItemSocials">
+            <span class="info-label">Redes</span>
+            <span class="info-value" id="cfgSocials">[TUS REDES AQUÍ]</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Booking CTA -->
+      <div class="reveal-right">
+        <div class="cita-form-wrap cita-book-panel">
+          <p class="cbp-eyebrow">Reserva online</p>
+
+          <div class="cbp-hero">
+            <span class="cbp-thirty">30</span>
+            <span class="cbp-unit">seg.</span>
+          </div>
+
+          <div class="cbp-rule"></div>
+
+          <p class="cbp-desc">Elige tu día, tu hora y tu barbero.<br>Sin llamadas, sin esperas.</p>
+
+          <div class="cbp-chips">
+            <span class="cbp-chip">✓ Sin llamadas</span>
+            <span class="cbp-chip">✓ Confirmación inmediata</span>
+            <span class="cbp-chip">✓ Cancela gratis</span>
+          </div>
+
+          <button onclick="openBooking()" class="cita-submit open-booking" style="margin-top:0;">
+            Ver disponibilidad
+          </button>
+
+          <p class="cbp-sched">Lun–Jue 10:00–20:00 &nbsp;·&nbsp; Vie–Sáb 07:00–20/21:00 &nbsp;·&nbsp; Dom 07:00–14:00</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#top" class="footer-logo">
+    <img src="assets/9sm-logo.png" alt="9SM NEXO" />
+  </a>
+  <div class="footer-copy" id="cfgFooterCopy">© 2026 9SM NEXO · Todos los derechos reservados.</div>
+  <div class="footer-socials">
+    <a href="#" id="cfgInstagram">Instagram</a>
+    <a href="#" id="cfgTiktok">TikTok</a>
+    <a href="#" id="cfgWhatsapp">WhatsApp</a>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     BOOKING MODAL v2 — 3 pasos
+═══════════════════════════════════════════ -->
+<div class="booking-overlay" id="bookingOverlay" role="dialog" aria-modal="true" aria-label="Reservar cita">
+  <div class="booking-sheet" id="bookingSheet">
+
+    <!-- Header fijo -->
+    <div class="booking-header">
+      <button class="booking-back" id="bookingBack" style="display:none" onclick="bPrevView()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Volver
+      </button>
+      <div class="booking-steps" id="bookingSteps">
+        <span class="bstep active" id="bs1">1</span>
+        <span class="bstep-line"></span>
+        <span class="bstep" id="bs2">2</span>
+        <span class="bstep-line"></span>
+        <span class="bstep" id="bs3">3</span>
+      </div>
+      <button class="booking-close" onclick="closeBooking()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- ───── PASO 1: Barbero + Servicio ───── -->
+    <div class="booking-view" id="bview-1">
+      <span class="booking-section-label">Paso 1 de 3</span>
+      <h2 class="booking-title">Tu cita,<br/><em>a tu medida</em></h2>
+
+      <p class="bblock-label">Elige tu barbero</p>
+      <div class="barbers-grid" id="barbersGrid"></div>
+
+      <p class="bblock-label">Elige el servicio</p>
+      <div class="bsvc-grid" id="bSvcGrid"></div>
+
+      <div class="booking-footer">
+        <button class="booking-next-btn" id="toCalBtn" disabled onclick="bGoToView(2)">
+          Elegir fecha
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ───── PASO 2: Fecha + Hora ───── -->
+    <div class="booking-view" id="bview-2" style="display:none">
+      <span class="booking-section-label">Paso 2 de 3</span>
+      <h2 class="booking-title">Elige fecha<br/>y <em>hora</em></h2>
+
+      <div class="bsel-pill" id="bSelPill"></div>
+
+      <div class="week-nav">
+        <button class="week-arrow" id="weekPrev" onclick="bChangeWeek(-1)" aria-label="Semana anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="week-label" id="weekLabel"></span>
+        <button class="week-arrow" id="weekNext" onclick="bChangeWeek(1)" aria-label="Semana siguiente">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="days-strip" id="daysStrip"></div>
+
+      <div id="slotsWrap" style="min-height:80px">
+        <div id="slotsContent"></div>
+      </div>
+
+      <div class="booking-footer">
+        <button class="booking-next-btn" id="toConfirmBtn" disabled onclick="bGoToView(3)">
+          Confirmar
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ───── PASO 3: Confirmar + Éxito ───── -->
+    <div class="booking-view" id="bview-3" style="display:none">
+
+      <!-- Estado: formulario -->
+      <div id="bConfirmForm">
+        <span class="booking-section-label">Paso 3 de 3</span>
+        <h2 class="booking-title" style="margin-bottom:22px">Tu <em>reserva</em></h2>
+
+        <div class="bappt-card">
+          <div class="bappt-row"><span class="bappt-lbl">Barbero</span><span id="sum-barber"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Servicio</span><span id="sum-service"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Fecha</span><span id="sum-date"></span></div>
+          <div class="bappt-row"><span class="bappt-lbl">Hora</span><span id="sum-time"></span></div>
+        </div>
+
+        <!-- ── Cita recurrente ── -->
+        <div class="brecur-wrap">
+          <span class="brecur-label">¿Quieres repetir esta cita?</span>
+          <div class="brecur-chips">
+            <button type="button" class="brecur-chip selected" data-every="none"   onclick="bRecurPick('none')">Solo esta vez</button>
+            <button type="button" class="brecur-chip"          data-every="week"   onclick="bRecurPick('week')">Cada semana</button>
+            <button type="button" class="brecur-chip"          data-every="2weeks" onclick="bRecurPick('2weeks')">Cada 15 días</button>
+            <button type="button" class="brecur-chip"          data-every="month"  onclick="bRecurPick('month')">Cada mes</button>
+          </div>
+
+          <div id="bRecurCountWrap" style="display:none">
+            <span class="brecur-label brecur-label--2">¿Cuántas citas en total?</span>
+            <div class="brecur-chips brecur-chips--num">
+              <button type="button" class="brecur-chip brecur-chip--num" data-count="2"  onclick="bRecurPickCount(2)">2</button>
+              <button type="button" class="brecur-chip brecur-chip--num" data-count="4"  onclick="bRecurPickCount(4)">4</button>
+              <button type="button" class="brecur-chip brecur-chip--num" data-count="6"  onclick="bRecurPickCount(6)">6</button>
+              <button type="button" class="brecur-chip brecur-chip--num" data-count="8"  onclick="bRecurPickCount(8)">8</button>
+              <button type="button" class="brecur-chip brecur-chip--num" data-count="12" onclick="bRecurPickCount(12)">12</button>
+            </div>
+            <div class="brecur-preview" id="bRecurPreview"></div>
+          </div>
+        </div>
+
+        <form id="bForm" onsubmit="bSubmit(event)">
+          <!-- Cliente registrado: muestra tarjeta con su info -->
+          <div id="bClientReturn" style="display:none;margin-bottom:20px">
+            <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">
+              <div id="bRetInitial" style="width:42px;height:42px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0;color:var(--white)">?</div>
+              <div style="flex:1;min-width:0;overflow:hidden">
+                <p id="bRetNombre" style="font-weight:600;font-size:0.9rem;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
+                <p id="bRetTel" style="color:var(--text-muted);font-size:0.77rem;margin:0"></p>
+              </div>
+              <button type="button" onclick="bClearClientData()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:5px 10px;border-radius:6px;font-size:0.65rem;cursor:pointer;white-space:nowrap;flex-shrink:0">↩ No soy yo</button>
+            </div>
+          </div>
+
+          <!-- Cliente nuevo: campos de datos -->
+          <div id="bClientNew">
+            <div class="bfield-wrap">
+              <label class="bfield-label" for="b-nombre">Tu nombre</label>
+              <input class="bfield-input" id="b-nombre" type="text" autocomplete="name" placeholder=" " />
+            </div>
+            <div class="bfield-wrap">
+              <label class="bfield-label" for="b-telefono">Tu WhatsApp</label>
+              <input class="bfield-input" id="b-telefono" type="tel" autocomplete="tel" placeholder=" " />
+            </div>
+            <p class="cancel-hint" style="margin:6px 0 0;font-size:0.68rem">Te confirmaremos la cita por este número.</p>
+          </div>
+
+          <p id="bSubmitError" style="display:none;color:#e05555;font-size:0.72rem;margin-top:12px;line-height:1.5;"></p>
+          <div class="booking-footer" style="margin-top:24px">
+            <button type="submit" class="booking-next-btn" style="width:100%;justify-content:center">
+              Confirmar reserva
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Estado: éxito (tras submit) -->
+      <div id="bSuccess" style="display:none">
+        <div class="booking-success">
+          <div class="success-check">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2 class="success-title">¡Cita confirmada!</h2>
+          <p class="success-sub" id="bSuccessSub"></p>
+          <div class="success-details" id="bSuccessDetails"></div>
+
+          <!-- El cliente se lleva la cita a su propio calendario: su móvil
+               le avisa solo, sin depender de que nadie le escriba -->
+          <div class="cal-btns">
+            <button class="cal-btn" onclick="descargarICS()">Añadir a mi calendario</button>
+            <a class="cal-btn" id="calGoogle" href="#" target="_blank" rel="noopener">Google Calendar</a>
+            <a class="cal-btn" id="calWhats" href="#" target="_blank" rel="noopener" style="display:none">Confirmar por WhatsApp</a>
+          </div>
+          <p class="success-note">Tu calendario te avisará el día antes y 2 horas antes.<br/>Puedes gestionar tus citas en <em>Mis citas</em>.</p>
+          <p id="bReloadCountdown" style="font-size:0.75rem;color:#888;margin-top:10px;"></p>
+          <button class="booking-close-full" onclick="location.reload()">Reservar otra cita</button>
+          <button class="booking-close-full" onclick="closeBooking()">Cerrar</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- MIS CITAS -->
+<!-- ═══════════════════════════════════════════
+     RESEÑAS — se abre con el QR de cada barbero (9sm.site/?r=b1)
+═══════════════════════════════════════════ -->
+<div class="booking-overlay" id="resenaOverlay" role="dialog" aria-modal="true" aria-label="Dejar reseña">
+  <div class="booking-sheet">
+    <div class="booking-header">
+      <span></span>
+      <span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Tu reseña</span>
+      <button class="booking-close" onclick="closeResena()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div id="resForm" style="padding:8px 28px 32px">
+      <div class="res-barbero">
+        <div class="res-avatar" id="resAvatar">?</div>
+        <div>
+          <p class="res-nombre" id="resNombre">Barbero</p>
+          <p class="res-sub" id="resSub">¿Cómo fue tu experiencia?</p>
+        </div>
+      </div>
+
+      <div class="res-stars" id="resStars" role="radiogroup" aria-label="Puntuación"></div>
+      <p class="res-hint" id="resHint">Toca una estrella para puntuar</p>
+
+      <div class="bfield-wrap">
+        <label class="bfield-label" for="resTexto" style="position:static;display:block;margin-bottom:8px">Comentario (opcional)</label>
+        <textarea id="resTexto" class="res-textarea" rows="3" maxlength="400" placeholder="Cuéntanos cómo te atendieron"></textarea>
+      </div>
+      <div class="bfield-wrap">
+        <label class="bfield-label" for="resAutor" style="position:static;display:block;margin-bottom:8px">Tu nombre (opcional)</label>
+        <input id="resAutor" class="res-input" type="text" maxlength="40" placeholder="Nombre">
+      </div>
+
+      <p id="resError" class="res-error"></p>
+      <button class="booking-next-btn" id="resEnviar" style="width:100%;justify-content:center;margin-top:18px" onclick="enviarResena()">Enviar reseña</button>
+    </div>
+
+    <div id="resOk" style="display:none;padding:56px 28px;text-align:center">
+      <div class="success-check" style="margin:0 auto 24px">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3 style="font-family:var(--font-display);font-size:1.5rem;font-weight:400;margin:0 0 10px">Gracias</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.7;margin:0">Tu reseña nos ayuda a mejorar.</p>
+      <button class="booking-next-btn" style="width:100%;justify-content:center;margin-top:26px" onclick="closeResena()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="booking-overlay" id="myCitasOverlay" role="dialog" aria-modal="true" aria-label="Mis citas">
+  <div class="booking-sheet">
+    <div class="booking-header">
+      <span></span>
+      <span style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted)">Mi cita</span>
+      <button class="booking-close" onclick="closeMyCitas()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Cargando -->
+    <div id="mcLoading" style="display:none;padding:52px 28px;text-align:center">
+      <p style="color:var(--text-muted);font-size:0.82rem;letter-spacing:0.06em">Cargando…</p>
+    </div>
+
+    <!-- Tarjeta de cita -->
+    <div id="mcCard" style="display:none;padding:8px 28px 32px">
+      <!-- Badge estado -->
+      <div style="display:inline-flex;align-items:center;gap:7px;margin-bottom:24px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0"></span>
+        <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.15em;color:#22c55e;font-weight:600">Confirmada</span>
+      </div>
+      <!-- Fecha + Hora -->
+      <p id="mcCardFecha" style="font-size:0.8rem;color:var(--text-muted);margin:0 0 8px;letter-spacing:0.02em"></p>
+      <p id="mcCardHora"  style="font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin:0 0 26px;line-height:1"></p>
+      <!-- Detalles -->
+      <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;display:flex;flex-direction:column;gap:14px;margin-bottom:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.11em;color:var(--text-muted)">Barbero</span>
+          <span id="mcCardBarber" style="font-size:0.85rem;font-weight:500;color:var(--white)"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.11em;color:var(--text-muted)">Servicio</span>
+          <span id="mcCardService" style="font-size:0.85rem;color:var(--text-soft)"></span>
+        </div>
+      </div>
+      <!-- Acciones -->
+      <div id="mcCardActions"></div>
+    </div>
+
+    <!-- Sin citas -->
+    <div id="mcEmpty" style="display:none;padding:52px 28px;text-align:center">
+      <p style="font-size:1rem;font-weight:600;margin:0 0 8px;letter-spacing:-0.01em">Sin citas próximas</p>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:0 0 32px;line-height:1.6">Cuando reserves una cita<br/>aparecerá aquí.</p>
+      <button onclick="closeMyCitas()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:11px 28px;border-radius:8px;font-size:0.75rem;cursor:pointer;letter-spacing:0.06em">Cerrar</button>
+    </div>
+
+    <!-- Formulario (fallback sin datos guardados) -->
+    <div id="mcPhoneForm" style="display:none;padding:8px 28px 32px">
+      <h2 class="booking-title" style="margin-bottom:6px">Tu número<br/><em>de WhatsApp</em></h2>
+      <p class="cancel-hint" style="margin-bottom:28px">Ingresa el número con el que reservaste.</p>
+      <form onsubmit="mcBuscarPorTel(event)">
+        <div class="bfield-wrap">
+          <label class="bfield-label" for="mcPhoneInput">Tu WhatsApp</label>
+          <input class="bfield-input" id="mcPhoneInput" type="tel" placeholder=" " />
+        </div>
+        <p id="mcPhoneError" style="display:none;color:#e05555;font-size:0.72rem;margin-top:8px"></p>
+        <div class="booking-footer" style="margin-top:24px">
+          <button type="submit" class="booking-next-btn" style="width:100%;justify-content:center">Ver mi cita</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Cancelada OK -->
+    <div id="mcDone" style="display:none;padding:52px 28px;text-align:center">
+      <div style="width:48px;height:48px;border-radius:50%;border:1.5px solid #22c55e;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <p style="font-size:1.05rem;font-weight:700;margin:0 0 8px">Cita cancelada</p>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:0 0 36px;line-height:1.5">Tu espacio quedó liberado.</p>
+      <button onclick="closeMyCitas()" class="booking-next-btn" style="width:100%;justify-content:center">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Modo claro/oscuro ── */
+function syncThemeUI() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const switchBtn = document.getElementById('themeSwitch');
+  if (switchBtn) switchBtn.setAttribute('aria-label', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+  const mobileLabel = document.getElementById('mobileThemeLabel');
+  if (mobileLabel) mobileLabel.textContent = isLight ? 'Modo oscuro' : 'Modo claro';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('9sm_theme', next);
+  syncThemeUI();
+}
+syncThemeUI();
+
+/* ── Panel de configuración (engranaje en el nav) ── */
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settingsPanel');
+  const btn   = document.getElementById('settingsBtn');
+  const willOpen = !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  btn.classList.toggle('open', willOpen);
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.settings-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('settingsPanel').classList.remove('open');
+    document.getElementById('settingsBtn').classList.remove('open');
+  }
+});
+
+/* ── NAV scroll + float CTA ── */
+const nav      = document.getElementById('nav');
+const floatCta = document.getElementById('floatCta');
+window.addEventListener('scroll', () => {
+  const s = window.scrollY;
+  nav.classList.toggle('scrolled', s > 50);
+  floatCta.classList.toggle('visible', s > window.innerHeight * 0.8);
+}, { passive: true });
+
+/* ── Scroll spy ── */
+const sections = document.querySelectorAll('section[id], div[id]');
+const navAs    = document.querySelectorAll('.nav-links a[data-section]');
+const spyObs   = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navAs.forEach(a => a.classList.toggle('active', a.dataset.section === e.target.id));
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => spyObs.observe(s));
+
+/* ── Hamburger ── */
+const ham = document.getElementById('hamburger');
+const mob = document.getElementById('mobileMenu');
+ham.addEventListener('click', () => {
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+document.querySelectorAll('.mobile-link').forEach(l =>
+  l.addEventListener('click', () => { ham.classList.remove('open'); mob.classList.remove('open'); })
+);
+
+/* ── Intersection Observer (reveal + stagger) ── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .stagger').forEach(el => io.observe(el));
+
+/* ── Counter animation ── */
+const cntObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('.counter').forEach(c => {
+      const n = parseInt(c.dataset.target);
+      if (isNaN(n) || n === 0) return;
+      let t0 = null;
+      const dur = 1800;
+      const step = ts => {
+        if (!t0) t0 = ts;
+        const p = Math.min((ts - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        c.textContent = Math.floor(ease * n);
+        if (p < 1) requestAnimationFrame(step); else c.textContent = n;
+      };
+      requestAnimationFrame(step);
+    });
+    cntObs.unobserve(e.target);
+  });
+}, { threshold: 0.5 });
+const sb = document.getElementById('statsBlock');
+if (sb) cntObs.observe(sb);
+
+/* ── Count-up "+1800 clientes" ── */
+(function() {
+  var el = document.querySelector('.clients-number');
+  if (!el) return;
+  var target = 1800;
+  var done = false;
+  var obs = new IntersectionObserver(function(entries) {
+    if (done || !entries[0].isIntersecting) return;
+    done = true;
+    obs.disconnect();
+    var t0 = null;
+    var dur = 2000;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = '+' + Math.floor(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = '+' + target;
+    }
+    requestAnimationFrame(step);
+  }, { threshold: 0.5 });
+  obs.observe(el);
+})();
+
+/* ── Scroll-video hero (avance suave: el video persigue el scroll con inercia, no salta de golpe) ── */
+(function () {
+  const video = document.getElementById('heroVideo');
+  const hero  = document.getElementById('scroll-hero');
+  if (!video || !hero) return;
+
+  // El video NUNCA se reproduce solo: siempre queda en pausa y el scroll es lo único que mueve el frame.
+  video.autoplay = false;
+  video.loop = false;
+  video.removeAttribute('autoplay');
+  video.removeAttribute('loop');
+  video.pause();
+  video.currentTime = 0;
+  video.addEventListener('play', () => video.pause()); // por si algo externo intenta reproducirlo
+
+  let ready = false;
+  video.addEventListener('loadedmetadata', () => { ready = true; computeTarget(); });
+  video.addEventListener('error', () => console.error('No se pudo cargar el video del hero:', video.error));
+  video.load();
+
+  let targetTime   = 0;    // punto del video que le corresponde a la posición actual del scroll
+  let renderedTime = 0;    // punto realmente mostrado, que avanza poco a poco hacia targetTime
+  // Más bajo = más suave y lento; más alto = sigue el scroll de cerca.
+  // En móvil se sube: con 0.07 el vídeo iba muy por detrás del dedo.
+  const SMOOTHING  = (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) ? 0.2 : 0.07;
+
+  function computeTarget() {
+    if (!ready || !video.duration) return;
+    const rect = hero.getBoundingClientRect();
+    const scrolled   = -rect.top;
+    const scrollable = hero.offsetHeight - window.innerHeight;
+    const p = scrollable > 0 ? Math.min(1, Math.max(0, scrolled / scrollable)) : 0;
+    targetTime = p * video.duration;
+  }
+  window.addEventListener('scroll', computeTarget, { passive: true });
+  window.addEventListener('resize', computeTarget);
+
+  function tick() {
+    renderedTime += (targetTime - renderedTime) * SMOOTHING;
+    if (Math.abs(targetTime - renderedTime) > 0.01 && !video.seeking) {
+      video.currentTime = renderedTime;
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+
+/* ══════════════════════════════════════════
+   BOOKING MODAL v2 — 3 pasos
+══════════════════════════════════════════ */
+const BMTHS     = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const BDAYS     = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+const BDAYSFULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+const BARBERS = [
+  { id: 'b1',  name: 'Sebastian Montoya Garcia', role: 'Head Barber', init: 'SM', photo: 'assets/barber1.jpg' },
+  { id: 'b2',  name: 'Miguel Angel Zuluaga',    role: 'Barber',      init: 'MA', photo: 'assets/barber2.jpg' },
+  { id: 'b3',  name: 'James David Mosquera',     role: 'Barber',      init: 'JD', photo: 'assets/barber3.jpg' },
+];
+const BSERVICES = [
+  { id: 'brow',       name: '09 brow',         time: '15 min', price: '$8.000',            mins: 15  },
+  { id: 'classic',    name: 'NEXO Classic',    time: '40 min', price: '$25.000',           mins: 40  },
+  { id: 'cut',        name: 'NEXO Cut',        time: '50 min', price: '$35.000',           mins: 50  },
+  { id: 'beard',      name: '09 Beard',        time: '25 min', price: '$17.000',           mins: 25  },
+  { id: 'ritual',     name: 'PRIME Ritual',    time: '45 min', price: '$50.000',           mins: 45  },
+  { id: 'experience', name: 'NEXO Experience', time: '1 hora', price: '$60.000 – $70.000', mins: 60  },
+];
+
+let bState = { weekOffset: 0, selDate: null, selTime: null, selBarber: '', selService: '' };
+
+function openBooking(service) {
+  bState = { weekOffset: 0, selDate: null, selTime: null, selBarber: '', selService: service || '' };
+  document.getElementById('bookingOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bGoToView(1);
+  // Carga inicial y arranca listener en tiempo real
+  bLoadBookings().then(function() { bRenderStep1(); bStartRealtimeListener(); });
+}
+
+function closeBooking() {
+  document.getElementById('bookingOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  bStopRealtimeListener();
+}
+
+function closeMobileMenu() {
+  const ham = document.getElementById('hamburger');
+  const mob = document.getElementById('mobileMenu');
+  if (ham) ham.classList.remove('open');
+  if (mob) mob.classList.remove('open');
+}
+
+function bGoToView(n) {
+  [1,2,3].forEach(function(i) {
+    const v = document.getElementById('bview-' + i);
+    if (v) v.style.display = (i === n) ? 'block' : 'none';
+  });
+  const back  = document.getElementById('bookingBack');
+  const steps = document.getElementById('bookingSteps');
+  const bs = [document.getElementById('bs1'), document.getElementById('bs2'), document.getElementById('bs3')];
+  if (back)  back.style.display  = (n > 1) ? 'flex' : 'none';
+  if (steps) steps.style.display = 'flex';
+  bs.forEach(function(el, i) {
+    if (!el) return;
+    el.className = 'bstep' + (i+1 === n ? ' active' : i+1 < n ? ' done' : '');
+  });
+  const sheet = document.getElementById('bookingSheet');
+  if (sheet) sheet.scrollTop = 0;
+  if (n === 2) bRenderCalendar();
+  if (n === 3) bRenderConfirm();
+}
+
+function bPrevView() {
+  const cur = [1,2,3].find(function(i) {
+    const v = document.getElementById('bview-' + i);
+    return v && v.style.display !== 'none';
+  });
+  if (cur > 1) bGoToView(cur - 1);
+}
+
+/* ── Paso 1: Barbero + Servicio ── */
+function bRenderStep1() {
+  const bg = document.getElementById('barbersGrid');
+  bg.innerHTML = '';
+  BARBERS.forEach(function(b) {
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'barber-chip' + (bState.selBarber === b.id ? ' selected' : '');
+    var avatarInner = b.photo
+      ? '<img src="' + b.photo + '" alt="' + b.name + '" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + b.init + '\'">'
+      : b.init;
+    var nota = resMedias[b.id];
+    c.innerHTML = '<div class="barber-avatar">' + avatarInner + '</div>'
+      + '<span class="barber-name">' + b.name + '</span>'
+      + '<span class="barber-role">' + b.role + '</span>'
+      + (nota ? '<span class="barber-rating">★ ' + nota.media.toFixed(1) + ' (' + nota.total + ')</span>' : '');
+    c.addEventListener('click', function() { bState.selBarber = b.id; bRenderStep1(); });
+    bg.appendChild(c);
+  });
+  const sg = document.getElementById('bSvcGrid');
+  sg.innerHTML = '';
+
+  // Solo los servicios que ofrece el barbero elegido, con SU duración.
+  // Sin barbero elegido todavía no se muestra ninguno.
+  const ofrecidos = bState.selBarber
+    ? BSERVICES.filter(function(s) { return barberOffers(bState.selBarber, s.id); })
+    : [];
+
+  // Si el servicio ya elegido no lo hace este barbero, se deselecciona
+  if (bState.selService && !ofrecidos.some(function(s) { return s.name === bState.selService; })) {
+    bState.selService = '';
+  }
+
+  ofrecidos.forEach(function(s) {
+    const mins = serviceMinsFor(bState.selBarber, s.name);
+    const tiempo = mins >= 60
+      ? (mins % 60 === 0 ? (mins / 60) + (mins === 60 ? ' hora' : ' horas') : mins + ' min')
+      : mins + ' min';
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'bsvc-chip' + (bState.selService === s.name ? ' selected' : '');
+    c.innerHTML = '<span class="bsvc-chip-name">' + s.name + '</span>'
+      + '<span class="bsvc-chip-meta">'
+      + '<span class="bsvc-chip-price">' + s.price + '</span>'
+      + '<span class="bsvc-chip-time">' + tiempo + '</span>'
+      + '</span>';
+    c.addEventListener('click', function() { bState.selService = s.name; bRenderStep1(); });
+    sg.appendChild(c);
+  });
+
+  if (!ofrecidos.length) {
+    sg.innerHTML = '<p style="color:var(--text-muted);font-size:0.8rem;padding:8px 0">'
+      + (bState.selBarber
+          ? 'Este barbero no tiene servicios disponibles ahora mismo. Elige otro.'
+          : 'Elige primero un barbero para ver sus servicios y precios.') + '</p>';
+  }
+
+  const btn = document.getElementById('toCalBtn');
+  if (btn) btn.disabled = !bState.selService || !bState.selBarber;
+}
+
+/* ── Paso 2: Calendario ── */
+function bChangeWeek(delta) {
+  const next = bState.weekOffset + delta;
+  if (next < 0) return;
+  bState.weekOffset = next;
+  bState.selDate = null;
+  bState.selTime = null;
+  bRenderCalendar();
+  bUpdateCalBtn();
+}
+
+function bGetMonday(offset) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const dow = t.getDay();
+  const shift = (dow === 0) ? -6 : 1 - dow;
+  const m = new Date(t);
+  m.setDate(t.getDate() + shift + offset * 7);
+  return m;
+}
+
+/* ── Firebase SDK (real-time) ── */
+const FB_URL = 'https://sm-72741-default-rtdb.firebaseio.com';
+
+firebase.initializeApp({
+  apiKey:            'AIzaSyCY6nAgMYnMaurqNlaMAZiY_ZfkANAvSqs',
+  authDomain:        'sm-72741.firebaseapp.com',
+  databaseURL:       'https://sm-72741-default-rtdb.firebaseio.com',
+  projectId:         'sm-72741',
+  storageBucket:     'sm-72741.firebasestorage.app',
+  messagingSenderId: '763739661918',
+  appId:             '1:763739661918:web:63e0a0eab88a3315d776cf'
+}, 'booking-public');
+const bDB = firebase.app('booking-public').database();
+
+function fmt12(time) {
+  if (!time) return time;
+  var parts = time.split(':');
+  var h = parseInt(parts[0], 10), m = parts[1];
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+
+// Slots bloqueados por admin { 'b1': { '2026-07-01': { '10_00': true } } }
+let bBlockedCache = {};
+
+/* ¿Llegaron de verdad las citas del servidor?
+   Mientras sea false no se ofrece ninguna hora: es preferible no poder
+   reservar a reservar encima de otra persona. */
+let bDatosOK = false;
+// Citas por día y barbero { '2026-07-01': { 'b1': 3 } }, para el tope diario
+let bDayCount = {};
+// Handles para detener actualizaciones en tiempo real
+let bRTListener  = null;
+let bPollInterval = null;
+
+function bDateKey(date) {
+  return date.getFullYear() + '-'
+    + String(date.getMonth() + 1).padStart(2, '0') + '-'
+    + String(date.getDate()).padStart(2, '0');
+}
+
+/* Citas con su duración real: { fecha: [ {barber, time, mins, service} ] }.
+   Las filas 'overflow' de versiones anteriores no se registran: la
+   duración de la cita ya dice qué tramo ocupa. */
+let bAppts = {};
+function addAppt(b) {
+  if (!b || !b.date || !b.time) return;
+  if (b.status === 'overflow' || b.status === 'cancelled' || b.status === 'blocked') return;
+  if (!bAppts[b.date]) bAppts[b.date] = [];
+  bAppts[b.date].push({ barber: b.barber || 'any', time: b.time, mins: parseInt(b.mins, 10) || 0, service: b.service });
+}
+
+function minToHHMM(m) {
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+
+/* Tramos ocupados de un barbero ese día, en minutos [inicio, fin, tipo].
+   Citas antiguas sin duración guardada: se deduce de su servicio. */
+function busyIntervals(bid, dateKey) {
+  var out = [];
+  (bAppts[dateKey] || []).forEach(function(a) {
+    if (a.barber !== bid && a.barber !== 'any') return;
+    var dur = a.mins || serviceMinsFor(a.barber === 'any' ? bid : a.barber, a.service) || barberSlotMinutes(bid);
+    var ini = toMinutes(a.time);
+    out.push([ini, ini + dur, 'cita']);
+  });
+  var bl = bBlockedCache[bid] && bBlockedCache[bid][dateKey];
+  var paso = barberSlotMinutes(bid);
+  if (bl) Object.keys(bl).forEach(function(k) {
+    if (!bl[k]) return;
+    var m = toMinutes(k.replace('_', ':'));
+    out.push([m, m + paso, 'bloqueo']);
+  });
+  return out;
+}
+
+/* Jornada de un barbero en minutos. El cierre es el final del último
+   turno: la hora de cierre configurada es el inicio del último turno. */
+function dayWindow(bid, dow) {
+  var d = barberDay(bid, dow);
+  if (!d.active) return null;
+  var paso = parseInt(d.slotMinutes, 10) || SLOT_DEFAULT;
+  // ult: hora más tardía a la que puede EMPEZAR una cita (el cierre configurado)
+  var w = { ini: toMinutes(d.start), ult: toMinutes(d.end), fin: toMinutes(d.end) + paso, paso: paso, desc: null };
+  if (d.breakActive && d.breakStart && d.breakEnd && toMinutes(d.breakEnd) > toMinutes(d.breakStart)) {
+    w.desc = [toMinutes(d.breakStart), toMinutes(d.breakEnd)];
+  }
+  return w;
+}
+
+function solapa(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
+
+/* ¿Cabe un servicio de 'm' minutos empezando en el minuto 'c'? */
+function fitsAt(bid, date, c, m) {
+  var w = dayWindow(bid, date.getDay());
+  if (!w || c < w.ini || c > w.ult || c + m > w.fin) return false;
+  if (w.desc && solapa(c, c + m, w.desc[0], w.desc[1])) return false;
+  return busyIntervals(bid, bDateKey(date)).every(function(x) { return !solapa(c, c + m, x[0], x[1]); });
+}
+
+/* Horas de inicio de un barbero ese día. La rejilla avanza lo que dura
+   el servicio elegido (15 min -> 3:00, 3:15, 3:30...) y, cada vez que
+   choca con una cita o el descanso, se reinicia justo cuando termina:
+   la siguiente cita empieza en cuanto acaba la anterior. */
+function startCandidates(bid, date, paso) {
+  var w = dayWindow(bid, date.getDay());
+  if (!w) return [];
+  var step = parseInt(paso, 10) || w.paso;
+  var obst = busyIntervals(bid, bDateKey(date));
+  if (w.desc) obst.push([w.desc[0], w.desc[1], 'descanso']);
+  var set = {}, t = w.ini, guard = 0;
+  while (t <= w.ult && guard++ < 1000) {
+    var dentro = null;
+    for (var i = 0; i < obst.length; i++) {
+      if (t >= obst[i][0] && t < obst[i][1]) { dentro = obst[i]; break; }
+    }
+    if (dentro) { t = dentro[1]; continue; }
+    set[t] = true;
+    t += step;
+  }
+  // El final de cada tramo ocupado también es una hora válida de inicio
+  obst.forEach(function(x) { if (x[1] >= w.ini && x[1] <= w.ult) set[x[1]] = true; });
+  return Object.keys(set).map(Number).sort(function(a, b) { return a - b; });
+}
+
+/* Barberos reales que pueden atender el servicio elegido ese día */
+function candidatos(bid, dateKey) {
+  var svc = BSERVICES.find(function(s) { return s.name === bState.selService; });
+  var ids = (bid && bid !== 'any')
+    ? [bid]
+    : BARBERS.filter(function(b) { return b.id !== 'any'; }).map(function(b) { return b.id; });
+  return ids.filter(function(id) {
+    return (!svc || barberOffers(id, svc.id)) && !barberDayFull(id, dateKey);
+  });
+}
+
+/* ¿Cabe el servicio completo empezando a esa hora con ese barbero?
+   Todos los turnos que ocupa deben existir en su jornada (fuera de
+   descansos y antes del cierre), estar libres y no bloqueados. */
+function fitsFor(bid, date, time) {
+  return fitsAt(bid, date, toMinutes(time), serviceMinsFor(bid, bState.selService));
+}
+
+/* Reconstruye ambos caches desde datos crudos JSON (REST) o snapshot SDK */
+function bProcessData(data) {
+  bAppts = {};
+  bBlockedCache = {};
+  bDayCount = {};
+  if (!data || typeof data !== 'object') return;
+  Object.values(data).forEach(function(b) {
+    if (!b) return;
+    if (b.status === 'blocked' && b.barber && b.date && b.time) {
+      if (!bBlockedCache[b.barber]) bBlockedCache[b.barber] = {};
+      if (!bBlockedCache[b.barber][b.date]) bBlockedCache[b.barber][b.date] = {};
+      bBlockedCache[b.barber][b.date][b.time.replace(':', '_')] = true;
+      return;
+    }
+    if (b.status === 'cancelled') return;
+
+    // Citas por barbero y día, para el tope diario. Solo la entrada
+    // principal cuenta: las de 'overflow' son la continuación de una cita.
+    if (b.status !== 'overflow' && b.barber && b.date) {
+      if (!bDayCount[b.date]) bDayCount[b.date] = {};
+      bDayCount[b.date][b.barber] = (bDayCount[b.date][b.barber] || 0) + 1;
+    }
+
+    addAppt(b);
+  });
+}
+
+/* Re-renderiza el calendario completo si la vista de fecha/hora esta visible */
+function bRefreshSlotsIfVisible() {
+  var view2 = document.getElementById('bview-2');
+  if (view2 && view2.style.display === 'block') {
+    bRenderCalendar();
+  }
+}
+
+/* Fetch REST que actualiza datos y re-renderiza */
+function bFetchAndRefresh() {
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && typeof data === 'object' && !data.error) {
+        bProcessData(data);
+        bRefreshSlotsIfVisible();
+      }
+    })
+    .catch(function() {});
+}
+
+/* Arranca el listener SDK + polling REST cada 1 s (doble mecanismo) */
+function bStartRealtimeListener() {
+  bStopRealtimeListener();
+
+  // 1) Firebase SDK listener (tiempo real instantáneo)
+  try {
+    bRTListener = bDB.ref('bookings').on('value', function(snap) {
+      bProcessData(snap.val());
+      bRefreshSlotsIfVisible();
+    }, function() {});
+  } catch(e) {}
+
+  // 2) Polling REST cada 1 s (respaldo garantizado)
+  bPollInterval = setInterval(bFetchAndRefresh, 1000);
+}
+
+function bStopRealtimeListener() {
+  if (bRTListener !== null) {
+    try { bDB.ref('bookings').off('value', bRTListener); } catch(e) {}
+    bRTListener = null;
+  }
+  if (bPollInterval) { clearInterval(bPollInterval); bPollInterval = null; }
+}
+
+function bLoadBookings() {
+  bAppts = {};
+  bBlockedCache = {};
+
+  // Carga localStorage inmediatamente
+  try {
+    var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+    local.forEach(function(b) {
+      if (!b || b.status === 'cancelled') return;
+        addAppt(b);
+    });
+  } catch(e) {}
+
+  // Snapshot inicial vía REST
+  var ctrl = new AbortController();
+  setTimeout(function() { ctrl.abort(); }, 6000);
+  return fetch(FB_URL + '/bookings.json?t=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' })
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      // null es una respuesta válida: significa que no hay ninguna cita
+      if (data === null) { bDatosOK = true; return true; }
+      if (data && typeof data === 'object' && !data.error) {
+        bProcessData(data);
+        bDatosOK = true;
+        return true;
+      }
+      throw new Error('respuesta inesperada');
+    })
+    .catch(function(err) {
+      // Sin datos fiables no se abre la agenda. El paso 2 lo avisa.
+      bDatosOK = false;
+      console.warn('No se pudieron cargar las citas:', err && err.message);
+      return false;
+    });
+}
+
+/* Código corto para que el cliente identifique su reserva al cancelarla */
+function genBookingCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sin 0/O/1/I/L para evitar confusión
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+/* Guarda una cita o una serie de citas recurrentes.
+   `dates` admite una fecha suelta o un array de fechas.
+   Devuelve { code, saved: [...], skipped: [...] } con las fechas
+   que se pudieron reservar y las que estaban ocupadas. */
+function bSaveBooking(dates, time, barber, service, nombre, telefono) {
+  const dateList = Array.isArray(dates) ? dates : [dates];
+  // Con "Cualquiera" se asigna el primer barbero al que le cabe el servicio,
+  // para que la cita ocupe una agenda real y no choque con nadie
+  if (barber === 'any') {
+    const libre = candidatos('any', bDateKey(dateList[0])).find(function(id) {
+      return fitsFor(id, dateList[0], time);
+    });
+    if (libre) barber = libre;
+  }
+  const barberObj = BARBERS.find(function(x) { return x.id === barber; });
+  const svc = BSERVICES.find(function(s) { return s.name === service; });
+  const mins = serviceMinsFor(barber, service);   // cada barbero puede tardar distinto
+  const ts = Date.now();
+  const code = genBookingCode();
+  const isSeries = dateList.length > 1;
+  const seriesId = isSeries ? (code + '-' + ts.toString(36)) : null;
+  const seriesEvery = isSeries ? bRecurState().every : null;
+
+  // La primera fecha siempre entra: es la que el cliente eligió y ya
+  // se validó en el paso 2. Las repeticiones se descartan si chocan.
+  const savedDates = [];
+  const skippedDates = [];
+  const bookingEntries = [];
+
+  dateList.forEach(function(d, occIdx) {
+    const dateKey = bDateKey(d);
+    if (occIdx > 0 && !bOccurrenceFree(d, time, mins, barber)) {
+      skippedDates.push(dateKey);
+      return;
+    }
+    savedDates.push(dateKey);
+    // Una fila por cita: la duración ('mins') marca el tramo que ocupa
+    bookingEntries.push({
+      date:        dateKey,
+      time:        time,
+      mins:        mins,
+      barber:      barber,
+      barberName:  barberObj ? barberObj.name : 'Cualquiera',
+      service:     service,
+      nombre:      nombre,
+      telefono:    telefono,
+      status:      'pending',
+      code:        code,
+      ts:          ts,
+      seriesId:    seriesId,
+      seriesEvery: seriesEvery,
+      seriesIndex: isSeries ? savedDates.length : null,
+      seriesTotal: isSeries ? dateList.length : null
+    });
+  });
+
+  // 1. Guardar en el servidor y ESPERAR la respuesta.
+  //    Una cita que no llega a Firebase no existe: el barbero no la ve.
+  //    Antes se confirmaba sin esperar y el cliente se iba con una cita
+  //    fantasma, así que ahora manda lo que diga el servidor.
+  var ctrl = new AbortController();
+  var fbTimer = setTimeout(function() { ctrl.abort(); }, 10000);
+
+  return Promise.all(bookingEntries.map(function(data) {
+    return fetch(FB_URL + '/bookings.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      signal: ctrl.signal
+    }).then(function(res) {
+      if (!res.ok) throw new Error('El servidor rechazó la reserva (' + res.status + ')');
+      return res.json();
+    }).then(function(r) {
+      // Firebase devuelve { name: "-Pxxxx" }. Sin nombre no se guardó nada.
+      if (!r || !r.name) throw new Error('La reserva no se registró');
+      return r.name;
+    });
+  }))
+  .then(function(claves) {
+    clearTimeout(fbTimer);
+
+    // 2. Ahora sí: cache local y localStorage, ya que existe en el servidor
+    bookingEntries.forEach(function(b) { addAppt(b); });
+    try {
+      var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+      bookingEntries.forEach(function(b) { local.push(b); });
+      localStorage.setItem('9sm_bookings', JSON.stringify(local));
+    } catch (e) {}
+
+    return { code: code, saved: savedDates, skipped: skippedDates, keys: claves };
+  })
+  .catch(function(err) {
+    clearTimeout(fbTimer);
+    // No se toca ni el cache ni localStorage: la cita no existe.
+    // Los errores de red llegan en inglés y sin contexto, así que se traducen.
+    var bruto = (err && err.message) || '';
+    var msg;
+    if (err && err.name === 'AbortError') {
+      msg = 'El servidor tardó demasiado en responder. Inténtalo de nuevo.';
+    } else if (/failed to fetch|networkerror|load failed|network request/i.test(bruto)) {
+      msg = 'No hay conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
+    } else {
+      msg = bruto || 'No se pudo guardar la reserva.';
+    }
+    throw new Error('Tu cita NO quedó reservada. ' + msg);
+  });
+}
+
+/* ══════════════════════════════════════════
+   CITAS RECURRENTES
+══════════════════════════════════════════ */
+
+/* Selección actual de repetición. Se guarda aquí en vez de leerla del DOM
+   porque ahora son botones y no un desplegable. */
+var bRecur = { every: 'none', count: 4 };
+
+function bRecurState() {
+  if (bRecur.every === 'none' || bRecur.count < 2) return { every: 'none', count: 1 };
+  return { every: bRecur.every, count: bRecur.count };
+}
+
+/* Elegir cada cuánto se repite */
+function bRecurPick(every) {
+  bRecur.every = every;
+  var chips = document.querySelectorAll('.brecur-chip[data-every]');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].classList.toggle('selected', chips[i].getAttribute('data-every') === every);
+  }
+  bRecurChanged();
+}
+
+/* Elegir cuántas citas en total */
+function bRecurPickCount(n) {
+  bRecur.count = n;
+  var chips = document.querySelectorAll('.brecur-chip[data-count]');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].classList.toggle('selected', parseInt(chips[i].getAttribute('data-count'), 10) === n);
+  }
+  bRecurChanged();
+}
+
+/* Suma n periodos a una fecha.
+   En el caso mensual se recorta al último día del mes destino, para que
+   una cita del 31 no salte al mes siguiente en febrero. */
+function bAddPeriod(date, every, n) {
+  var d = new Date(date.getTime());
+  if (every === 'week')   { d.setDate(d.getDate() + 7 * n);  return d; }
+  if (every === '2weeks') { d.setDate(d.getDate() + 14 * n); return d; }
+  if (every === 'month') {
+    var day = date.getDate();
+    var target = new Date(date.getFullYear(), date.getMonth() + n, 1);
+    var lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+    target.setDate(Math.min(day, lastDay));
+    target.setHours(0, 0, 0, 0);
+    return target;
+  }
+  return d;
+}
+
+/* Lista de fechas de la serie, incluida la primera */
+function bRecurDates(startDate, every, count) {
+  var out = [];
+  for (var i = 0; i < count; i++) out.push(bAddPeriod(startDate, every, i));
+  return out;
+}
+
+/* ¿Cabe el servicio completo en esa fecha a esa hora? */
+function bOccurrenceFree(date, time, mins, bid) {
+  return candidatos(bid || bState.selBarber, bDateKey(date)).some(function(id) {
+    return fitsFor(id, date, time);
+  });
+}
+
+/* Muestra las opciones de cantidad y la lista de fechas que se reservarán.
+   Enseñar las fechas reales evita que el cliente tenga que imaginárselas. */
+function bRecurChanged() {
+  var st = bRecurState();
+  var wrap = document.getElementById('bRecurCountWrap');
+  var prev = document.getElementById('bRecurPreview');
+
+  if (wrap) wrap.style.display = st.every === 'none' ? 'none' : 'block';
+  if (!prev) return;
+  if (st.every === 'none') { prev.innerHTML = ''; return; }
+
+  var start = bState.selDate;
+  if (!start) { prev.innerHTML = ''; return; }
+
+  var svc = BSERVICES.find(function(s) { return s.name === bState.selService; });
+  var mins = serviceMinsFor(bState.selBarber, bState.selService);
+  var dates = bRecurDates(start, st.every, st.count);
+
+  var libres = 0, ocupadas = 0, filas = '';
+  dates.forEach(function(d, i) {
+    // La primera ya se validó al elegir la hora en el paso 2
+    var libre = (i === 0) || bOccurrenceFree(d, bState.selTime, mins);
+    if (libre) libres++; else ocupadas++;
+
+    filas += '<div class="brecur-date ' + (libre ? 'ok' : 'busy') + '">'
+      + '<span class="brecur-date-mark">' + (libre ? '✓' : '✕') + '</span>'
+      + '<span>' + BDAYS[d.getDay()] + ' ' + d.getDate() + ' ' + BMTHS[d.getMonth()].slice(0, 3)
+      + ' · ' + fmt12(bState.selTime) + '</span>'
+      + (libre ? '' : '<span class="brecur-date-why">ocupada</span>')
+      + '</div>';
+  });
+
+  var resumen;
+  if (ocupadas) {
+    resumen = '<p class="brecur-total warn">Se reservarán ' + libres + ' de ' + st.count
+      + ' citas. Las marcadas como ocupadas se omiten porque ya hay otra reserva a esa hora.</p>';
+  } else {
+    resumen = '<p class="brecur-total">Se reservarán las ' + libres + ' citas.</p>';
+  }
+
+  prev.innerHTML = '<p class="brecur-prev-title">Tus citas</p>' + filas + resumen;
+}
+
+/* ══════════════════════════════════════════
+   MI CITA — última reserva del cliente
+══════════════════════════════════════════ */
+var _mcCurrentKey = null;
+
+function mcShowView(id) {
+  ['mcLoading','mcCard','mcEmpty','mcPhoneForm','mcDone'].forEach(function(v) {
+    document.getElementById(v).style.display = (v === id) ? 'block' : 'none';
+  });
+}
+
+function openMyCitas() {
+  closeBooking();
+  closeMobileMenu();
+  _mcCurrentKey = null;
+  document.getElementById('myCitasOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // 1. Buscar en localStorage 9sm_bookings (más rápido, no necesita red)
+  var todayKey = bDateKey(new Date());
+  var local = [];
+  try { local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]'); } catch(e) {}
+  var upcoming = local.filter(function(b) {
+    return b && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey;
+  }).sort(function(a, b) {
+    return a.date.localeCompare(b.date) || a.time.localeCompare(b.time);
+  });
+
+  if (upcoming.length) {
+    // Mostrar inmediatamente desde localStorage
+    mcMostrarCita(upcoming[0], null);
+    // Verificar en Firebase si no fue cancelada por el admin
+    mcVerificarEnFirebase(upcoming[0]);
+    return;
+  }
+
+  // 2. Fallback: si tiene teléfono guardado, buscar en Firebase
+  var saved = getSavedClient();
+  if (saved && saved.telefono) {
+    mcShowView('mcLoading');
+    mcCargarUltimaCita(saved.telefono);
+    return;
+  }
+
+  // 3. Último recurso: pedir teléfono
+  mcShowView('mcPhoneForm');
+  var inp = document.getElementById('mcPhoneInput');
+  if (inp) inp.value = '';
+  var errEl = document.getElementById('mcPhoneError');
+  if (errEl) errEl.style.display = 'none';
+}
+
+function closeMyCitas() {
+  document.getElementById('myCitasOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function mcBuscarPorTel(e) {
+  e.preventDefault();
+  var tel = (document.getElementById('mcPhoneInput').value || '').trim();
+  var errEl = document.getElementById('mcPhoneError');
+  if (!tel) { errEl.textContent = 'Ingresa tu número de WhatsApp.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  mcShowView('mcLoading');
+  mcCargarUltimaCita(tel);
+}
+
+function mcMostrarCita(cita, fbKey) {
+  var DAYS2 = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var MTHS2 = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  if (fbKey) _mcCurrentKey = fbKey;
+  var d = new Date(cita.date + 'T00:00:00');
+  document.getElementById('mcCardFecha').textContent   = DAYS2[d.getDay()] + ', ' + d.getDate() + ' de ' + MTHS2[d.getMonth()];
+  document.getElementById('mcCardHora').textContent    = fmt12(cita.time);
+  document.getElementById('mcCardBarber').textContent  = cita.barberName || 'Cualquiera';
+  document.getElementById('mcCardService').textContent = cita.service || '';
+  mcSetActions('cancelar');
+  mcShowView('mcCard');
+}
+
+function mcVerificarEnFirebase(localCita) {
+  // Busca el fbKey real y confirma que no fue cancelada por el admin
+  var cleanTel = (localCita.telefono || '').replace(/\D/g, '');
+  var todayKey = bDateKey(new Date());
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || typeof data !== 'object') return;
+      var match = null;
+      Object.entries(data).forEach(function(kv) {
+        var b = kv[1];
+        if (!b) return;
+        var bTel = (b.telefono || '').replace(/\D/g, '');
+        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
+          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
+            match = Object.assign({ _fbKey: kv[0] }, b);
+          }
+        }
+      });
+      if (match) {
+        _mcCurrentKey = match._fbKey;
+      } else {
+        // La cita fue cancelada por el admin → actualizar localStorage y mostrar vacío
+        try {
+          var local = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+          local = local.map(function(b) {
+            return (b && b.date === localCita.date && b.time === localCita.time) ? Object.assign({}, b, { status: 'cancelled' }) : b;
+          });
+          localStorage.setItem('9sm_bookings', JSON.stringify(local));
+        } catch(e) {}
+        // Si el overlay sigue abierto y mostrando la tarjeta, actualizar
+        if (document.getElementById('mcCard').style.display !== 'none') {
+          mcShowView('mcEmpty');
+        }
+      }
+    })
+    .catch(function() {});
+}
+
+function mcCargarUltimaCita(telefono) {
+  var cleanTel = telefono.replace(/\D/g, '');
+  var todayKey = bDateKey(new Date());
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || typeof data !== 'object' || data.error) { mcShowView('mcEmpty'); return; }
+      var match = null;
+      Object.entries(data).forEach(function(kv) {
+        var b = kv[1];
+        if (!b) return;
+        var bTel = (b.telefono || '').replace(/\D/g, '');
+        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
+          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
+            match = Object.assign({ _fbKey: kv[0] }, b);
+          }
+        }
+      });
+      if (!match) { mcShowView('mcEmpty'); return; }
+      mcMostrarCita(match, match._fbKey);
+    })
+    .catch(function() { mcShowView('mcEmpty'); });
+}
+
+function mcSetActions(state) {
+  var div = document.getElementById('mcCardActions');
+  if (!div) return;
+  if (state === 'cancelar') {
+    div.innerHTML =
+      '<button onclick="mcSetActions(\'confirmar\')" style="width:100%;background:none;border:1px solid rgba(239,68,68,0.35);color:#ef4444;padding:13px;border-radius:10px;font-size:0.78rem;font-weight:500;cursor:pointer;letter-spacing:0.04em;transition:background 0.2s" onmouseover="this.style.background=\'rgba(239,68,68,0.08)\'" onmouseout="this.style.background=\'none\'">Cancelar cita</button>';
+  } else if (state === 'confirmar') {
+    div.innerHTML =
+      '<p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin:0 0 16px;line-height:1.5">¿Estás seguro? Esta acción<br/>no se puede deshacer.</p>' +
+      '<div style="display:flex;gap:10px">' +
+      '  <button onclick="mcSetActions(\'cancelar\')" style="flex:1;background:none;border:1px solid var(--border);color:var(--text-muted);padding:13px;border-radius:10px;font-size:0.78rem;cursor:pointer;font-weight:500">Mantener</button>' +
+      '  <button onclick="mcEjecutarCancelar()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:13px;border-radius:10px;font-size:0.78rem;font-weight:600;cursor:pointer">Sí, cancelar</button>' +
+      '</div>';
+  } else if (state === 'cargando') {
+    div.innerHTML = '<p style="text-align:center;font-size:0.78rem;color:var(--text-muted);padding:12px 0;letter-spacing:0.06em">Cancelando…</p>';
+  } else if (state === 'error') {
+    div.innerHTML =
+      '<p style="text-align:center;font-size:0.76rem;color:#ef4444;margin:0 0 14px">No se pudo cancelar. Intenta de nuevo.</p>' +
+      '<button onclick="mcSetActions(\'cancelar\')" style="width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);padding:12px;border-radius:10px;font-size:0.76rem;cursor:pointer">Volver</button>';
+  }
+}
+
+function mcEjecutarCancelar() {
+  if (!_mcCurrentKey) return;
+  mcSetActions('cargando');
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, 8000);
+  fetch(FB_URL + '/bookings/' + _mcCurrentKey + '.json', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    // cancelledAt/cancelledBy alimentan los avisos del panel
+    body: JSON.stringify({ status: 'cancelled', cancelledAt: Date.now(), cancelledBy: 'cliente' }),
+    signal: ctrl.signal
+  }).then(function() {
+    clearTimeout(t);
+    mcShowView('mcDone');
+  }).catch(function() {
+    clearTimeout(t);
+    mcSetActions('error');
+  });
+}
+
+/* ══════════════════════════════════════════
+   HORARIOS POR BARBERO
+   Cada barbero define su jornada por día de la semana
+   desde el panel. Si no la ha tocado, se usa el horario
+   histórico de la barbería, que este modelo reproduce
+   turno a turno.
+══════════════════════════════════════════ */
+
+/* 0=Dom, 1..4=Lun-Jue, 5=Vie, 6=Sáb */
+const DEFAULT_SCHEDULE = {
+  0: { active: true, start: '07:00', end: '13:00' },
+  1: { active: true, start: '10:00', end: '19:00' },
+  2: { active: true, start: '10:00', end: '19:00' },
+  3: { active: true, start: '10:00', end: '19:00' },
+  4: { active: true, start: '10:00', end: '19:00' },
+  5: { active: true, start: '07:00', end: '19:45' },
+  6: { active: true, start: '07:00', end: '19:00' }
+};
+
+/* Duración de turno por defecto, si un barbero no ha elegido la suya */
+const SLOT_DEFAULT = 45;
+
+/* Turnos entre dos horas, extremos incluidos.
+   El paso lo decide cada barbero desde el panel. */
+function genSlotRange(start, end, paso) {
+  var out = [];
+  var step = parseInt(paso, 10) || SLOT_DEFAULT;
+  var a = String(start).split(':').map(Number);
+  var b = String(end).split(':').map(Number);
+  var t = a[0] * 60 + a[1], fin = b[0] * 60 + b[1];
+  if (isNaN(t) || isNaN(fin)) return out;
+  var guard = 0;
+  while (t <= fin && guard++ < 200) {
+    out.push(String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'));
+    t += step;
+  }
+  return out;
+}
+
+/* Minutos que dura cada turno de un barbero */
+function barberSlotMinutes(barberId) {
+  if (!barberId || barberId === 'any') return SLOT_DEFAULT;
+  var b = cfgBarber(barberId);
+  return (b && parseInt(b.slotMinutes, 10)) || SLOT_DEFAULT;
+}
+
+/* Jornada de un barbero para un día de la semana, con su descanso */
+function barberDay(barberId, dow) {
+  var def = DEFAULT_SCHEDULE[dow];
+  if (!siteCfg || !Array.isArray(siteCfg.barbers)) return def;
+  var b = siteCfg.barbers.find(function(x) { return x && x.id === barberId; });
+  if (!b || !b.schedule || !b.schedule[dow]) return def;
+  var d = b.schedule[dow];
+  return {
+    active:      d.active !== false,
+    start:       d.start || def.start,
+    end:         d.end   || def.end,
+    breakActive: d.breakActive === true,
+    breakStart:  d.breakStart || '',
+    breakEnd:    d.breakEnd   || '',
+    slotMinutes: parseInt(b.slotMinutes, 10) || SLOT_DEFAULT
+  };
+}
+
+function toMinutes(t) {
+  var p = String(t).split(':').map(Number);
+  return (p[0] * 60) + (p[1] || 0);
+}
+
+/* Quita los turnos que se solapen con el descanso.
+   No basta con mirar la hora de inicio: un turno que arranca a las 12:45
+   y dura 45 minutos termina a las 13:30, así que invadiría un descanso
+   que empieza a las 13:00 y el barbero no estaría libre de verdad. */
+function filterBreak(slots, d) {
+  if (!d || !d.breakActive || !d.breakStart || !d.breakEnd) return slots;
+  var bs = toMinutes(d.breakStart), be = toMinutes(d.breakEnd);
+  if (isNaN(bs) || isNaN(be) || be <= bs) return slots;
+  var dur = parseInt(d.slotMinutes, 10) || SLOT_DEFAULT;
+  return slots.filter(function(t) {
+    var ini = toMinutes(t), fin = ini + dur;
+    return fin <= bs || ini >= be;   // termina antes, o empieza después
+  });
+}
+
+/* Turnos efectivos de un barbero ese día: jornada menos descanso */
+function slotsOfDay(barberId, dow) {
+  var d = barberDay(barberId, dow);
+  if (!d.active) return [];
+  return filterBreak(genSlotRange(d.start, d.end, d.slotMinutes), d);
+}
+
+/* ── Ajustes por barbero ── */
+
+function cfgBarber(barberId) {
+  if (!siteCfg || !Array.isArray(siteCfg.barbers)) return null;
+  return siteCfg.barbers.find(function(b) { return b && b.id === barberId; }) || null;
+}
+
+/* Duración de un servicio para un barbero concreto. Cada uno puede
+   tardar distinto en lo mismo, así que manda su ajuste sobre el catálogo. */
+function serviceMinsFor(barberId, serviceName) {
+  var svc = BSERVICES.find(function(s) { return s.name === serviceName; });
+  var base = svc ? (parseInt(svc.mins, 10) || 45) : 45;
+  if (!barberId || barberId === 'any' || !svc) return base;
+  var b = cfgBarber(barberId);
+  if (!b || !b.svc || !b.svc[svc.id]) return base;
+  return parseInt(b.svc[svc.id].mins, 10) || base;
+}
+
+/* ¿Ofrece ese barbero ese servicio? "Cualquiera" vale si lo ofrece alguno. */
+function barberOffers(barberId, serviceId) {
+  if (!barberId || barberId === 'any') {
+    var ids = BARBERS.filter(function(b) { return b.id !== 'any'; }).map(function(b) { return b.id; });
+    if (!ids.length) return true;
+    return ids.some(function(id) { return barberOffers(id, serviceId); });
+  }
+  var b = cfgBarber(barberId);
+  if (!b || !b.svc || !b.svc[serviceId]) return true;   // sin ajuste, lo ofrece
+  return b.svc[serviceId].on !== false;
+}
+
+/* Tope de citas al día del barbero. 0 o ausente = sin tope. */
+function barberMaxDaily(barberId) {
+  var b = cfgBarber(barberId);
+  return b ? (parseInt(b.maxDaily, 10) || 0) : 0;
+}
+
+/* ¿Ha llegado ya a su tope ese día?
+   Con "Cualquiera" solo se considera lleno si TODOS los barberos
+   han llegado al suyo, porque basta con que quede uno libre. */
+function barberDayFull(barberId, dateKey) {
+  if (!barberId || barberId === 'any') {
+    var ids = BARBERS.filter(function(b) { return b.id !== 'any'; }).map(function(b) { return b.id; });
+    if (!ids.length) return false;
+    return ids.every(function(id) { return barberDayFull(id, dateKey); });
+  }
+  var tope = barberMaxDaily(barberId);
+  if (!tope) return false;
+  var n = (bDayCount[dateKey] && bDayCount[dateKey][barberId]) || 0;
+  return n >= tope;
+}
+
+/* Turnos que ofrece un barbero ese día. Para "Cualquiera" se unen
+   los de todos los barberos activos, porque basta con que uno pueda. */
+function slotsForBarber(barberId, dow) {
+  if (barberId && barberId !== 'any') return slotsOfDay(barberId, dow);
+
+  var ids = BARBERS.filter(function(b) { return b.id !== 'any'; }).map(function(b) { return b.id; });
+  if (!ids.length) {
+    var def = DEFAULT_SCHEDULE[dow];
+    return def.active ? genSlotRange(def.start, def.end) : [];
+  }
+  var union = {};
+  ids.forEach(function(id) {
+    slotsOfDay(id, dow).forEach(function(t) { union[t] = true; });
+  });
+  return Object.keys(union).sort();
+}
+
+function bSlots(date) {
+  const now   = new Date();
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (date < today) return [];               // Past
+
+  const day = date.getDay(); // 0=Dom, 1=Lun … 5=Vie, 6=Sáb
+
+  if (!bDatosOK) return [];                         // sin datos no se inventa disponibilidad
+  const sel = bState.selBarber;
+  if (!sel) return [];                              // hay que elegir barbero antes
+  const cands = candidatos(sel, bDateKey(date));   // excluye topes llenos
+  if (!cands.length) return [];
+
+  const isToday = date.getTime() === today.getTime();
+  const ahora = isToday ? now.getHours() * 60 + now.getMinutes() : -1;
+  const dk = bDateKey(date);
+
+  // Horas de inicio de cada barbero candidato, reorganizadas tras cada cita
+  const horas = {};
+  cands.forEach(function(id) {
+    startCandidates(id, date, serviceMinsFor(id, bState.selService)).forEach(function(m) { horas[m] = true; });
+  });
+
+  // Con un barbero concreto, sus citas se muestran tachadas como referencia
+  const ocupadas = {};
+  if (sel !== 'any') {
+    busyIntervals(sel, dk).forEach(function(x) {
+      if (x[2] === 'cita') { horas[x[0]] = true; ocupadas[x[0]] = true; }
+    });
+  }
+
+  return Object.keys(horas).map(Number).sort(function(a, b) { return a - b; })
+    .filter(function(m) { return m > ahora; })
+    .map(function(m) {
+      const t = minToHHMM(m);
+      if (ocupadas[m]) return { time: t, available: false, booked: true };
+      // Libre solo si el servicio completo cabe sin pisar descanso, cierre ni otra cita
+      return { time: t, available: cands.some(function(id) { return fitsAt(id, date, m, serviceMinsFor(id, bState.selService)); }) };
+    });
+}
+
+function bRenderCalendar() {
+  /* ── Pill: barbero + servicio seleccionados ── */
+  const pill = document.getElementById('bSelPill');
+  if (pill) {
+    const b = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+    const bName = b ? b.name : '';
+    const sName = bState.selService || '';
+    pill.innerHTML = bName && sName
+      ? '<span>' + bName + '</span><span class="bsel-sep">·</span><span>' + sName + '</span>'
+      : '<span>' + (bName || sName || '') + '</span>';
+  }
+
+  const mon = bGetMonday(bState.weekOffset);
+  const sat = new Date(mon); sat.setDate(mon.getDate() + 5);
+  const sameMonth = mon.getMonth() === sat.getMonth();
+  document.getElementById('weekLabel').textContent = sameMonth
+    ? mon.getDate() + ' – ' + sat.getDate() + ' ' + BMTHS[sat.getMonth()]
+    : mon.getDate() + ' ' + BMTHS[mon.getMonth()] + ' – ' + sat.getDate() + ' ' + BMTHS[sat.getMonth()];
+  document.getElementById('weekPrev').disabled = bState.weekOffset === 0;
+
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const strip  = document.getElementById('daysStrip');
+  strip.innerHTML = '';
+
+  let weekHasAvailable = false;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const slots  = bSlots(d);
+    const hasAv  = slots.some(s => s.available);
+    const isPast = d < today;
+    const isToday= d.getTime() === today.getTime();
+    const isSel  = bState.selDate && d.getTime() === bState.selDate.getTime();
+
+    if (!isPast && hasAv) weekHasAvailable = true;
+
+    const chip = document.createElement('button');
+    chip.className = 'day-chip'
+      + (isSel  ? ' selected' : '')
+      + ((isPast || !hasAv) ? ' disabled' : '')
+      + (isToday ? ' today-chip' : '');
+    chip.type = 'button';
+    chip.innerHTML =
+      '<span class="day-name-label">' + (isToday ? 'Hoy' : BDAYS[d.getDay()]) + '</span>' +
+      '<span class="day-num-label">'  + d.getDate() + '</span>' +
+      (hasAv && !isPast ? '<span class="day-dot"></span>' : '');
+    if (!isPast && hasAv) chip.addEventListener('click', function() { bSelectDay(d); });
+    strip.appendChild(chip);
+  }
+
+  // Si la semana actual no tiene ningún día disponible, avanzar automáticamente
+  if (!weekHasAvailable && bState.weekOffset < 12) {
+    bState.weekOffset++;
+    bRenderCalendar();
+    return;
+  }
+
+  if (bState.selDate) bRenderSlots(bState.selDate);
+  else {
+    const sc = document.getElementById('slotsContent');
+    if (sc) sc.innerHTML = '';
+  }
+}
+
+function bSelectDay(date) {
+  bState.selDate = date;
+  bState.selTime = null;
+  // Renderiza con datos en cache primero (instantáneo)
+  bRenderCalendar();
+  bUpdateCalBtn();
+  // Luego re-fetcha Firebase y actualiza si hay cambios
+  bFetchAndRefresh();
+}
+
+function bRenderSlots(date) {
+  const sc = document.getElementById('slotsContent');
+  if (!sc) return;
+  sc.innerHTML = '';
+
+  // Si la agenda no se pudo leer, se dice claramente en vez de mostrar
+  // horas inventadas que podrían chocar con citas ya existentes
+  if (!bDatosOK) {
+    sc.innerHTML = '<p class="slots-empty">No pudimos cargar la agenda. '
+      + 'Revisa tu conexión.<br/>'
+      + '<button type="button" class="slots-retry" onclick="bReintentarAgenda()">Reintentar</button></p>';
+    return;
+  }
+
+  const slots  = bSlots(date);
+  const avail  = slots.filter(function(s) { return s.available; });
+
+  if (!slots.length || !avail.length) {
+    sc.innerHTML = '<p class="slots-empty">No hay disponibilidad este día.</p>';
+    return;
+  }
+
+  /* Separar mañana (< 14:00) y tarde (≥ 14:00) */
+  function makeGroup(label, list) {
+    if (!list.length) return null;
+    const wrap = document.createElement('div');
+    wrap.className = 'time-group';
+    const lbl = document.createElement('p');
+    lbl.className = 'time-group-label';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'slots-row';
+    list.forEach(function(s) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-btn'
+        + (s.booked ? ' booked unavailable' : (!s.available ? ' unavailable' : ''))
+        + (bState.selTime === s.time ? ' selected' : '');
+      btn.textContent = fmt12(s.time);
+      btn.disabled = !s.available;
+      if (s.available) btn.addEventListener('click', function() { bSelectTime(s.time); });
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  const morning = slots.filter(function(s) { return parseInt(s.time) < 14; });
+  const afternoon = slots.filter(function(s) { return parseInt(s.time) >= 14; });
+
+  const gMorn = makeGroup('Mañana', morning);
+  const gAft  = makeGroup('Tarde',  afternoon);
+  if (gMorn) sc.appendChild(gMorn);
+  if (gAft)  sc.appendChild(gAft);
+
+  setTimeout(function() {
+    const w = document.getElementById('slotsWrap');
+    if (w) w.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 60);
+}
+
+/* Vuelve a pedir la agenda cuando el cliente pulsa "Reintentar" */
+function bReintentarAgenda() {
+  const sc = document.getElementById('slotsContent');
+  if (sc) sc.innerHTML = '<p class="slots-empty">Cargando agenda…</p>';
+  bLoadBookings().then(function() {
+    if (bState.selDate) bRenderSlots(bState.selDate);
+    bRenderCalendar();
+  });
+}
+
+function bSelectTime(time) {
+  bState.selTime = time;
+  if (bState.selDate) bRenderSlots(bState.selDate);
+  bUpdateCalBtn();
+}
+
+function bUpdateCalBtn() {
+  const btn = document.getElementById('toConfirmBtn');
+  if (btn) btn.disabled = !(bState.selDate && bState.selTime);
+}
+
+function getSavedClient() {
+  try { return JSON.parse(localStorage.getItem('9sm_client') || 'null'); } catch(e) { return null; }
+}
+
+function bClearClientData() {
+  localStorage.removeItem('9sm_client');
+  document.getElementById('bClientReturn').style.display = 'none';
+  document.getElementById('bClientNew').style.display = 'block';
+  var nb = document.getElementById('b-nombre');
+  var tb = document.getElementById('b-telefono');
+  if (nb) nb.value = '';
+  if (tb) tb.value = '';
+}
+
+/* ── Paso 3: Confirmar ── */
+function bRenderConfirm() {
+  const d   = bState.selDate;
+  const fmt = BDAYSFULL[d.getDay()] + ' ' + d.getDate() + ' de ' + BMTHS[d.getMonth()];
+  const b   = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+  document.getElementById('sum-barber').textContent  = b ? b.name : 'Cualquiera';
+  document.getElementById('sum-service').textContent = bState.selService;
+  document.getElementById('sum-date').textContent    = fmt;
+  document.getElementById('sum-time').textContent    = fmt12(bState.selTime);
+  document.getElementById('bConfirmForm').style.display = 'block';
+  document.getElementById('bSuccess').style.display    = 'none';
+  var errEl = document.getElementById('bSubmitError');
+  if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+
+  // Reinicia la repetición y recalcula las fechas contra el día y la hora
+  // recién elegidos. bRecurPick deja "Solo esta vez" marcado.
+  bRecur.count = 4;
+  bRecurPickCount(4);
+  bRecurPick('none');
+
+  var saved = getSavedClient();
+  if (saved && saved.nombre && saved.telefono) {
+    document.getElementById('bClientReturn').style.display = 'block';
+    document.getElementById('bClientNew').style.display    = 'none';
+    document.getElementById('bRetInitial').textContent     = saved.nombre.charAt(0).toUpperCase();
+    document.getElementById('bRetNombre').textContent      = saved.nombre;
+    document.getElementById('bRetTel').textContent         = saved.telefono;
+  } else {
+    document.getElementById('bClientReturn').style.display = 'none';
+    document.getElementById('bClientNew').style.display    = 'block';
+  }
+}
+
+function bSubmit(e) {
+  e.preventDefault();
+
+  var nombre, telefono;
+  var returnDiv = document.getElementById('bClientReturn');
+  if (returnDiv && returnDiv.style.display !== 'none') {
+    var saved = getSavedClient();
+    if (!saved) return;
+    nombre   = saved.nombre;
+    telefono = saved.telefono;
+  } else {
+    nombre   = (document.getElementById('b-nombre')   || {}).value.trim();
+    telefono = (document.getElementById('b-telefono') || {}).value.trim();
+    if (!nombre || !telefono) {
+      var errEl = document.getElementById('bSubmitError');
+      if (errEl) { errEl.textContent = 'Por favor completa tu nombre y número de WhatsApp.'; errEl.style.display = 'block'; }
+      return;
+    }
+  }
+
+  // Guardar datos del cliente para futuros agendamientos (pre-relleno)
+  try { localStorage.setItem('9sm_client', JSON.stringify({ nombre: nombre, telefono: telefono })); } catch(e) {}
+
+  // Guardar cliente en Firebase para marketing (deduplicado por teléfono)
+  const clientKey = telefono.replace(/\D/g, '');
+  if (clientKey) {
+    fetch(FB_URL + '/clients/' + clientKey + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre:   nombre,
+        telefono: telefono,
+        ultimaCita: bDateKey(bState.selDate || new Date())
+      })
+    }).catch(function() {});
+  }
+  const d   = bState.selDate;
+  const fmt = BDAYSFULL[d.getDay()] + ' ' + d.getDate() + ' de ' + BMTHS[d.getMonth()];
+  const b   = BARBERS.find(function(x) { return x.id === bState.selBarber; });
+
+  // ── Guardar en Firebase y bloquear la hora ──
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando…'; }
+
+  function showBookingError(msg) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Confirmar reserva'; }
+    var errEl = document.getElementById('bSubmitError');
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+  }
+
+  // Timeout de seguridad — si Firebase no responde en 12s muestra error
+  var saveTimeout = setTimeout(function() {
+    showBookingError('Tiempo de espera agotado. Comprueba tu conexión e inténtalo.');
+  }, 12000);
+
+  // Fechas de la serie: una sola si no se pidió repetición
+  const recur = bRecurState();
+  const seriesDates = recur.every === 'none'
+    ? [d]
+    : bRecurDates(d, recur.every, recur.count);
+
+  // Antes de guardar se releen las citas: la hora elegida pudo ocuparse
+  // mientras el cliente rellenaba sus datos.
+  bLoadBookings()
+  .then(function(ok) {
+    if (!ok) throw new Error('No pudimos comprobar la disponibilidad. Revisa tu conexión.');
+    if (!fitsFor(bState.selBarber, d, bState.selTime)) {
+      var e2 = new Error('Esa hora acaba de ocuparse. Elige otra, por favor.');
+      e2.horaOcupada = true;
+      throw e2;
+    }
+    return bSaveBooking(seriesDates, bState.selTime, bState.selBarber, bState.selService, nombre, telefono);
+  })
+  .then(function(res) {
+    clearTimeout(saveTimeout);
+    const code = res.code;
+    const nSaved = res.saved.length;
+
+    document.getElementById('bSuccessSub').textContent = nSaved > 1
+      ? nSaved + ' citas · desde el ' + fmt + ' · ' + fmt12(bState.selTime)
+      : fmt + ' · ' + fmt12(bState.selTime);
+
+    // Filas extra cuando es una serie: cuántas quedaron y cuál es la última
+    var seriesRows = '';
+    if (nSaved > 1) {
+      var lastKey = res.saved[res.saved.length - 1].split('-');
+      var lastD = new Date(+lastKey[0], +lastKey[1] - 1, +lastKey[2]);
+      var everyTxt = recur.every === 'week' ? 'Cada semana'
+                   : recur.every === '2weeks' ? 'Cada 2 semanas' : 'Cada mes';
+      seriesRows =
+        '<div class="success-detail-row"><span>Repetición</span><span>' + everyTxt + '</span></div>' +
+        '<div class="success-detail-row"><span>Citas reservadas</span><span>' + nSaved + '</span></div>' +
+        '<div class="success-detail-row"><span>Última cita</span><span>'
+          + (BDAYSFULL[lastD.getDay()] + ' ' + lastD.getDate() + ' de ' + BMTHS[lastD.getMonth()]) + '</span></div>';
+      if (res.skipped.length) {
+        seriesRows += '<div class="success-detail-row"><span>Sin disponibilidad</span><span>'
+          + res.skipped.length + ' fecha' + (res.skipped.length === 1 ? '' : 's') + '</span></div>';
+      }
+    }
+
+    document.getElementById('bSuccessDetails').innerHTML =
+      '<div class="success-detail-row"><span>Nombre</span><span>'    + nombre + '</span></div>' +
+      '<div class="success-detail-row"><span>Barbero</span><span>'   + (b ? b.name : 'Cualquiera') + '</span></div>' +
+      '<div class="success-detail-row"><span>Servicio</span><span>'  + bState.selService + '</span></div>' +
+      '<div class="success-detail-row"><span>' + (nSaved > 1 ? 'Primera cita' : 'Fecha') + '</span><span>' + fmt + '</span></div>' +
+      '<div class="success-detail-row"><span>Hora</span><span>'      + fmt12(bState.selTime) + '</span></div>' +
+      seriesRows +
+      '<div class="success-detail-row"><span>Código de reserva</span><span class="success-code">' + code + '</span></div>';
+    // Deja lista la cita para añadirla al calendario del cliente
+    prepararCalendario({
+      date: res.saved[0], time: bState.selTime, code: code,
+      service: bState.selService, barberName: b ? b.name : 'Cualquiera',
+      mins: serviceMinsFor(bState.selBarber, bState.selService)
+    });
+
+    document.getElementById('bConfirmForm').style.display = 'none';
+    document.getElementById('bSuccess').style.display     = 'block';
+    document.getElementById('bookingBack').style.display  = 'none';
+    document.getElementById('bookingSteps').style.display = 'none';
+
+    // Sin recarga automática: el cliente necesita tiempo para apuntar su
+    // código y para añadir la cita a su calendario.
+    var cdEl = document.getElementById('bReloadCountdown');
+    if (cdEl) cdEl.textContent = '';
+
+  }).catch(function(err) {
+    clearTimeout(saveTimeout);
+    console.error('Reserva no completada:', err);
+    showBookingError((err && err.message) || 'No se pudo guardar. Inténtalo de nuevo.');
+    // Si la hora se ocupó, se devuelve al calendario con las horas al día
+    if (err && err.horaOcupada) {
+      bState.selTime = null;
+      bGoToView(2);
+      if (bState.selDate) bRenderSlots(bState.selDate);
+      bUpdateCalBtn();
+    }
+  });
+}
+
+// ── Fade-in de página (clase JS, no animación CSS en body) ──
+// Esto evita que el transform en body rompa position:fixed del booking overlay
+requestAnimationFrame(function() {
+  document.body.classList.add('page-ready');
+});
+
+// Close on backdrop
+document.getElementById('bookingOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeBooking();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('bookingOverlay').classList.contains('open')) closeBooking();
+});
+
+// ── Gallery fade ────────────────────────────────
+// Reiniciable: si el panel cambia las fotos, se vuelve a llamar
+// para que el intervalo no quede apuntando a nodos ya eliminados.
+var _galleryTimer = null;
+function initGalleryFade() {
+  if (_galleryTimer) { clearInterval(_galleryTimer); _galleryTimer = null; }
+
+  var items = Array.from(document.querySelectorAll('.gallery-item'));
+  if (!items.length) return;
+
+  // Inicializa índice activo en cada celda
+  items.forEach(function(item) {
+    item._gpIdx = 0;
+  });
+
+  var cardIdx = 0;
+  // Cada 2.2s cambia UNA celda, en secuencia → efecto continuo y escalonado
+  _galleryTimer = setInterval(function() {
+    var item = items[cardIdx];
+    if (item) {
+      var photos = item.querySelectorAll('.gallery-photo');
+      if (photos.length > 1) {
+        photos[item._gpIdx].classList.remove('gp-active');
+        item._gpIdx = (item._gpIdx + 1) % photos.length;
+        photos[item._gpIdx].classList.add('gp-active');
+      }
+    }
+    cardIdx = (cardIdx + 1) % items.length;
+  }, 2200);
+}
+initGalleryFade();
+
+/* Reestructura cada tarjeta de servicio: mete el icono en su medallón,
+   agrupa precio y duración en un pie, y añade la franja del barrido de
+   luz. Se hace por código para no repetir el mismo marcado seis veces
+   y para que valga igual con servicios añadidos desde el panel. */
+function buildServiceCards() {
+  var cards = document.querySelectorAll('.service-card');
+
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+
+    // 1. Medallón del icono
+    var icon = card.querySelector('.service-icon');
+    if (icon && !card.querySelector('.service-icon-wrap')) {
+      var wrap = document.createElement('div');
+      wrap.className = 'service-icon-wrap';
+      icon.parentNode.insertBefore(wrap, icon);
+      wrap.appendChild(icon);
+    }
+
+    // 2. Pie con precio y duración
+    var price = card.querySelector('.service-price');
+    if (price && !card.querySelector('.service-foot')) {
+      var foot = document.createElement('div');
+      foot.className = 'service-foot';
+      price.parentNode.insertBefore(foot, price);
+      foot.appendChild(price);
+
+      var chip = document.createElement('span');
+      chip.className = 'service-time-chip';
+      chip.textContent = serviceTimeLabel(card.getAttribute('data-svc'));
+      foot.appendChild(chip);
+    }
+
+    // 3. Franja del barrido de luz
+    if (!card.querySelector('.service-sheen')) {
+      var s = document.createElement('span');
+      s.className = 'service-sheen';
+      s.setAttribute('aria-hidden', 'true');
+      card.appendChild(s);
+    }
+  }
+}
+
+/* Etiqueta de duración de la tarjeta, tomada del catálogo publicado */
+function serviceTimeLabel(svcId) {
+  var s = BSERVICES.find(function(x) { return x.id === svcId; });
+  if (!s) return '';
+  if (s.time) return s.time;
+  var m = parseInt(s.mins, 10) || 45;
+  return m >= 60 && m % 60 === 0 ? (m / 60) + (m === 60 ? ' hora' : ' horas') : m + ' min';
+}
+
+/* Refresca la duración cuando llega la configuración del panel */
+function refreshServiceChips() {
+  var cards = document.querySelectorAll('.service-card[data-svc]');
+  for (var i = 0; i < cards.length; i++) {
+    var chip = cards[i].querySelector('.service-time-chip');
+    if (chip) chip.textContent = serviceTimeLabel(cards[i].getAttribute('data-svc'));
+  }
+}
+
+buildServiceCards();
+
+/* ══════════════════════════════════════════
+   CONFIGURACIÓN EDITABLE DE LA WEB
+   Se lee de Firebase (/siteConfig), que el panel
+   de barberos escribe. Si el nodo no existe o no
+   es legible, la web conserva sus valores actuales
+   y no se rompe nada.
+══════════════════════════════════════════ */
+
+/* Secciones que se pueden encender/apagar desde el panel */
+const SECTION_IDS = ['scroll-hero', 'nosotros', 'servicios', 'galeria', 'contacto'];
+
+let siteCfg = null;
+
+/* Oculta o muestra secciones y sus enlaces de navegación */
+function applySections(sections) {
+  if (!sections) return;
+  SECTION_IDS.forEach(function(id) {
+    // Solo se oculta si está explícitamente en false; por defecto visible
+    var visible = sections[id] !== false;
+    var sec = document.getElementById(id);
+    if (sec) sec.style.display = visible ? '' : 'none';
+
+    // Enlace del nav de escritorio (está dentro de un <li>)
+    var deskLink = document.querySelector('.nav-links a[data-section="' + id + '"]');
+    if (deskLink) {
+      var li = deskLink.parentNode;
+      if (li) li.style.display = visible ? '' : 'none';
+    }
+
+    // Enlaces del menú móvil, que usan href directo
+    var mobLinks = document.querySelectorAll('.mobile-menu a[href="#' + id + '"]');
+    for (var i = 0; i < mobLinks.length; i++) {
+      mobLinks[i].style.display = visible ? '' : 'none';
+    }
+  });
+  renumberSections();
+}
+
+/* Renumera 01, 02, 03... sobre las secciones visibles, para que
+   al apagar una no quede un hueco en la numeración */
+function renumberSections() {
+  var n = 0;
+  SECTION_IDS.forEach(function(id) {
+    var sec = document.getElementById(id);
+    if (!sec || sec.style.display === 'none') return;
+    var num = sec.querySelector('.section-num');
+    if (!num) return;
+    n++;
+    num.textContent = (n < 10 ? '0' : '') + n;
+  });
+}
+
+/* ── Barberos ──
+   Se sustituye el contenido del array en sitio (no se reasigna)
+   para no invalidar referencias que ya tenga el resto del código.
+   El cliente elige siempre un barbero concreto: no hay opción genérica. */
+function applyBarbers(barbers) {
+  if (!Array.isArray(barbers) || !barbers.length) return;
+  BARBERS.length = 0;
+  barbers.forEach(function(b) {
+    if (!b || !b.id || b.id === 'any') return;
+    if (b.active === false) return;
+    BARBERS.push({
+      id:    b.id,
+      name:  b.name || b.id,
+      role:  b.role || 'Barber',
+      init:  b.init || (b.name || '?').slice(0, 2).toUpperCase(),
+      photo: b.photo || ''
+    });
+  });
+}
+
+/* ── Servicios ── */
+function applyServices(services) {
+  if (!Array.isArray(services) || !services.length) return;
+  BSERVICES.length = 0;
+  services.forEach(function(s) {
+    if (!s || !s.name) return;
+    if (s.active === false) return;
+    var mins = parseInt(s.mins, 10) || 45;
+    var priceNum = typeof s.price === 'number' ? s.price : parseInt(String(s.price).replace(/[^0-9]/g, ''), 10);
+    BSERVICES.push({
+      id:    s.id || s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name:  s.name,
+      time:  s.time || (mins + ' min'),
+      price: isNaN(priceNum) ? (s.price || '') : '$' + priceNum.toLocaleString('es-CO'),
+      mins:  mins
+    });
+  });
+}
+
+/* ── Tarjetas de servicio de la sección 02 ──
+   Se emparejan por data-svc, no por nombre, para que renombrar un
+   servicio desde el panel actualice la tarjeta en vez de dejarla huérfana.
+   El diseño, los iconos y las categorías se conservan tal cual. */
+function applyServiceCards(services) {
+  if (!Array.isArray(services) || !services.length) return;
+  var byId = {};
+  services.forEach(function(s) { if (s && s.id) byId[s.id] = s; });
+
+  var cards = document.querySelectorAll('.service-card[data-svc]');
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    var s = byId[card.getAttribute('data-svc')];
+
+    // Servicio eliminado o desactivado en el panel: se oculta la tarjeta
+    if (!s || s.active === false) { card.style.display = 'none'; continue; }
+    card.style.display = '';
+
+    var nameEl = card.querySelector('.service-name');
+    if (nameEl && s.name) nameEl.textContent = s.name;
+
+    var descEl = card.querySelector('.service-desc');
+    if (descEl && s.desc) descEl.textContent = s.desc;
+
+    var priceEl = card.querySelector('.service-price');
+    if (priceEl && typeof s.price === 'number' && s.price > 0) {
+      priceEl.textContent = '$' + s.price.toLocaleString('es-CO');
+    }
+
+    // El botón lleva el nombre incrustado; se reasigna por si cambió
+    var btn = card.querySelector('.service-cta-link');
+    if (btn && s.name) {
+      btn.setAttribute('onclick', "openBooking('" + String(s.name).replace(/'/g, "\\'") + "')");
+    }
+  }
+
+  // Categoría sin ninguna tarjeta visible: se oculta entera
+  var cats = document.querySelectorAll('.service-category');
+  for (var c = 0; c < cats.length; c++) {
+    var visibles = cats[c].querySelectorAll('.service-card:not([style*="display: none"])');
+    cats[c].style.display = visibles.length ? '' : 'none';
+  }
+}
+
+/* ── Galería ──
+   Reconstruye la rejilla conservando el diseño: 5 celdas, las dos
+   últimas panorámicas. Las fotos se reparten por turnos entre celdas,
+   de modo que las que reciben más de una alternan con fundido. */
+function applyGallery(photos) {
+  if (!Array.isArray(photos)) return;
+  var clean = photos.filter(function(p) { return typeof p === 'string' && p.trim(); });
+  var grid = document.getElementById('galleryGrid');
+  if (!grid || !clean.length) return;
+
+  var CELLS = 5;
+  var buckets = [];
+  for (var i = 0; i < CELLS; i++) buckets.push([]);
+  clean.forEach(function(src, idx) { buckets[idx % CELLS].push(src); });
+
+  var html = '';
+  buckets.forEach(function(list, idx) {
+    if (!list.length) return;
+    var cls = 'gallery-item' + (idx >= 3 ? ' gallery-item--half' : '');
+    html += '<div class="' + cls + '">';
+    list.forEach(function(src, j) {
+      html += '<img class="gallery-photo' + (j === 0 ? ' gp-active' : '') + '" src="'
+            + src + '" alt="Corte" loading="lazy">';
+    });
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+  initGalleryFade();
+}
+
+/* ── Horario de apertura deducido de las jornadas ──
+   El local está abierto desde que entra el primer barbero hasta que
+   sale el último. Así el horario anunciado no se queda desfasado
+   cuando alguien cambia su jornada en el panel. */
+const DIAS_CORTOS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function deriveOpeningHours() {
+  var ids = BARBERS.filter(function(b) { return b.id !== 'any'; }).map(function(b) { return b.id; });
+  if (!ids.length) return '';
+
+  // Rango de apertura de cada día, uniendo a todos los barberos
+  var rangos = [];
+  for (var dow = 0; dow < 7; dow++) {
+    var ini = null, fin = null;
+    for (var i = 0; i < ids.length; i++) {
+      var d = barberDay(ids[i], dow);
+      if (!d.active) continue;
+      var s = toMinutes(d.start), e = toMinutes(d.end);
+      if (isNaN(s) || isNaN(e)) continue;
+      if (ini === null || s < ini) ini = s;
+      if (fin === null || e > fin) fin = e;
+    }
+    rangos[dow] = (ini === null) ? null : { ini: ini, fin: fin };
+  }
+
+  function hhmm(m) {
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  }
+
+  // Se recorre de lunes a domingo agrupando días seguidos con el mismo rango
+  var orden = [1, 2, 3, 4, 5, 6, 0];
+  var partes = [], grupo = null;
+
+  function cerrarGrupo() {
+    if (!grupo) return;
+    var etiqueta = grupo.dias.length > 1
+      ? DIAS_CORTOS[grupo.dias[0]] + '–' + DIAS_CORTOS[grupo.dias[grupo.dias.length - 1]]
+      : DIAS_CORTOS[grupo.dias[0]];
+    partes.push(etiqueta + ' ' + hhmm(grupo.r.ini) + '–' + hhmm(grupo.r.fin));
+    grupo = null;
+  }
+
+  orden.forEach(function(dow) {
+    var r = rangos[dow];
+    if (!r) { cerrarGrupo(); return; }          // día cerrado: corta la racha
+    if (grupo && grupo.r.ini === r.ini && grupo.r.fin === r.fin) {
+      grupo.dias.push(dow);
+    } else {
+      cerrarGrupo();
+      grupo = { r: r, dias: [dow] };
+    }
+  });
+  cerrarGrupo();
+
+  return partes.join(' · ');
+}
+
+/* ── Datos del negocio ── */
+function setText(id, value) {
+  if (value === undefined || value === null || value === '') return;
+  var el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+function setLink(id, url) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (url) { el.href = url; el.style.display = ''; }
+  else { el.style.display = 'none'; }
+}
+function applyBusiness(biz) {
+  biz = biz || {};
+  setText('cfgAddress', biz.address);
+  setText('cfgPhone',   biz.phone);
+
+  // El texto escrito a mano manda; si está vacío se deduce de las jornadas
+  if (biz.hours) {
+    setText('cfgHours', biz.hours);
+  } else {
+    var auto = deriveOpeningHours();
+    if (auto) setText('cfgHours', auto);
+  }
+
+  setText('cfgSocials', biz.socials);
+  setText('cfgFooterCopy', biz.footer);
+  setLink('cfgInstagram', biz.instagram);
+  setLink('cfgTiktok',    biz.tiktok);
+  setLink('cfgWhatsapp',  biz.whatsapp);
+}
+
+/* ── Foto del local (sección 01) ──
+   Sustituye el marcador "[FOTO DEL LOCAL]" por la imagen real. */
+function applyLocalPhoto(src) {
+  var host = document.getElementById('aboutImg');
+  if (!host) return;
+  var ph = document.getElementById('aboutImgPlaceholder');
+  var img = host.querySelector('.about-img-photo');
+
+  if (!src) {                                   // sin foto: vuelve el marcador
+    if (img) img.remove();
+    if (ph) ph.style.display = '';
+    return;
+  }
+
+  if (!img) {
+    img = document.createElement('img');
+    img.className = 'about-img-photo';
+    img.alt = 'Nuestro local';
+    // Si la ruta no carga, se deja el marcador en lugar de un hueco vacío
+    img.onerror = function() { img.remove(); if (ph) ph.style.display = ''; };
+    host.appendChild(img);
+  }
+  img.src = src;
+  if (ph) ph.style.display = 'none';
+}
+
+/* ── Imágenes subidas desde el panel ──
+   Se guardan en /siteConfig/images como data URL y se referencian como
+   "db:<id>", tanto en la galería como en la foto del local. Ese nodo se
+   pide aparte y SÍ se deja cachear (la versión en la URL lo invalida al
+   cambiar), para no descargar las imágenes en cada visita. */
+function applyImagesFrom(cfg) {
+  var list  = Array.isArray(cfg.gallery) ? cfg.gallery : [];
+  var local = typeof cfg.localPhoto === 'string' ? cfg.localPhoto : '';
+
+  function esSubida(s) { return typeof s === 'string' && s.indexOf('db:') === 0; }
+
+  var needsUploads = list.some(esSubida) || esSubida(local);
+
+  // Nada subido: se resuelve todo con rutas estáticas, sin pedir el nodo
+  if (!needsUploads) {
+    applyGallery(list);
+    applyLocalPhoto(local);
+    return Promise.resolve();
+  }
+
+  return fetch(FB_URL + '/siteConfig/images.json?v=' + (cfg.galleryVersion || 0))
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(imgs) {
+      function resolver(s) {
+        if (!esSubida(s)) return s;
+        var id = s.slice(3);
+        return (imgs && imgs[id]) ? imgs[id] : null;
+      }
+      applyGallery(list.map(resolver).filter(Boolean));
+      applyLocalPhoto(resolver(local) || '');
+    })
+    .catch(function() {
+      // Si no se pueden leer las subidas, se muestra al menos lo estático
+      applyGallery(list.filter(function(s) { return !esSubida(s); }));
+      applyLocalPhoto(esSubida(local) ? '' : local);
+    });
+}
+
+/* Descarga la configuración y la aplica. Nunca lanza:
+   ante cualquier fallo la web se queda como está. */
+function loadSiteConfig() {
+  return fetch(FB_URL + '/siteConfig/config.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(cfg) {
+      if (!cfg || typeof cfg !== 'object') return null;
+      siteCfg = cfg;
+      applySections(cfg.sections);
+      applyBarbers(cfg.barbers);
+      applyServices(cfg.services);
+      applyServiceCards(cfg.services);
+      refreshServiceChips();
+      applyBusiness(cfg.business);
+      applyImagesFrom(cfg);
+
+      // Si el modal de reserva ya estaba abierto, se repinta con los datos nuevos
+      var ov = document.getElementById('bookingOverlay');
+      if (ov && ov.classList.contains('open') && typeof bRenderStep1 === 'function') {
+        try { bRenderStep1(); bRefreshSlotsIfVisible(); } catch (e) {}
+      }
+      return cfg;
+    })
+    .catch(function() { return null; });
+}
+
+/* ══════════════════════════════════════════
+   RECORDATORIO EN EL CALENDARIO DEL CLIENTE
+   Sin servidor: el propio móvil del cliente avisa. Se añade
+   una alarma 2 horas antes dentro del evento.
+══════════════════════════════════════════ */
+
+let ultimaCita = null;   // datos de la cita recién confirmada
+
+function fechaICS(dateKey, hhmm, sumaMin) {
+  const p = dateKey.split('-').map(Number);
+  const t = hhmm.split(':').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2], t[0], t[1] + (sumaMin || 0));
+  const z = function(n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate())
+    + 'T' + z(d.getHours()) + z(d.getMinutes()) + '00';
+}
+
+function prepararCalendario(cita) {
+  ultimaCita = cita;
+  const ini = fechaICS(cita.date, cita.time, 0);
+  const fin = fechaICS(cita.date, cita.time, cita.mins || 45);
+  const titulo = 'Cita en 9SM NEXO · ' + (cita.service || '');
+  const detalle = 'Barbero: ' + (cita.barberName || '') + '. Código de reserva: ' + (cita.code || '');
+  const dir = (siteCfg && siteCfg.business && siteCfg.business.address) || '';
+
+  // Botón de WhatsApp, solo si hay número del negocio configurado
+  const wa = document.getElementById('calWhats');
+  if (wa) {
+    const enlace = waConfirmacion(cita);
+    if (enlace) { wa.href = enlace; wa.style.display = ''; }
+    else        { wa.style.display = 'none'; }
+  }
+
+  const g = document.getElementById('calGoogle');
+  if (g) {
+    g.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent(titulo)
+      + '&dates=' + ini + '/' + fin
+      + '&details=' + encodeURIComponent(detalle)
+      + (dir ? '&location=' + encodeURIComponent(dir) : '');
+  }
+}
+
+/* Enlace de WhatsApp a la barbería con la cita ya escrita.
+   Devuelve null si el negocio todavía no tiene número configurado. */
+function waConfirmacion(cita) {
+  var num = (siteCfg && siteCfg.business && siteCfg.business.whatsapp) || '';
+  // Admite tanto un número suelto como un enlace wa.me ya montado
+  var digits = String(num).replace(/\D/g, '');
+  if (digits.length < 10) return null;
+  if (digits.length === 10) digits = '57' + digits;   // Colombia si no trae indicativo
+
+  var p = String(cita.date || '').split('-');
+  var fecha = p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (cita.date || '');
+  var msg = 'Hola, acabo de reservar en 9SM NEXO.\n'
+    + 'Servicio: ' + (cita.service || '') + '\n'
+    + 'Barbero: ' + (cita.barberName || '') + '\n'
+    + 'Fecha: ' + fecha + ' a las ' + fmt12(cita.time) + '\n'
+    + 'Codigo: ' + (cita.code || '');
+  return 'https://wa.me/' + digits + '?text=' + encodeURIComponent(msg);
+}
+
+function descargarICS() {
+  if (!ultimaCita) return;
+  const c = ultimaCita;
+  const dir = (siteCfg && siteCfg.business && siteCfg.business.address) || '';
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//9SM NEXO//ES', 'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    'UID:' + (c.code || Date.now()) + '@9sm.site',
+    'DTSTAMP:' + fechaICS(c.date, c.time, 0) + 'Z',
+    'DTSTART:' + fechaICS(c.date, c.time, 0),
+    'DTEND:' + fechaICS(c.date, c.time, c.mins || 45),
+    'SUMMARY:Cita en 9SM NEXO - ' + (c.service || ''),
+    'DESCRIPTION:Barbero: ' + (c.barberName || '') + '. Codigo: ' + (c.code || ''),
+    dir ? 'LOCATION:' + dir : '',
+    'BEGIN:VALARM', 'TRIGGER:-P1D',  'ACTION:DISPLAY', 'DESCRIPTION:Manana tienes tu cita en 9SM NEXO', 'END:VALARM',
+    'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', 'DESCRIPTION:Tu cita en 9SM NEXO es en 2 horas', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].filter(Boolean).join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cita-9sm-' + c.date + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 4000);
+}
+
+/* ══════════════════════════════════════════
+   RESEÑAS POR BARBERO
+   El QR de cada barbero apunta a 9sm.site/?r=<id>, que abre
+   este formulario ya asociado a él.
+══════════════════════════════════════════ */
+
+let resBarbero = null;   // barbero que se está puntuando
+let resValor   = 0;      // estrellas elegidas
+let resMedias  = {};     // { barberoId: { media, total } }
+
+function estrellaSVG() {
+  return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+    + '<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg>';
+}
+
+function pintarEstrellas() {
+  const host = document.getElementById('resStars');
+  if (!host) return;
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    html += '<button type="button" class="res-star' + (i <= resValor ? ' on' : '') + '"'
+      + ' role="radio" aria-checked="' + (i === resValor) + '"'
+      + ' aria-label="' + i + ' de 5" onclick="setResValor(' + i + ')">' + estrellaSVG() + '</button>';
+  }
+  host.innerHTML = html;
+  const textos = ['Toca una estrella para puntuar', 'Muy mal', 'Mejorable', 'Correcto', 'Muy bien', 'Excelente'];
+  document.getElementById('resHint').textContent = textos[resValor] || textos[0];
+}
+
+function setResValor(n) { resValor = n; pintarEstrellas(); }
+
+function openResena(barberId) {
+  const b = BARBERS.find(function(x) { return x.id === barberId; })
+         || (siteCfg && (siteCfg.barbers || []).find(function(x) { return x.id === barberId; }));
+  if (!b) return false;
+  resBarbero = b;
+  resValor = 0;
+
+  document.getElementById('resNombre').textContent = b.name || b.id;
+  const av = document.getElementById('resAvatar');
+  av.innerHTML = b.photo
+    ? '<img src="' + b.photo + '" alt="" onerror="this.parentNode.textContent=\'' + (b.init || '') + '\'">'
+    : (b.init || '?');
+  document.getElementById('resForm').style.display = 'block';
+  document.getElementById('resOk').style.display = 'none';
+  document.getElementById('resTexto').value = '';
+  document.getElementById('resAutor').value = '';
+  document.getElementById('resError').style.display = 'none';
+  pintarEstrellas();
+
+  document.getElementById('resenaOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  return true;
+}
+
+function closeResena() {
+  document.getElementById('resenaOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // Limpia el parámetro del QR para que al recargar no se reabra
+  if (window.history && history.replaceState && location.search.indexOf('r=') !== -1) {
+    history.replaceState({}, '', location.pathname);
+  }
+}
+
+function enviarResena() {
+  const err = document.getElementById('resError');
+  if (!resValor) {
+    err.textContent = 'Elige cuántas estrellas.';
+    err.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('resEnviar');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  err.style.display = 'none';
+
+  fetch(FB_URL + '/reviews.json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      barber:  resBarbero.id,
+      barberName: resBarbero.name || resBarbero.id,
+      stars:   resValor,
+      texto:   document.getElementById('resTexto').value.trim().slice(0, 400),
+      autor:   document.getElementById('resAutor').value.trim().slice(0, 40),
+      ts:      Date.now()
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    document.getElementById('resForm').style.display = 'none';
+    document.getElementById('resOk').style.display = 'block';
+    cargarResenas();
+  })
+  .catch(function(e) {
+    btn.disabled = false;
+    btn.textContent = 'Enviar reseña';
+    err.textContent = 'No se pudo enviar (' + e.message + '). Inténtalo de nuevo en un momento.';
+    err.style.display = 'block';
+  });
+}
+
+/* Media por barbero, para mostrarla al elegir barbero */
+function cargarResenas() {
+  return fetch(FB_URL + '/reviews.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      resMedias = {};
+      if (!data) return;
+      const acc = {};
+      Object.keys(data).forEach(function(k) {
+        const v = data[k];
+        if (!v || !v.barber || !v.stars) return;
+        if (!acc[v.barber]) acc[v.barber] = { suma: 0, n: 0 };
+        acc[v.barber].suma += Number(v.stars);
+        acc[v.barber].n++;
+      });
+      Object.keys(acc).forEach(function(id) {
+        resMedias[id] = { media: acc[id].suma / acc[id].n, total: acc[id].n };
+      });
+      if (typeof bRenderStep1 === 'function') {
+        const ov = document.getElementById('bookingOverlay');
+        if (ov && ov.classList.contains('open')) { try { bRenderStep1(); } catch (e) {} }
+      }
+    })
+    .catch(function() {});
+}
+
+/* Abre la reseña si se llegó por el QR: 9sm.site/?r=b1 */
+function resenaDesdeQR() {
+  const m = location.search.match(/[?&]r=([^&]+)/);
+  if (!m) return;
+  const id = decodeURIComponent(m[1]);
+  // Puede llegar antes de que cargue la configuración: se reintenta al tenerla
+  if (!openResena(id)) {
+    loadSiteConfig().then(function() { openResena(id); });
+  }
+}
+
+cargarResenas();
+loadSiteConfig().then(resenaDesdeQR);
+
+/* Si se ha publicado una versión nueva, la página se recarga sola.
+   Cubre las pestañas de móvil que quedan abiertas en segundo plano: al
+   volver a ellas el navegador reanuda la copia vieja sin pedirla de nuevo.
+   Solo una recarga por versión, para no entrar en bucle si el servidor
+   aún sirve la anterior. */
+(function () {
+  var BUILD = '20261009a';
+  function comprobar() {
+    fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (v) {
+        v = String(v).trim();
+        if (!v || v === BUILD) return;
+        try {
+          if (sessionStorage.getItem('9sm_reload') === v) return;
+          sessionStorage.setItem('9sm_reload', v);
+        } catch (e) {}
+        location.reload();
+      })
+      .catch(function () {});
+  }
+  comprobar();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) comprobar(); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) comprobar(); });
+})();
+</script>
+</body>
+</html>
