@@ -3240,6 +3240,11 @@ var MC_CANCEL_MIN = 60;
 var _mcCurrentCita = null;   // la cita que muestra la tarjeta
 var _mcList = [];            // todas las citas próximas de este cliente
 
+/* Escapa texto de Firebase antes de ponerlo en el HTML */
+function mcEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /* Minutos que faltan para que empiece la cita (Infinity si no hay datos) */
 function mcMinutosHasta(cita) {
   if (!cita || !/^\d{4}-\d{2}-\d{2}$/.test(cita.date || '') || !/^\d{1,2}:\d{2}$/.test(cita.time || '')) return Infinity;
@@ -3292,9 +3297,9 @@ function mcRenderSerie() {
     var d = new Date(b.date + 'T00:00:00');
     var activa = b._fbKey && b._fbKey === _mcCurrentKey;
     var pos = (b.seriesIndex && b.seriesTotal) ? ' · ' + b.seriesIndex + '/' + b.seriesTotal : '';
-    return '<button type="button" onclick="mcElegir(\'' + escHtml(b._fbKey) + '\')" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:' + (activa ? 'rgba(255,255,255,0.06)' : 'none') + ';border:1px solid ' + (activa ? 'var(--white)' : 'var(--border)') + ';color:var(--white);padding:11px 14px;border-radius:10px;font-size:0.78rem;cursor:pointer;margin-bottom:8px">'
-      + '<span>' + DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()] + ' · ' + escHtml(fmt12(b.time)) + '</span>'
-      + '<span style="color:var(--text-muted);font-size:0.7rem">' + escHtml((b.barberName || '').split(' ')[0]) + pos + '</span>'
+    return '<button type="button" onclick="mcElegir(\'' + mcEsc(b._fbKey) + '\')" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:' + (activa ? 'rgba(255,255,255,0.06)' : 'none') + ';border:1px solid ' + (activa ? 'var(--white)' : 'var(--border)') + ';color:var(--white);padding:11px 14px;border-radius:10px;font-size:0.78rem;cursor:pointer;margin-bottom:8px">'
+      + '<span>' + DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()] + ' · ' + mcEsc(fmt12(b.time)) + '</span>'
+      + '<span style="color:var(--text-muted);font-size:0.7rem">' + mcEsc((b.barberName || '').split(' ')[0]) + pos + '</span>'
       + '</button>';
   }
   var enSerie = cur.seriesId ? list.filter(function(b) { return b.seriesId === cur.seriesId; }) : [];
