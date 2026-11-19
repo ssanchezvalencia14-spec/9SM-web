@@ -2648,7 +2648,7 @@ function bRenderStep1() {
     c.className = 'bsvc-chip' + (bState.selService === s.name ? ' selected' : '');
     c.innerHTML = '<span class="bsvc-chip-name">' + s.name + '</span>'
       + '<span class="bsvc-chip-meta">'
-      + '<span class="bsvc-chip-price">' + s.price + '</span>'
+      + '<span class="bsvc-chip-price">' + servicePriceFor(bState.selBarber, s) + '</span>'
       + '<span class="bsvc-chip-time">' + tiempo + '</span>'
       + '</span>';
     c.addEventListener('click', function() { bState.selService = s.name; bRenderStep1(); });
@@ -3559,6 +3559,18 @@ function serviceMinsFor(barberId, serviceName) {
   var b = cfgBarber(barberId);
   if (!b || !b.svc || !b.svc[svc.id]) return base;
   return parseInt(b.svc[svc.id].mins, 10) || base;
+}
+
+/* Precio de un servicio para un barbero concreto. Si el administrador le fijó
+   uno propio manda ese; si no, el del catálogo. Devuelve el texto a mostrar. */
+function servicePriceFor(barberId, svc) {
+  if (!svc) return '';
+  if (barberId && barberId !== 'any') {
+    var b = cfgBarber(barberId);
+    var p = (b && b.svc && b.svc[svc.id]) ? Number(b.svc[svc.id].price) : 0;
+    if (p > 0) return '$' + Math.round(p).toLocaleString('es-CO');
+  }
+  return svc.price;
 }
 
 /* ¿Ofrece ese barbero ese servicio? "Cualquiera" vale si lo ofrece alguno. */
@@ -4688,7 +4700,7 @@ loadSiteConfig().then(resenaDesdeQR);
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261119a';
+  var BUILD = '20261120a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
