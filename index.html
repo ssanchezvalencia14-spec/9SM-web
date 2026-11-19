@@ -2030,7 +2030,7 @@
           <div class="cbp-chips">
             <span class="cbp-chip">✓ Sin llamadas</span>
             <span class="cbp-chip">✓ Confirmación inmediata</span>
-            <span class="cbp-chip">✓ Cancela gratis</span>
+            <span class="cbp-chip">✓ Cancela hasta 1 h antes</span>
           </div>
 
           <button onclick="openBooking()" class="cita-submit open-booking" style="margin-top:0;">
@@ -2322,6 +2322,8 @@
       </div>
       <!-- Acciones -->
       <div id="mcCardActions"></div>
+      <!-- Otras citas del cliente: las de una serie recurrente y las sueltas -->
+      <div id="mcSerie"></div>
     </div>
 
     <!-- Sin citas -->
@@ -3178,6 +3180,8 @@ function openMyCitas() {
   closeBooking();
   closeMobileMenu();
   _mcCurrentKey = null;
+  _mcCurrentCita = null;
+  _mcList = [];
   document.getElementById('myCitasOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -3230,9 +3234,100 @@ function mcBuscarPorTel(e) {
   mcCargarUltimaCita(tel);
 }
 
+/* El cliente solo puede cancelar si faltan más de 60 minutos para su cita.
+   Es una regla de la interfaz: en la última hora debe avisar a la barbería. */
+var MC_CANCEL_MIN = 60;
+var _mcCurrentCita = null;   // la cita que muestra la tarjeta
+var _mcList = [];            // todas las citas próximas de este cliente
+
+/* Escapa texto de Firebase antes de ponerlo en el HTML */
+function mcEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* Minutos que faltan para que empiece la cita (Infinity si no hay datos) */
+function mcMinutosHasta(cita) {
+  if (!cita || !/^\d{4}-\d{2}-\d{2}$/.test(cita.date || '') || !/^\d{1,2}:\d{2}$/.test(cita.time || '')) return Infinity;
+  var t = new Date(cita.date + 'T' + (cita.time.length === 4 ? '0' : '') + cita.time + ':00');
+  if (isNaN(t.getTime())) return Infinity;
+  return (t.getTime() - Date.now()) / 60000;
+}
+
+/* WhatsApp de la barbería para avisar de un cambio de última hora */
+function mcWaLink(cita) {
+  var num = (siteCfg && siteCfg.business && siteCfg.business.whatsapp) || '';
+  var digits = String(num).replace(/\D/g, '');
+  if (digits.length < 10) return null;
+  if (digits.length === 10) digits = '57' + digits;
+  var msg = 'Hola, necesito cambiar o cancelar mi cita de ' + (cita.service || '')
+    + ' el ' + (cita.date || '') + ' a las ' + fmt12(cita.time)
+    + (cita.code ? ' (codigo ' + cita.code + ')' : '') + '.';
+  return 'https://wa.me/' + digits + '?text=' + encodeURIComponent(msg);
+}
+
+/* Citas próximas y activas de un teléfono, de la más cercana a la más lejana */
+function mcRecolectar(data, cleanTel) {
+  var todayKey = bDateKey(new Date());
+  var out = [];
+  Object.entries(data).forEach(function(kv) {
+    var b = kv[1];
+    if (!b || typeof b !== 'object') return;
+    var bTel = (b.telefono || '').replace(/\D/g, '');
+    if (bTel && bTel === cleanTel && b.date >= todayKey &&
+        b.status !== 'cancelled' && b.status !== 'overflow' && b.status !== 'blocked' && b.status !== 'done') {
+      out.push(Object.assign({ _fbKey: kv[0] }, b));
+    }
+  });
+  out.sort(function(a, b) { return a.date.localeCompare(b.date) || a.time.localeCompare(b.time); });
+  return out;
+}
+
+/* Lista de las demás citas del cliente. Si la actual es parte de una serie
+   recurrente, se muestran todas las fechas de esa serie. */
+function mcRenderSerie() {
+  var host = document.getElementById('mcSerie');
+  if (!host) return;
+  var cur = _mcCurrentCita;
+  var list = _mcList || [];
+  if (!cur || list.length < 2) { host.innerHTML = ''; return; }
+
+  var DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
+  var MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  function fila(b) {
+    var d = new Date(b.date + 'T00:00:00');
+    var activa = b._fbKey && b._fbKey === _mcCurrentKey;
+    var pos = (b.seriesIndex && b.seriesTotal) ? ' · ' + b.seriesIndex + '/' + b.seriesTotal : '';
+    return '<button type="button" onclick="mcElegir(\'' + mcEsc(b._fbKey) + '\')" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;background:' + (activa ? 'rgba(255,255,255,0.06)' : 'none') + ';border:1px solid ' + (activa ? 'var(--white)' : 'var(--border)') + ';color:var(--white);padding:11px 14px;border-radius:10px;font-size:0.78rem;cursor:pointer;margin-bottom:8px">'
+      + '<span>' + DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()] + ' · ' + mcEsc(fmt12(b.time)) + '</span>'
+      + '<span style="color:var(--text-muted);font-size:0.7rem">' + mcEsc((b.barberName || '').split(' ')[0]) + pos + '</span>'
+      + '</button>';
+  }
+  var enSerie = cur.seriesId ? list.filter(function(b) { return b.seriesId === cur.seriesId; }) : [];
+  var otras = list.filter(function(b) { return enSerie.indexOf(b) < 0; });
+  var freq = { week: 'semanal', '2weeks': 'quincenal', month: 'mensual' }[cur.seriesEvery] || 'recurrente';
+
+  var html = '';
+  if (enSerie.length > 1) {
+    html += '<p style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin:26px 0 12px">↻ Cita ' + freq + ' · tus fechas</p>'
+      + enSerie.map(fila).join('');
+  }
+  if (otras.length) {
+    html += '<p style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-muted);margin:' + (enSerie.length > 1 ? '18' : '26') + 'px 0 12px">' + (enSerie.length > 1 ? 'Otras citas' : 'Tus próximas citas') + '</p>'
+      + otras.map(fila).join('');
+  }
+  host.innerHTML = html;
+}
+
+/* Cambia la tarjeta a otra de las citas de la lista */
+function mcElegir(key) {
+  var b = (_mcList || []).find(function(x) { return x._fbKey === key; });
+  if (b) mcMostrarCita(b, b._fbKey);
+}
+
 function mcMostrarCita(cita, fbKey) {
   var DAYS2 = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   var MTHS2 = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  _mcCurrentCita = cita;
   if (fbKey) _mcCurrentKey = fbKey;
   var d = new Date(cita.date + 'T00:00:00');
   document.getElementById('mcCardFecha').textContent   = DAYS2[d.getDay()] + ', ' + d.getDate() + ' de ' + MTHS2[d.getMonth()];
@@ -3240,6 +3335,7 @@ function mcMostrarCita(cita, fbKey) {
   document.getElementById('mcCardBarber').textContent  = cita.barberName || 'Cualquiera';
   document.getElementById('mcCardService').textContent = cita.service || '';
   mcSetActions('cancelar');
+  mcRenderSerie();
   mcShowView('mcCard');
 }
 
@@ -3251,19 +3347,28 @@ function mcVerificarEnFirebase(localCita) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data || typeof data !== 'object') return;
-      var match = null;
-      Object.entries(data).forEach(function(kv) {
-        var b = kv[1];
-        if (!b) return;
-        var bTel = (b.telefono || '').replace(/\D/g, '');
-        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
-          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
-            match = Object.assign({ _fbKey: kv[0] }, b);
-          }
-        }
+      var lista = mcRecolectar(data, cleanTel);
+      // La que ya se está mostrando, tal como quedó en Firebase
+      var actual = lista.find(function(b) {
+        return b.date === localCita.date && b.time === localCita.time;
       });
-      if (match) {
-        _mcCurrentKey = match._fbKey;
+      if (lista.length) {
+        _mcList = lista;
+        if (actual) {
+          _mcCurrentKey = actual._fbKey;
+          _mcCurrentCita = actual;
+          mcRenderSerie();
+        } else {
+          // La mostrada ya no existe (cancelada por el admin), pero el cliente tiene otras
+          try {
+            var loc = JSON.parse(localStorage.getItem('9sm_bookings') || '[]');
+            loc = loc.map(function(b) {
+              return (b && b.date === localCita.date && b.time === localCita.time) ? Object.assign({}, b, { status: 'cancelled' }) : b;
+            });
+            localStorage.setItem('9sm_bookings', JSON.stringify(loc));
+          } catch(e) {}
+          if (document.getElementById('mcCard').style.display !== 'none') mcMostrarCita(lista[0], lista[0]._fbKey);
+        }
       } else {
         // La cita fue cancelada por el admin → actualizar localStorage y mostrar vacío
         try {
@@ -3289,19 +3394,10 @@ function mcCargarUltimaCita(telefono) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data || typeof data !== 'object' || data.error) { mcShowView('mcEmpty'); return; }
-      var match = null;
-      Object.entries(data).forEach(function(kv) {
-        var b = kv[1];
-        if (!b) return;
-        var bTel = (b.telefono || '').replace(/\D/g, '');
-        if (bTel === cleanTel && b.status !== 'cancelled' && b.status !== 'overflow' && b.date >= todayKey) {
-          if (!match || b.date < match.date || (b.date === match.date && b.time < match.time)) {
-            match = Object.assign({ _fbKey: kv[0] }, b);
-          }
-        }
-      });
-      if (!match) { mcShowView('mcEmpty'); return; }
-      mcMostrarCita(match, match._fbKey);
+      var lista = mcRecolectar(data, cleanTel);
+      if (!lista.length) { mcShowView('mcEmpty'); return; }
+      _mcList = lista;
+      mcMostrarCita(lista[0], lista[0]._fbKey);
     })
     .catch(function() { mcShowView('mcEmpty'); });
 }
@@ -3309,7 +3405,13 @@ function mcCargarUltimaCita(telefono) {
 function mcSetActions(state) {
   var div = document.getElementById('mcCardActions');
   if (!div) return;
-  if (state === 'cancelar') {
+  if (state === 'cancelar' && mcMinutosHasta(_mcCurrentCita) < MC_CANCEL_MIN) {
+    // En la última hora ya no se cancela desde la web: hay que avisar a la barbería
+    var wa = mcWaLink(_mcCurrentCita);
+    div.innerHTML =
+      '<p style="text-align:center;font-size:0.78rem;color:var(--text-muted);margin:0 0 14px;line-height:1.5">Ya no se puede cancelar desde aquí:<br/>falta menos de 1 hora para tu cita.</p>' +
+      (wa ? '<a href="' + wa + '" target="_blank" rel="noopener" style="display:block;text-align:center;border:1px solid var(--border);color:var(--white);padding:13px;border-radius:10px;font-size:0.78rem;text-decoration:none;letter-spacing:0.04em">Avisar por WhatsApp</a>' : '');
+  } else if (state === 'cancelar') {
     div.innerHTML =
       '<button onclick="mcSetActions(\'confirmar\')" style="width:100%;background:none;border:1px solid rgba(239,68,68,0.35);color:#ef4444;padding:13px;border-radius:10px;font-size:0.78rem;font-weight:500;cursor:pointer;letter-spacing:0.04em;transition:background 0.2s" onmouseover="this.style.background=\'rgba(239,68,68,0.08)\'" onmouseout="this.style.background=\'none\'">Cancelar cita</button>';
   } else if (state === 'confirmar') {
@@ -3330,6 +3432,8 @@ function mcSetActions(state) {
 
 function mcEjecutarCancelar() {
   if (!_mcCurrentKey) return;
+  // Se vuelve a comprobar: el cliente pudo dejar la pantalla abierta hasta entrar en la última hora
+  if (mcMinutosHasta(_mcCurrentCita) < MC_CANCEL_MIN) { mcSetActions('cancelar'); return; }
   mcSetActions('cargando');
   var ctrl = new AbortController();
   var t = setTimeout(function() { ctrl.abort(); }, 8000);
@@ -4584,7 +4688,7 @@ loadSiteConfig().then(resenaDesdeQR);
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261009a';
+  var BUILD = '20261119a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
