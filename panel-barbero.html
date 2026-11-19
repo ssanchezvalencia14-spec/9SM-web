@@ -898,6 +898,14 @@
       font-size: 0.62rem; color: var(--text-muted);
       text-align: right; letter-spacing: 0.04em;
     }
+    /* Precio propio del barbero para este servicio (lo fija el administrador) */
+    .hor-svc-price { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .hor-svc-price input {
+      width: 92px; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 8px; font-size: 0.74rem; font-family: inherit; outline: none;
+    }
+    .hor-svc-price input:focus { border-color: rgba(255,255,255,0.3); }
     @media (max-width: 760px) {
       .hor-svc { grid-template-columns: 30px 1fr; row-gap: 10px; }
       .hor-svc-mins, .hor-svc-turnos { grid-column: 2 / -1; text-align: left; }
@@ -1916,11 +1924,25 @@ const SERVICE_PRICES = {
 };
 /* Precio del catálogo publicado; la lista de arriba queda como respaldo
    para instalaciones que todavía no han guardado configuración */
-function servicePrice(name) {
+function servicePrice(name, barberId) {
   var cat = (PANEL_CFG && Array.isArray(PANEL_CFG.services)) ? PANEL_CFG.services : [];
   var s = cat.find(function(x) { return x && x.name === name; });
+  // Precio propio del barbero, si el administrador le fijó uno para este servicio
+  if (s && barberId) {
+    var br = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers))
+      ? PANEL_CFG.barbers.find(function(b) { return b && b.id === barberId; }) : null;
+    var propio = br && br.svc && br.svc[s.id] ? Number(br.svc[s.id].price) : 0;
+    if (propio > 0) return propio;
+  }
   if (s && Number(s.price) > 0) return Number(s.price);
   return SERVICE_PRICES[name] || 0;
+}
+/* Lo que vale una cita: lo cobrado si ya se registró el pago; si no, el precio
+   vigente de ese servicio para el barbero que la atiende */
+function apptPrice(a) {
+  var cobrado = Number(a && a.paidAmount);
+  if (cobrado > 0) return cobrado;
+  return servicePrice(a && a.service, a && a.barber);
 }
 function formatCOP(n) { return '$' + Math.round(n).toLocaleString('es-CO'); }
 
@@ -2764,7 +2786,7 @@ function openPayModal(key, marcarCompletada) {
       '<div class="pay-box">'
     +   '<p class="pay-title">¿Cómo pagó el cliente?</p>'
     +   '<p class="pay-sub">' + escHtml(a.nombre || 'Cliente') + ' · ' + escHtml(a.service || '')
-    +     ' · ' + formatCOP(servicePrice(a.service)) + '</p>'
+    +     ' · ' + formatCOP(servicePrice(a.service, a.barber)) + '</p>'
     +   '<div class="pay-opts">'
     +     '<button class="pay-opt" onclick="savePayment(\'' + key + '\',\'efectivo\',' + (marcarCompletada ? 'true' : 'false') + ')">Efectivo</button>'
     +     '<button class="pay-opt" onclick="savePayment(\'' + key + '\',\'transferencia\',' + (marcarCompletada ? 'true' : 'false') + ')">Transferencia</button>'
@@ -2786,7 +2808,7 @@ function savePayment(key, metodo, marcarCompletada) {
     paymentMethod: metodo,
     paidAt: Date.now(),
     paidBy: (currentBarber && currentBarber.id) || 'barbero',
-    paidAmount: a ? servicePrice(a.service) : 0
+    paidAmount: a ? servicePrice(a.service, a.barber) : 0
   };
   if (marcarCompletada) upd.status = 'done';
   db.ref('bookings/' + key).update(upd).then(closePayModal).catch(function() {
@@ -3243,7 +3265,7 @@ function renderBalanceView() {
   }
 
   // ── Totales del período ──
-  const totIng   = filtered.reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
+  const totIng   = filtered.reduce(function(s,a){ return s + apptPrice(a); }, 0);
   const totCitas = filtered.length;
   const prom     = totCitas ? Math.round(totIng / totCitas) : 0;
   const totEl = document.getElementById('balTotales');
@@ -3258,10 +3280,10 @@ function renderBalanceView() {
     // antes de existir el registro de pago quedan aparte
     const porMetodo = function(m) {
       return filtered.filter(function(a){ return a.paymentMethod === m; })
-                     .reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
+                     .reduce(function(s,a){ return s + apptPrice(a); }, 0);
     };
     const sinPago = filtered.filter(function(a){ return !payLabel(a.paymentMethod); });
-    const sinPagoIng = sinPago.reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
+    const sinPagoIng = sinPago.reduce(function(s,a){ return s + apptPrice(a); }, 0);
     totEl.innerHTML = kpi('Ingresos', formatCOP(totIng))
       + kpi('Citas completadas', String(totCitas))
       + kpi('Promedio por cita', formatCOP(prom))
@@ -3273,7 +3295,7 @@ function renderBalanceView() {
   barbers.forEach(function(b) {
     // Sin '|| any': una cita antigua sin barbero asignado sumaba a los tres
     const citas = filtered.filter(function(a){ return a.barber === b.id; });
-    totals[b.id] = { citas: citas.length, ingresos: citas.reduce(function(s,a){ return s+servicePrice(a.service); },0) };
+    totals[b.id] = { citas: citas.length, ingresos: citas.reduce(function(s,a){ return s+apptPrice(a); },0) };
   });
   const maxIng = Math.max(1, Math.max.apply(null, barbers.map(function(b){ return totals[b.id].ingresos; })));
 
@@ -3306,7 +3328,7 @@ function renderBalanceView() {
       // Sin '|| any': una cita sin barbero asignado sumaba a todos a la vez
       if (a.barber === b.id) {
         if (!daySet[a.date]) daySet[a.date] = {};
-        daySet[a.date][b.id] = (daySet[a.date][b.id] || 0) + servicePrice(a.service);
+        daySet[a.date][b.id] = (daySet[a.date][b.id] || 0) + apptPrice(a);
       }
     });
   });
@@ -3374,7 +3396,7 @@ function renderBalanceView() {
     var svc = a.service || '—';
     if (!svcMap[svc]) svcMap[svc] = { count: 0, rev: 0 };
     svcMap[svc].count++;
-    svcMap[svc].rev += servicePrice(a.service);
+    svcMap[svc].rev += apptPrice(a);
   });
   const svcRows = Object.keys(svcMap).sort(function(a,b){ return svcMap[b].rev - svcMap[a].rev; });
   const tbody = document.getElementById('balServiceBody');
@@ -3640,8 +3662,31 @@ function horSvcAjuste(b, s) {
   var a = (b.svc && b.svc[s.id]) || {};
   return {
     on:   a.on !== false,
-    mins: parseInt(a.mins, 10) || parseInt(s.mins, 10) || 45
+    mins: parseInt(a.mins, 10) || parseInt(s.mins, 10) || 45,
+    // 0 = sin precio propio: se cobra el del catálogo
+    price: Number(a.price) > 0 ? Math.round(Number(a.price)) : 0
   };
+}
+
+/* Precio propio del barbero para un servicio. Solo el administrador lo
+   cambia; el barbero ve cuál es el suyo pero no puede editarlo. */
+function horSvcPrecioHtml(s, a) {
+  const cat = Number(s.price) || 0;
+  if (hasAdminRights(currentBarber)) {
+    return '<span class="hor-svc-meta hor-svc-price">Precio de este barbero $ '
+      + '<input type="number" data-k="price" min="0" step="1000" inputmode="numeric" placeholder="' + cat + '"'
+      + (a.price ? ' value="' + a.price + '"' : '') + ' onchange="horarioSvcPrecio(this)">'
+      + '<span>' + (a.price ? 'propio' : 'vacío = precio del catálogo') + '</span></span>';
+  }
+  return '<span class="hor-svc-meta">Tu precio: $' + (a.price || cat).toLocaleString('es-CO')
+    + (a.price ? '' : ' (el del catálogo)') + '</span>';
+}
+
+/* Al cambiar el precio se recoge de inmediato para no perderlo al redibujar */
+function horarioSvcPrecio(input) {
+  if (!hasAdminRights(currentBarber)) return;
+  horarioCollect();
+  horarioRenderServicios();
 }
 
 function horarioRenderServicios() {
@@ -3658,7 +3703,9 @@ function horarioRenderServicios() {
       + '<input type="checkbox" data-k="on"' + (a.on ? ' checked' : '') + ' onchange="horarioToggleSvc(this)">'
       + '<div><span class="hor-svc-name">' + String(s.name).replace(/</g,'&lt;') + '</span>'
       +   '<span class="hor-svc-meta">Catálogo: ' + (s.mins || 45) + ' min · $'
-      +   (Number(s.price) || 0).toLocaleString('es-CO') + '</span></div>'
+      +   (Number(s.price) || 0).toLocaleString('es-CO') + '</span>'
+      +   (a.on ? horSvcPrecioHtml(s, a) : '')
+      + '</div>'
       + (a.on
           ? '<div class="hor-svc-mins"><input type="number" data-k="mins" min="15" max="240" step="5" value="'
             + a.mins + '" onchange="horarioSvcMins(this)"><span class="hor-desc-sep">min</span></div>'
@@ -3776,6 +3823,15 @@ function horarioCollect() {
       on: on,
       mins: mi ? (parseInt(mi.value, 10) || 45) : (parseInt(prevSvc.mins, 10) || 45)
     };
+    // El precio propio solo lo toca el administrador; para el resto se conserva
+    // el que ya tenía, aunque la fila no lo muestre como campo editable
+    let precio = Number(prevSvc.price) > 0 ? Math.round(Number(prevSvc.price)) : 0;
+    const pi = fila.querySelector('[data-k="price"]');
+    if (pi && hasAdminRights(currentBarber)) {
+      const n = parseInt(String(pi.value).replace(/[^0-9]/g, ''), 10);
+      precio = n > 0 ? n : 0;
+    }
+    if (precio > 0) svc[sid].price = precio;
   });
   if (Object.keys(svc).length) b.svc = svc;
 }
@@ -4889,7 +4945,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261119a';
+  var BUILD = '20261120a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
