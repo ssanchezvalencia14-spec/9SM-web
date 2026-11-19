@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9SM NEXO · Maquetas del panel del barbero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="componentes.css">
+<link rel="stylesheet" href="maqueta.css">
+</head>
+<body class="viewer">
+<!--ICONOS-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!-- Iconos de interfaz 9SM. Rejilla 24, trazo 1,75 (lo pone .icon), puntas redondas.
+       Equivalencias con SF Symbols (HIG › Icons › Standard icons) en el nombre. -->
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-calendar-plus" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.8v5M9.5 15.3h5"/></symbol>
+  <symbol id="i-calendar-today" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><rect x="8" y="13" width="3.5" height="3.5" rx=".8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 5.5l6.5 6.5-6.5 6.5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M5.5 9.5L12 16l6.5-6.5"/></symbol>
+  <symbol id="i-xmark" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"/></symbol>
+  <symbol id="i-persons" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M2.8 19.5c.7-3.2 3.1-5 6.2-5s5.5 1.8 6.2 5M15.5 5.6a3.2 3.2 0 0 1 0 6M17.6 14.6c2 .6 3.3 2.2 3.7 4.9"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6.5" cy="17" r="2.8"/><circle cx="6.5" cy="7" r="2.8"/><path d="M8.8 8.6L20 17M8.8 15.4L20 7"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M20 11.5c0 4.1-3.6 7.5-8 7.5-1.2 0-2.3-.2-3.3-.6L4 19.5l1.3-3.7A7.2 7.2 0 0 1 4 11.5C4 7.4 7.6 4 12 4s8 3.4 8 7.5z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.8l2.6-.3 1.6 4-1.9 1.4a11 11 0 0 0 6.2 6.2l1.4-1.9 4 1.6-.3 2.6a2 2 0 0 1-2.1 1.8C10.4 18.8 5.2 13.6 4.8 6a2 2 0 0 1 1.8-2.2z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l.9 13a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13M10 10.5v6M14 10.5v6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4.5 19.5l1-4L16 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/><path d="M14 7l3 3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5v-5M12 16.5V7M17 16.5v-8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><path d="M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.3 3.5 5.2 3.5 8.5s-1.2 6.2-3.5 8.5c-2.3-2.3-3.5-5.2-3.5-8.5S9.7 5.8 12 3.5z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3.5l7.5 4v9L12 20.5l-7.5-4v-9z"/><path d="M4.5 7.5L12 11.5l7.5-4M12 11.5v9"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1M19.5 14h.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-ellipsis" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.4h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6h.01"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M19 4.5V8h-3.5"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 8.5h14M14.5 5L18 8.5 14.5 12M20 15.5H6M9.5 12L6 15.5 9.5 19"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 4.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h7M11 12h9.5M17 8.5l3.5 3.5-3.5 3.5"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11M8 7l4-4 4 4M8 10.5H6.5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H16"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 19.5h14"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5L16 11l-8 8"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4.5 9h15M4.5 15h15"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 4.5L19.5 7 17 9.5M19.5 7H8a3.5 3.5 0 0 0-3.5 3.5V12M7 19.5L4.5 17 7 14.5M4.5 17H16a3.5 3.5 0 0 0 3.5-3.5V12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="12.5" rx="2.2"/><path d="M16 8V5.7a2.2 2.2 0 0 0-2.2-2.2H6.7a2.2 2.2 0 0 0-2.2 2.2v8.1A2.2 2.2 0 0 0 6.7 16H8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13.5l2.2-7.3a2 2 0 0 1 1.9-1.4h7.8a2 2 0 0 1 1.9 1.4l2.2 7.3v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M4 9.5a12 12 0 0 1 5-2.6M14.5 6.8A12 12 0 0 1 20 9.5M7 13a7.5 7.5 0 0 1 3.4-1.8M17 13a7.5 7.5 0 0 0-2-1.3M10 16.3a3 3 0 0 1 4 0M12 19.5h.01M4 4l16 16"/></symbol>
+</svg>
+<!--/ICONOS-->
+
+<header class="viewer-top">
+  <h1>9SM NEXO · Panel del barbero<small>Maquetas para aprobar · cada pantalla en móvil y escritorio</small></h1>
+  <div class="segmented" role="group" aria-label="Dispositivo">
+    <button class="segmented__item" data-set-device="mobile" aria-pressed="false">Móvil</button>
+    <button class="segmented__item" data-set-device="desktop" aria-pressed="false">Escritorio</button>
+    <button class="segmented__item" data-set-device="both" aria-pressed="false">Ambos</button>
+  </div>
+  <div class="segmented" role="group" aria-label="Apariencia de la maqueta">
+    <button class="segmented__item" data-set-appearance="light" aria-pressed="false">Claro</button>
+    <button class="segmented__item" data-set-appearance="dark" aria-pressed="false">Oscuro</button>
+  </div>
+</header>
+
+<div class="viewer-layout">
+  <nav class="viewer-index" id="index" aria-label="Pantallas"></nav>
+  <main class="viewer-main" id="shots">
+    <p class="viewer-intro">Estas son <strong>todas las pantallas y estados del panel</strong>, con aspecto de app nativa: en el teléfono, tab bar flotante y títulos grandes; en el computador, sidebar (HIG › Layout: misma funcionalidad, más visible con más espacio). Se muestran con el rol de barbero (Sebastian) o de administrador según la pantalla. El nombre y el código de cada pantalla son los que usa la matriz de flujos (<code>pruebas/flujos.md</code>).</p>
+  </main>
+</div>
+
+<!-- =====================================================================
+     PIEZAS COMPARTIDAS
+     ===================================================================== -->
+
+<!-- Estructura: sidebar (≥ 734 px) · contenido · tab bar (< 734 px).
+     HIG › Tab bars: 4 pestañas de navegación, nunca acciones; «Más» reúne
+     el resto. HIG › Sidebars: dos niveles como máximo. -->
+<template data-part="shell">
+  <div class="shell">
+    <aside class="shell__sidebar sidebar" aria-label="Secciones">
+      <div class="sidebar__brand"><img class="logo" src="assets/9sm-logo.png" alt="9SM NEXO"><span class="t-footnote t-secondary">Panel</span></div>
+      <a class="sidebar__item" data-nav="agenda" href="#"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Agenda<span class="sidebar__count">3</span></a>
+      <a class="sidebar__item" data-nav="horario" href="#"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Horario</a>
+      <a class="sidebar__item" data-nav="balance" href="#"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Balance</a>
+      <a class="sidebar__item" data-nav="resenas" href="#"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>Reseñas</a>
+      <p class="sidebar__section" data-admin>Administración</p>
+      <a class="sidebar__item" data-admin data-nav="clientes" href="#"><svg class="icon" aria-hidden="true"><use href="#i-persons"/></svg>Clientes</a>
+      <a class="sidebar__item" data-admin data-nav="inventario" href="#"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg>Inventario</a>
+      <a class="sidebar__item" data-admin data-nav="web" href="#"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>Personalizar web</a>
+      <div class="sidebar__footer">
+        <div class="sidebar__user"><span class="avatar avatar--sm" data-fill="initials">SM</span><span><span class="t-subhead" style="display:block;font-weight:600" data-fill="user">Sebastian Montoya</span><span class="t-footnote t-secondary" data-fill="userrole">Barbero</span></span></div>
+        <button class="sidebar__item" type="button" style="width:100%"><svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>Cerrar sesión</button>
+      </div>
+    </aside>
+    <div class="shell__main" data-slot></div>
+    <nav class="tabbar" aria-label="Secciones">
+      <a class="tabbar__item" data-nav="agenda" href="#"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Agenda</a>
+      <a class="tabbar__item" data-nav="horario" href="#"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Horario</a>
+      <a class="tabbar__item" data-nav="balance" href="#"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Balance</a>
+      <a class="tabbar__item" data-nav="mas" href="#"><svg class="icon" aria-hidden="true"><use href="#i-ellipsis"/></svg>Más</a>
+    </nav>
+  </div>
+</template>
+
+<!-- Barra superior: título corto en compact, avisos y acción principal a la derecha -->
+<template data-part="toolbar">
+  <div class="toolbar">
+    <p class="toolbar__title toolbar__title--compact-only" data-fill="title">Agenda</p>
+    <div class="toolbar__actions">
+      <button class="icon-btn" type="button" aria-label="Avisos"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="count-badge" data-fill="badge"></span></button>
+      <button class="icon-btn icon-btn--filled compact-only" type="button" aria-label="Nueva cita" data-add><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
+      <button class="btn btn--filled btn--small regular-only" type="button" data-add><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Nueva cita</button>
+    </div>
+  </div>
+</template>
+
+<!-- Agenda: control segmentado (HIG › Segmented controls: subvistas muy relacionadas) -->
+<template data-part="seg-agenda">
+  <div class="segmented segmented--block" role="tablist" aria-label="Vista de la agenda" style="max-width:440px">
+    <button class="segmented__item" role="tab" data-nav="hoy" type="button">Hoy</button>
+    <button class="segmented__item" role="tab" data-nav="semana" type="button">Semana</button>
+    <button class="segmented__item" role="tab" data-nav="mes" type="button">Mes</button>
+    <button class="segmented__item" role="tab" data-nav="todas" type="button">Todas</button>
+  </div>
+</template>
+<template data-part="seg-horario">
+  <div class="segmented segmented--block" role="tablist" aria-label="Horario" style="max-width:440px;margin-bottom:var(--space-6)">
+    <button class="segmented__item" role="tab" data-nav="jornada" type="button">Jornada y servicios</button>
+    <button class="segmented__item" role="tab" data-nav="bloquear" type="button">Bloquear turnos</button>
+  </div>
+</template>
+<!-- Agenda de quién (solo admin): botón emergente. HIG › Pop-up buttons para elegir de una lista -->
+<template data-part="scope">
+  <button class="btn btn--gray btn--small" type="button" aria-haspopup="listbox"><span class="t-secondary" style="font-weight:400">Agenda de</span> Todo el local<svg class="icon icon--sm" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+</template>
+
+<!-- Lista de hoy (Sebastian) -->
+<template data-part="list-hoy">
+  <div class="summary-bar" style="margin-bottom:var(--space-6)"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span><strong>3 citas pendientes</strong> hoy · la próxima a las <strong>3:15 p. m.</strong> con Juan Pablo · <strong>2 avisos</strong> sin leer</span></div>
+  <h3 class="list-header">Hoy · jueves 19 de noviembre</h3>
+  <ul class="list">
+    <li class="row appt"><span class="appt__time">9:00 a. m.<small>40 min</small></span><span class="row__main"><button class="row__link" type="button">Andrés Gómez</button><span class="row__subtitle">NEXO Classic · $25.000</span></span><span class="appt__side"><span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada · Efectivo</span></span></li>
+    <li class="row appt"><span class="appt__time">10:30 a. m.<small>25 min</small></span><span class="row__main"><button class="row__link" type="button">Carlos Ruiz</button><span class="row__subtitle">09 Beard · $17.000</span></span><span class="appt__side"><span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada</span><button class="btn btn--tinted btn--small" type="button">Registrar pago</button></span></li>
+    <li class="row appt"><span class="appt__time">12:00 p. m.<small>50 min</small></span><span class="row__main"><button class="row__link" type="button">Mateo Ríos</button><span class="row__subtitle">NEXO Cut · canceló el cliente</span></span><span class="appt__side"><span class="badge badge--cancelled"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg>Cancelada</span><a class="btn btn--gray btn--small" href="#"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Avisar</a></span></li>
+    <li class="row appt"><span class="appt__time">3:15 p. m.<small>50 min</small></span><span class="row__main"><button class="row__link" type="button">Juan Pablo Restrepo</button><span class="appt__series"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>semanal · 1 de 3</span><span class="row__subtitle">NEXO Cut · $35.000</span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span><button class="btn btn--tinted btn--small" type="button">Completar</button></span></li>
+    <li class="row appt"><span class="appt__time">4:45 p. m.<small>45 min</small></span><span class="row__main"><button class="row__link" type="button">Santiago López</button><span class="row__subtitle">PRIME Ritual · $50.000</span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span><button class="btn btn--tinted btn--small" type="button">Completar</button></span></li>
+    <li class="row appt"><span class="appt__time">6:00 p. m.<small>40 min</small></span><span class="row__main"><button class="row__link" type="button">Daniel Torres</button><span class="row__subtitle">NEXO Classic · $25.000</span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span><button class="btn btn--tinted btn--small" type="button">Completar</button></span></li>
+  </ul>
+  <p class="list-footer">Toca el nombre del cliente para ver la cita, recordarle por WhatsApp o cancelarla.</p>
+</template>
+
+<!-- Detalle de cita (sheet) -->
+<template data-part="appt-detail">
+  <div class="sheet__grabber" aria-hidden="true"></div>
+  <div class="sheet__bar"><span></span><h2 class="sheet__title">Cita</h2><button class="icon-btn icon-btn--filled" type="button" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+  <div class="sheet__body">
+    <span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span>
+    <p class="t-large-title t-num" style="margin:var(--space-3) 0 0">3:15 p. m.</p>
+    <p class="t-callout t-secondary" style="margin:var(--space-1) 0 var(--space-5)">Hoy, jueves 19 de noviembre · 50 min</p>
+    <ul class="list">
+      <li class="row"><span class="row__main"><span class="row__title">Cliente</span></span><span class="row__detail">Juan Pablo Restrepo</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">WhatsApp</span></span><span class="row__detail">300 123 4567</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">Precio</span></span><span class="row__detail">$35.000</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">Repetición</span></span><span class="row__detail">Cada semana · 1 de 3</span></li>
+      <li class="row"><span class="row__main"><span class="row__title">Código</span></span><span class="row__detail t-mono">9SM-4K7P</span></li>
+    </ul>
+    <div class="list" style="margin-top:var(--space-5)">
+      <a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="row__main"><span class="row__title">Recordar por WhatsApp</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
+    </div>
+  </div>
+  <div class="sheet__footer">
+    <button class="btn btn--filled btn--large btn--block" type="button">Completar cita</button>
+    <button class="btn btn--destructive btn--plain btn--block" type="button">Cancelar cita</button>
+  </div>
+</template>
+
+<!-- Mes (agenda) -->
+<template data-part="month">
+  <div class="month">
+    <div class="month__head">
+      <button class="icon-btn" type="button" aria-label="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+      <h3 class="month__title">Noviembre 2026</h3>
+      <button class="icon-btn" type="button" aria-label="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+    </div>
+    <div class="month__weekdays" aria-hidden="true"><span>dom</span><span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span></div>
+    <div class="month__grid">
+<button class="mday" type="button" aria-label="1 de noviembre, sin citas"><span class="mday__num">1</span></button>
+<button class="mday" type="button" aria-label="2 de noviembre, 1 cita"><span class="mday__num">2</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>10:00</b> Andrés G.</span></span></button>
+<button class="mday" type="button" aria-label="3 de noviembre, 2 citas"><span class="mday__num">3</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>11:30</b> Felipe M.</span><span style="--dot:var(--barber-1)"><b>4:00</b> Óscar P.</span></span></button>
+<button class="mday" type="button" aria-label="4 de noviembre, sin citas"><span class="mday__num">4</span></button>
+<button class="mday" type="button" aria-label="5 de noviembre, 1 cita"><span class="mday__num">5</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>9:00</b> Luis C.</span></span></button>
+<button class="mday" type="button" aria-label="6 de noviembre, 2 citas"><span class="mday__num">6</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:30</b> Camilo R.</span><span style="--dot:var(--barber-2)"><b>5:15</b> Iván D.</span></span></button>
+<button class="mday" type="button" aria-label="7 de noviembre, 3 citas"><span class="mday__num">7</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:00</b> Jorge T.</span><span style="--dot:var(--barber-2)"><b>10:45</b> Kevin A.</span><span style="--dot:var(--barber-3)"><b>3:00</b> Nico B.</span></span></button>
+<button class="mday" type="button" aria-label="8 de noviembre, sin citas"><span class="mday__num">8</span></button>
+<button class="mday" type="button" aria-label="9 de noviembre, 1 cita"><span class="mday__num">9</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>10:00</b> Pablo S.</span></span></button>
+<button class="mday" type="button" aria-label="10 de noviembre, 1 cita"><span class="mday__num">10</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>2:30</b> Diego V.</span></span></button>
+<button class="mday" type="button" aria-label="11 de noviembre, sin citas"><span class="mday__num">11</span></button>
+<button class="mday" type="button" aria-label="12 de noviembre, 2 citas"><span class="mday__num">12</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>11:00</b> Esteban R.</span><span style="--dot:var(--barber-3)"><b>6:00</b> Raúl M.</span></span></button>
+<button class="mday" type="button" aria-label="13 de noviembre, 2 citas"><span class="mday__num">13</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:00</b> Simón L.</span><span style="--dot:var(--barber-2)"><b>9:15</b> Tomás Q.</span></span></button>
+<button class="mday" type="button" aria-label="14 de noviembre, 4 citas"><span class="mday__num">14</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__count">+1</span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:30</b> Hugo P.</span><span style="--dot:var(--barber-2)"><b>11:30</b> Sergio N.</span><span style="--dot:var(--barber-3)"><b>2:00</b> Ángel F.</span><span style="--dot:transparent">+1 más</span></span></button>
+<button class="mday" type="button" aria-label="15 de noviembre, sin citas"><span class="mday__num">15</span></button>
+<button class="mday" type="button" aria-label="16 de noviembre, 1 cita"><span class="mday__num">16</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>10:45</b> Mario E.</span></span></button>
+<button class="mday" type="button" aria-label="17 de noviembre, 1 cita"><span class="mday__num">17</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span></span></button>
+<button class="mday" type="button" aria-label="18 de noviembre, 1 cita"><span class="mday__num">18</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>12:00</b> Álvaro C.</span></span></button>
+<button class="mday is-today" type="button" aria-label="19 de noviembre, 5 citas"><span class="mday__num">19</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-1)"></i></span><span class="mday__count">+2</span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>9:00</b> Andrés G.</span><span style="--dot:var(--barber-1)"><b>10:30</b> Carlos R.</span><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span><span style="--dot:transparent">+2 más</span></span></button>
+<button class="mday" type="button" aria-label="20 de noviembre, 3 citas"><span class="mday__num">20</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>10:00</b> Martín O.</span><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span><span style="--dot:var(--barber-3)"><b>5:30</b> Felipe A.</span></span></button>
+<button class="mday" type="button" aria-label="21 de noviembre, 2 citas"><span class="mday__num">21</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:45</b> Brayan C.</span><span style="--dot:var(--barber-2)"><b>9:15</b> Julián H.</span></span></button>
+<button class="mday" type="button" aria-label="22 de noviembre, 1 cita"><span class="mday__num">22</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:00</b> Cristian Z.</span></span></button>
+<button class="mday" type="button" aria-label="23 de noviembre, sin citas"><span class="mday__num">23</span></button>
+<button class="mday" type="button" aria-label="24 de noviembre, 1 cita"><span class="mday__num">24</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>11:30</b> Emilio U.</span></span></button>
+<button class="mday" type="button" aria-label="25 de noviembre, sin citas"><span class="mday__num">25</span></button>
+<button class="mday" type="button" aria-label="26 de noviembre, 1 cita"><span class="mday__num">26</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>4:00</b> Leo V.</span></span></button>
+<button class="mday" type="button" aria-label="27 de noviembre, 1 cita"><span class="mday__num">27</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span></span></button>
+<button class="mday" type="button" aria-label="28 de noviembre, 1 cita"><span class="mday__num">28</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>9:00</b> Samuel K.</span></span></button>
+<button class="mday" type="button" aria-label="29 de noviembre, sin citas"><span class="mday__num">29</span></button>
+<button class="mday" type="button" aria-label="30 de noviembre, sin citas"><span class="mday__num">30</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">1</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">2</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">3</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">4</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">5</span></button>
+    </div>
+  </div>
+</template>
+<template data-part="month-sel">
+  <div class="month">
+    <div class="month__head">
+      <button class="icon-btn" type="button" aria-label="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+      <h3 class="month__title">Noviembre 2026</h3>
+      <button class="icon-btn" type="button" aria-label="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+    </div>
+    <div class="month__weekdays" aria-hidden="true"><span>dom</span><span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span></div>
+    <div class="month__grid">
+<button class="mday" type="button" aria-label="1 de noviembre, sin citas"><span class="mday__num">1</span></button>
+<button class="mday" type="button" aria-label="2 de noviembre, 1 cita"><span class="mday__num">2</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>10:00</b> Andrés G.</span></span></button>
+<button class="mday" type="button" aria-label="3 de noviembre, 2 citas"><span class="mday__num">3</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>11:30</b> Felipe M.</span><span style="--dot:var(--barber-1)"><b>4:00</b> Óscar P.</span></span></button>
+<button class="mday" type="button" aria-label="4 de noviembre, sin citas"><span class="mday__num">4</span></button>
+<button class="mday" type="button" aria-label="5 de noviembre, 1 cita"><span class="mday__num">5</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>9:00</b> Luis C.</span></span></button>
+<button class="mday" type="button" aria-label="6 de noviembre, 2 citas"><span class="mday__num">6</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:30</b> Camilo R.</span><span style="--dot:var(--barber-2)"><b>5:15</b> Iván D.</span></span></button>
+<button class="mday" type="button" aria-label="7 de noviembre, 3 citas"><span class="mday__num">7</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:00</b> Jorge T.</span><span style="--dot:var(--barber-2)"><b>10:45</b> Kevin A.</span><span style="--dot:var(--barber-3)"><b>3:00</b> Nico B.</span></span></button>
+<button class="mday" type="button" aria-label="8 de noviembre, sin citas"><span class="mday__num">8</span></button>
+<button class="mday" type="button" aria-label="9 de noviembre, 1 cita"><span class="mday__num">9</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>10:00</b> Pablo S.</span></span></button>
+<button class="mday" type="button" aria-label="10 de noviembre, 1 cita"><span class="mday__num">10</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>2:30</b> Diego V.</span></span></button>
+<button class="mday" type="button" aria-label="11 de noviembre, sin citas"><span class="mday__num">11</span></button>
+<button class="mday" type="button" aria-label="12 de noviembre, 2 citas"><span class="mday__num">12</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>11:00</b> Esteban R.</span><span style="--dot:var(--barber-3)"><b>6:00</b> Raúl M.</span></span></button>
+<button class="mday" type="button" aria-label="13 de noviembre, 2 citas"><span class="mday__num">13</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:00</b> Simón L.</span><span style="--dot:var(--barber-2)"><b>9:15</b> Tomás Q.</span></span></button>
+<button class="mday" type="button" aria-label="14 de noviembre, 4 citas"><span class="mday__num">14</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__count">+1</span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:30</b> Hugo P.</span><span style="--dot:var(--barber-2)"><b>11:30</b> Sergio N.</span><span style="--dot:var(--barber-3)"><b>2:00</b> Ángel F.</span><span style="--dot:transparent">+1 más</span></span></button>
+<button class="mday" type="button" aria-label="15 de noviembre, sin citas"><span class="mday__num">15</span></button>
+<button class="mday" type="button" aria-label="16 de noviembre, 1 cita"><span class="mday__num">16</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>10:45</b> Mario E.</span></span></button>
+<button class="mday" type="button" aria-label="17 de noviembre, 1 cita"><span class="mday__num">17</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span></span></button>
+<button class="mday" type="button" aria-label="18 de noviembre, 1 cita"><span class="mday__num">18</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>12:00</b> Álvaro C.</span></span></button>
+<button class="mday is-today" type="button" aria-label="19 de noviembre, 5 citas"><span class="mday__num">19</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-1)"></i></span><span class="mday__count">+2</span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>9:00</b> Andrés G.</span><span style="--dot:var(--barber-1)"><b>10:30</b> Carlos R.</span><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span><span style="--dot:transparent">+2 más</span></span></button>
+<button class="mday is-selected" type="button" aria-label="20 de noviembre, 3 citas"><span class="mday__num">20</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>10:00</b> Martín O.</span><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span><span style="--dot:var(--barber-3)"><b>5:30</b> Felipe A.</span></span></button>
+<button class="mday" type="button" aria-label="21 de noviembre, 2 citas"><span class="mday__num">21</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>7:45</b> Brayan C.</span><span style="--dot:var(--barber-2)"><b>9:15</b> Julián H.</span></span></button>
+<button class="mday" type="button" aria-label="22 de noviembre, 1 cita"><span class="mday__num">22</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>8:00</b> Cristian Z.</span></span></button>
+<button class="mday" type="button" aria-label="23 de noviembre, sin citas"><span class="mday__num">23</span></button>
+<button class="mday" type="button" aria-label="24 de noviembre, 1 cita"><span class="mday__num">24</span><span class="mday__dots"><i style="--dot:var(--barber-2)"></i></span><span class="mday__list"><span style="--dot:var(--barber-2)"><b>11:30</b> Emilio U.</span></span></button>
+<button class="mday" type="button" aria-label="25 de noviembre, sin citas"><span class="mday__num">25</span></button>
+<button class="mday" type="button" aria-label="26 de noviembre, 1 cita"><span class="mday__num">26</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>4:00</b> Leo V.</span></span></button>
+<button class="mday" type="button" aria-label="27 de noviembre, 1 cita"><span class="mday__num">27</span><span class="mday__dots"><i style="--dot:var(--barber-1)"></i></span><span class="mday__list"><span style="--dot:var(--barber-1)"><b>3:15</b> Juan P. R.</span></span></button>
+<button class="mday" type="button" aria-label="28 de noviembre, 1 cita"><span class="mday__num">28</span><span class="mday__dots"><i style="--dot:var(--barber-3)"></i></span><span class="mday__list"><span style="--dot:var(--barber-3)"><b>9:00</b> Samuel K.</span></span></button>
+<button class="mday" type="button" aria-label="29 de noviembre, sin citas"><span class="mday__num">29</span></button>
+<button class="mday" type="button" aria-label="30 de noviembre, sin citas"><span class="mday__num">30</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">1</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">2</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">3</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">4</span></button>
+<button class="mday is-outside" type="button" tabindex="-1" aria-hidden="true"><span class="mday__num">5</span></button>
+    </div>
+  </div>
+</template>
+
+<template data-part="legend">
+  <div class="legend" style="margin:var(--space-4) var(--space-2) 0">
+    <span><i style="--dot:var(--barber-1)"></i>SM · Sebastian</span>
+    <span><i style="--dot:var(--barber-2)"></i>MA · Miguel Ángel</span>
+    <span><i style="--dot:var(--barber-3)"></i>JD · James David</span>
+    <span><i style="--dot:var(--barber-any)"></i>Cualquiera</span>
+  </div>
+</template>
+
+<!-- Fila de día de la jornada -->
+<template data-part="save-bar">
+  <div class="save-bar"><button class="btn btn--filled" type="button">Guardar cambios</button><button class="btn btn--plain" type="button">Descartar</button></div>
+</template>
+
+<!-- =====================================================================
+     P · ENTRAR
+     ===================================================================== -->
+<template data-part="login">
+  <div class="login">
+    <img class="logo" src="assets/9sm-logo.png" alt="9SM NEXO" style="height:40px;width:auto;margin:0 auto var(--space-6)">
+    <h1 class="t-title-1" style="margin:0;text-align:center">Panel de barbero</h1>
+    <p class="t-callout t-secondary" style="margin:var(--space-2) 0 var(--space-8);text-align:center">Entra con el correo y la contraseña que te dio el administrador.</p>
+    <div class="form" data-slot></div>
+  </div>
+</template>
+
+<template data-shot="panel-login" data-code="P01" data-group="Entrar" data-name="Entrar" data-app="app--grouped"
+  data-note="Pantalla limpia: logo una vez, título, por qué y cómo entrar (HIG › Managing accounts: «Explain the benefits… Display this message in your sign-in view»). Campos con etiqueta, autocompletar y contraseña oculta.">
+  <x-part name="login">
+    <div class="field"><label class="field__label">Correo</label><div class="field__control"><input class="field__input" type="email" autocomplete="email" inputmode="email" placeholder="tu@correo.com"></div></div>
+    <div class="field"><label class="field__label">Contraseña</label><div class="field__control"><input class="field__input" type="password" autocomplete="current-password" placeholder="Contraseña"></div></div>
+    <button class="btn btn--filled btn--large btn--block" type="button">Entrar</button>
+  </x-part>
+</template>
+
+<template data-shot="panel-login-error" data-code="P02" data-group="Entrar" data-name="Entrar · Datos incorrectos" data-app="app--grouped"
+  data-note="El error queda encima del botón, sin culpar y con lo que se puede hacer. El correo escrito se conserva.">
+  <x-part name="login">
+    <div class="field"><label class="field__label">Correo</label><div class="field__control"><input class="field__input" type="email" value="sebastian@9smnexo.co"></div></div>
+    <div class="field field--error"><label class="field__label">Contraseña</label><div class="field__control"><input class="field__input" type="password" value="contraseña" aria-invalid="true"></div></div>
+    <div class="notice notice--error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>El correo o la contraseña no coinciden.</strong> Revísalos o pide al administrador que te restablezca la contraseña.</div></div>
+    <button class="btn btn--filled btn--large btn--block" type="button">Entrar</button>
+  </x-part>
+</template>
+
+<template data-shot="panel-login-entrando" data-code="P03" data-group="Entrar" data-name="Entrar · Entrando" data-app="app--grouped"
+  data-note="Indicador dentro del botón (HIG › Buttons).">
+  <x-part name="login">
+    <div class="field"><label class="field__label">Correo</label><div class="field__control"><input class="field__input" type="email" value="sebastian@9smnexo.co" disabled></div></div>
+    <div class="field"><label class="field__label">Contraseña</label><div class="field__control"><input class="field__input" type="password" value="contraseña" disabled></div></div>
+    <button class="btn btn--filled btn--large btn--block is-loading" type="button" aria-disabled="true" style="opacity:.85"><span class="spinner"></span>Entrando…</button>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · AGENDA
+     ===================================================================== -->
+<template data-shot="panel-agenda-hoy" data-code="P04" data-group="Agenda" data-name="Agenda · Hoy (barbero)" data-app="app--grouped" data-full="true"
+  data-note="Título grande en el teléfono (HIG › Toolbars › iOS). Resumen del día integrado arriba, sin interrumpir (HIG › Feedback). Cada cita: hora, cliente, servicio, estado con icono + texto y <b>una sola acción rápida</b> (la más común); el resto vive en el detalle. «Nueva cita» es una acción, así que va en la barra y no en la tab bar (HIG › Tab bars: «not to provide actions»).">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda" badge="2"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body">
+      <div style="margin-bottom:var(--space-5)"><x-part name="seg-agenda" current="hoy"></x-part></div>
+      <x-part name="list-hoy"></x-part>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-agenda-semana" data-code="P05" data-group="Agenda" data-name="Agenda · Semana (administrador, todo el local)" data-app="app--grouped" data-full="true"
+  data-note="El administrador elige de quién es la agenda con un botón emergente. Cada barbero tiene un color, siempre junto a su nombre (HIG › Color: no solo color).">
+  <x-part name="shell" current="agenda" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Agenda" badge="4"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">16 – 22 de noviembre</p></header>
+    <div class="page-body">
+      <div class="cluster" style="margin-bottom:var(--space-5)"><x-part name="seg-agenda" current="semana"></x-part><x-part name="scope"></x-part></div>
+      <div class="day-group">
+        <h3 class="list-header">Hoy · jueves 19</h3>
+        <ul class="list">
+          <li class="row appt"><span class="appt__time">3:15 p. m.</span><span class="row__main"><button class="row__link" type="button">Juan Pablo Restrepo</button><span class="row__subtitle">NEXO Cut · <span class="appt__barber" style="--dot:var(--barber-1)">Sebastian</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+          <li class="row appt"><span class="appt__time">4:00 p. m.</span><span class="row__main"><button class="row__link" type="button">Felipe Arango</button><span class="row__subtitle">09 Beard · <span class="appt__barber" style="--dot:var(--barber-2)">Miguel Ángel</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+          <li class="row appt"><span class="appt__time">4:45 p. m.</span><span class="row__main"><button class="row__link" type="button">Santiago López</button><span class="row__subtitle">PRIME Ritual · <span class="appt__barber" style="--dot:var(--barber-1)">Sebastian</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+          <li class="row appt"><span class="appt__time">5:30 p. m.</span><span class="row__main"><button class="row__link" type="button">Ricardo Mejía</button><span class="row__subtitle">NEXO Classic · <span class="appt__barber" style="--dot:var(--barber-any)">Cualquiera</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+        </ul>
+      </div>
+      <div class="day-group">
+        <h3 class="list-header">Viernes 20</h3>
+        <ul class="list">
+          <li class="row appt"><span class="appt__time">10:00 a. m.</span><span class="row__main"><button class="row__link" type="button">Martín Osorio</button><span class="row__subtitle">NEXO Cut · <span class="appt__barber" style="--dot:var(--barber-2)">Miguel Ángel</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+          <li class="row appt"><span class="appt__time">2:00 p. m.</span><span class="row__main"><span class="row__title t-secondary">Turno bloqueado</span><span class="row__subtitle"><span class="appt__barber" style="--dot:var(--barber-1)">Sebastian</span> · 2:00 – 2:45 p. m.</span></span><span class="appt__side"><span class="badge badge--blocked"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Bloqueado</span></span></li>
+          <li class="row appt"><span class="appt__time">5:30 p. m.</span><span class="row__main"><button class="row__link" type="button">Felipe Arango</button><span class="row__subtitle">NEXO Experience · <span class="appt__barber" style="--dot:var(--barber-3)">James David</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-agenda-mes" data-code="P06" data-group="Agenda" data-name="Agenda · Mes (administrador)" data-app="app--grouped" data-full="true"
+  data-note="Hoy en rojo, como el Calendario de iOS. En el teléfono, puntos por barbero (máx. 3 y «+N»); en el computador, las primeras citas de cada día con hora y cliente. Tocar un día abre su detalle.">
+  <x-part name="shell" current="agenda" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Agenda" badge="4"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Noviembre 2026</p></header>
+    <div class="page-body">
+      <div class="cluster" style="margin-bottom:var(--space-5)"><x-part name="seg-agenda" current="mes"></x-part><x-part name="scope"></x-part></div>
+      <x-part name="month"></x-part>
+      <x-part name="legend"></x-part>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-agenda-dia" data-code="P07" data-group="Agenda" data-name="Agenda · Detalle de un día" data-app="app--grouped"
+  data-note="Sheet con las citas y los turnos bloqueados de ese día. Acción del pie: agendar en ese día.">
+  <x-part name="shell" current="agenda" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Agenda" badge="4"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Noviembre 2026</p></header>
+    <div class="page-body"><x-part name="month-sel"></x-part></div>
+  </x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Viernes 20 de noviembre">
+    <div class="sheet__grabber" aria-hidden="true"></div>
+    <div class="sheet__bar"><span></span><h2 class="sheet__title">Viernes 20 de noviembre</h2><button class="icon-btn icon-btn--filled" type="button" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+    <div class="sheet__body">
+      <ul class="list">
+        <li class="row appt"><span class="appt__time">10:00 a. m.</span><span class="row__main"><button class="row__link" type="button">Martín Osorio</button><span class="row__subtitle">NEXO Cut · <span class="appt__barber" style="--dot:var(--barber-2)">Miguel Ángel</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+        <li class="row appt"><span class="appt__time">2:00 p. m.</span><span class="row__main"><span class="row__title t-secondary">Turno bloqueado</span><span class="row__subtitle"><span class="appt__barber" style="--dot:var(--barber-1)">Sebastian</span></span></span><span class="appt__side"><span class="badge badge--blocked"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Bloqueado</span></span></li>
+        <li class="row appt"><span class="appt__time">3:15 p. m.</span><span class="row__main"><button class="row__link" type="button">Juan Pablo Restrepo</button><span class="appt__series"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>2 de 3</span><span class="row__subtitle">NEXO Cut · <span class="appt__barber" style="--dot:var(--barber-1)">Sebastian</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+        <li class="row appt"><span class="appt__time">5:30 p. m.</span><span class="row__main"><button class="row__link" type="button">Felipe Arango</button><span class="row__subtitle">NEXO Experience · <span class="appt__barber" style="--dot:var(--barber-3)">James David</span></span></span><span class="appt__side"><span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span></span></li>
+      </ul>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--gray btn--large btn--block" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Nueva cita este día</button></div>
+  </div>
+</template>
+
+<template data-shot="panel-agenda-vacia" data-code="P08" data-group="Agenda" data-name="Agenda · Sin citas" data-app="app--grouped"
+  data-note="Estado vacío con siguiente paso (HIG › Writing).">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body">
+      <div style="margin-bottom:var(--space-5)"><x-part name="seg-agenda" current="hoy"></x-part></div>
+      <div class="empty">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div>
+        <p class="empty__title">No tienes citas hoy</p>
+        <p class="empty__text">Las reservas de la web aparecen aquí al instante. También puedes agendar una a mano.</p>
+        <div class="empty__actions"><button class="btn btn--gray" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Nueva cita</button></div>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-agenda-cargando" data-code="P09" data-group="Agenda" data-name="Agenda · Cargando" data-app="app--grouped"
+  data-note="Esqueleto con la forma de la lista (HIG › Loading). Con Reducir movimiento, sin pulso.">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body" aria-busy="true">
+      <div style="margin-bottom:var(--space-5)"><x-part name="seg-agenda" current="hoy"></x-part></div>
+      <span class="skeleton" style="height:48px;border-radius:20px;margin-bottom:var(--space-6)"></span>
+      <ul class="list">
+        <li class="row"><span class="skeleton" style="width:56px;height:16px"></span><span class="row__main"><span class="skeleton skeleton--text" style="width:55%"></span><span class="skeleton skeleton--text" style="width:35%"></span></span><span class="skeleton" style="width:84px;height:24px;border-radius:12px"></span></li>
+        <li class="row"><span class="skeleton" style="width:56px;height:16px"></span><span class="row__main"><span class="skeleton skeleton--text" style="width:45%"></span><span class="skeleton skeleton--text" style="width:30%"></span></span><span class="skeleton" style="width:84px;height:24px;border-radius:12px"></span></li>
+        <li class="row"><span class="skeleton" style="width:56px;height:16px"></span><span class="row__main"><span class="skeleton skeleton--text" style="width:60%"></span><span class="skeleton skeleton--text" style="width:40%"></span></span><span class="skeleton" style="width:84px;height:24px;border-radius:12px"></span></li>
+      </ul>
+      <p class="status-inline" style="margin-top:var(--space-4)"><span class="spinner"></span>Cargando tus citas…</p>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-agenda-todas" data-code="P10" data-group="Agenda" data-name="Agenda · Todas las citas" data-app="app--grouped" data-full="true"
+  data-note="Histórico agrupado por día, de lo más reciente a lo más antiguo, con búsqueda por cliente.">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Todas las citas</p></header>
+    <div class="page-body">
+      <div style="margin-bottom:var(--space-4)"><x-part name="seg-agenda" current="todas"></x-part></div>
+      <div class="field__control" style="margin-bottom:var(--space-5);max-width:440px"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field__input" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente"></div>
+      <div class="day-group">
+        <h3 class="list-header">Martes 17 de noviembre</h3>
+        <ul class="list">
+          <li class="row appt"><span class="appt__time">3:15 p. m.</span><span class="row__main"><button class="row__link" type="button">Juan Pablo Restrepo</button><span class="row__subtitle">NEXO Cut · $35.000</span></span><span class="appt__side"><span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada · Transferencia</span></span></li>
+        </ul>
+      </div>
+      <div class="day-group">
+        <h3 class="list-header">Sábado 14 de noviembre</h3>
+        <ul class="list">
+          <li class="row appt"><span class="appt__time">8:30 a. m.</span><span class="row__main"><button class="row__link" type="button">Hugo Pineda</button><span class="row__subtitle">NEXO Classic · $25.000</span></span><span class="appt__side"><span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada · Efectivo</span></span></li>
+          <li class="row appt"><span class="appt__time">5:00 p. m.</span><span class="row__main"><button class="row__link" type="button">Iker Rendón</button><span class="row__subtitle">09 Beard · $17.000</span></span><span class="appt__side"><span class="badge badge--cancelled"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg>Cancelada</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · CITA
+     ===================================================================== -->
+<template data-shot="panel-cita" data-code="P11" data-group="Cita" data-name="Cita · Detalle" data-app="app--grouped"
+  data-note="Todo lo de la cita y sus acciones. «Completar cita» es la única prominente; «Cancelar cita» destructiva y abajo (HIG › Buttons › Role).">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda" badge="2"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body"><x-part name="list-hoy"></x-part></div>
+  </x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Cita"><x-part name="appt-detail"></x-part></div>
+</template>
+
+<template data-shot="panel-cita-pago" data-code="P12" data-group="Cita" data-name="Cita · ¿Cómo pagó?" data-app="app--grouped"
+  data-note="Al completar se pregunta el método de pago con una hoja de acción: opciones ligadas a una acción que el barbero inició (HIG › Action sheets). «Volver» y no «Cancelar», para no confundir con cancelar la cita.">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda" badge="2"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body"><x-part name="list-hoy"></x-part></div>
+  </x-part>
+  <div class="scrim alert-scrim"></div>
+  <div class="action-sheet" role="dialog" aria-modal="true" aria-label="¿Cómo pagó el cliente?">
+    <div class="action-sheet__group">
+      <div class="action-sheet__head"><p class="action-sheet__title">¿Cómo pagó Juan Pablo?</p><p class="action-sheet__text">NEXO Cut · $35.000</p></div>
+      <button class="action-sheet__btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg>Efectivo</button>
+      <button class="action-sheet__btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-transfer"/></svg>Transferencia</button>
+    </div>
+    <div class="action-sheet__group"><button class="action-sheet__btn action-sheet__btn--cancel" type="button">Volver</button></div>
+  </div>
+</template>
+
+<template data-shot="panel-cita-cancelar" data-code="P13" data-group="Cita" data-name="Cita · Confirmar cancelación" data-app="app--grouped"
+  data-note="Alerta: acción destructiva que no se deshace. Después se ofrece «Avisar» por WhatsApp en la fila de la cita.">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda" badge="2"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body"><x-part name="list-hoy"></x-part></div>
+  </x-part>
+  <div class="scrim alert-scrim"></div>
+  <div class="alert" role="alertdialog" aria-modal="true" aria-label="¿Cancelar la cita de Juan Pablo?">
+    <p class="alert__title">¿Cancelar la cita de Juan Pablo?</p>
+    <p class="alert__text">Hoy a las 3:15 p. m. La hora quedará libre en la web. Después podrás avisarle por WhatsApp.</p>
+    <div class="alert__actions">
+      <button class="btn btn--destructive btn--block" type="button">Cancelar cita</button>
+      <button class="btn btn--gray btn--block" type="button">Mantener cita</button>
+    </div>
+  </div>
+</template>
+
+<!-- =====================================================================
+     P · AVISOS
+     ===================================================================== -->
+<template data-part="avisos-lista">
+  <div class="spread" style="padding:var(--space-3) var(--space-4) var(--space-1)"><h2 class="t-headline" style="margin:0">Avisos</h2><button class="btn btn--plain btn--small" type="button">Marcar como leídos</button></div>
+  <ul class="list list--plain">
+    <li class="row row--icon"><span class="row__icon" style="background:var(--green-fill);color:var(--green)"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title row__title--strong">Cita nueva</span><span class="row__subtitle">Felipe Arango · vie 20 nov, 5:30 p. m. · NEXO Experience</span></span><span class="row__detail t-footnote">hace 5 min</span></li>
+    <li class="row row--icon"><span class="row__icon" style="background:var(--red-fill);color:var(--red)"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></span><span class="row__main"><span class="row__title row__title--strong">Canceló el cliente</span><span class="row__subtitle">Mateo Ríos · hoy, 12:00 p. m. · NEXO Cut</span></span><span class="row__detail t-footnote">hace 2 h</span></li>
+    <li class="row row--icon"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title">Cita nueva</span><span class="row__subtitle">Juan Pablo Restrepo · 3 citas cada semana desde hoy</span></span><span class="row__detail t-footnote">ayer</span></li>
+  </ul>
+  <div class="notice" style="margin:var(--space-3) var(--space-4) var(--space-4)"><svg class="icon" style="color:var(--label-secondary)" aria-hidden="true"><use href="#i-bell"/></svg><div class="notice__body">Activa los avisos del navegador para enterarte de citas nuevas aunque tengas el panel cerrado.<br><button class="btn btn--gray btn--small" type="button">Activar avisos</button></div></div>
+</template>
+
+<template data-shot="panel-avisos" data-code="P14" data-group="Avisos" data-name="Avisos" data-app="app--grouped"
+  data-note="Popover en el computador; sheet en el teléfono. Los no leídos en negrita con icono de color y texto. El permiso del navegador se pide aquí, explicando para qué (HIG › Privacy / Onboarding: pedir permiso en contexto).">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda" badge="2"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body"><x-part name="list-hoy"></x-part></div>
+  </x-part>
+  <div class="regular-only"><div class="popover" style="top:52px;right:150px" role="dialog" aria-label="Avisos"><x-part name="avisos-lista"></x-part></div></div>
+  <div class="compact-only">
+    <div class="scrim"></div>
+    <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Avisos">
+      <div class="sheet__grabber" aria-hidden="true"></div>
+      <div class="sheet__body" style="padding:0 0 var(--space-4)"><x-part name="avisos-lista"></x-part></div>
+    </div>
+  </div>
+</template>
+
+<template data-shot="panel-avisos-vacio" data-code="P15" data-group="Avisos" data-name="Avisos · Sin avisos" data-app="app--grouped"
+  data-note="Explica qué aparecerá aquí.">
+  <x-part name="shell" current="agenda">
+    <x-part name="toolbar" title="Agenda"></x-part>
+    <header class="page-head"><h1 class="page-head__title">Agenda</h1><p class="page-head__sub">Jueves 19 de noviembre</p></header>
+    <div class="page-body"><x-part name="list-hoy"></x-part></div>
+  </x-part>
+  <div class="regular-only"><div class="popover" style="top:52px;right:150px" role="dialog" aria-label="Avisos"><div class="empty" style="padding:var(--space-8) var(--space-6)"><div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-tray"/></svg></div><p class="empty__title">No hay avisos</p><p class="empty__text">Aquí verás las citas nuevas y las cancelaciones de los últimos 30 días.</p></div></div></div>
+  <div class="compact-only">
+    <div class="scrim"></div>
+    <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Avisos">
+      <div class="sheet__grabber" aria-hidden="true"></div>
+      <div class="sheet__body"><div class="empty"><div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-tray"/></svg></div><p class="empty__title">No hay avisos</p><p class="empty__text">Aquí verás las citas nuevas y las cancelaciones de los últimos 30 días.</p></div></div>
+    </div>
+  </div>
+</template>
+
+<!-- =====================================================================
+     P · NUEVA CITA
+     ===================================================================== -->
+<template data-part="nc-form">
+  <div class="card">
+    <div class="form-grid form-grid--2">
+      <div class="field" data-admin><label class="field__label">Barbero</label><div class="field__control field__control--select"><select class="field__select"><option>Sebastian Montoya</option></select></div></div>
+      <div class="field"><label class="field__label">Fecha</label><div class="field__control"><input class="field__input" type="text" value="Viernes 20 de noviembre" aria-label="Fecha"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div></div>
+      <div class="field"><label class="field__label">Servicio</label><div class="field__control field__control--select"><select class="field__select"><option>NEXO Cut · 50 min</option></select></div></div>
+      <div class="field"><label class="field__label">Hora</label><div class="field__control field__control--select"><select class="field__select"><option>3:15 p. m.</option></select></div><p class="field__hint">8 horas libres ese día para este servicio.</p></div>
+      <div class="field" data-slot></div>
+    </div>
+  </div>
+</template>
+
+<template data-shot="panel-nueva-cita" data-code="P16" data-group="Nueva cita" data-name="Nueva cita" data-app="app--grouped"
+  data-note="Para reservas por teléfono o en el local. La hora solo ofrece turnos libres. En el teléfono la tab bar se oculta mientras dura la tarea (HIG › Tab bars: excepción de vista modal).">
+  <x-part name="shell" current="agenda" no-tabbar>
+    <div class="toolbar"><button class="icon-btn" type="button" aria-label="Atrás"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><p class="toolbar__title">Nueva cita</p></div>
+    <header class="page-head"><h1 class="page-head__title">Nueva cita</h1><p class="page-head__sub">Para reservas por teléfono o clientes que llegan sin cita.</p></header>
+    <div class="page-body" style="max-width:760px">
+      <x-part name="nc-form">
+        <label class="field__label">Nombre del cliente</label><div class="field__control"><input class="field__input" type="text" autocomplete="off" placeholder="Nombre y apellido"></div>
+      </x-part>
+      <div class="field" style="margin-top:var(--space-4)"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" placeholder="300 123 4567"></div></div>
+      <div style="margin-top:var(--space-6)"><button class="btn btn--filled btn--large" type="button">Agendar cita</button></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-nueva-cita-error" data-code="P17" data-group="Nueva cita" data-name="Nueva cita · No cabe o faltan datos" data-app="app--grouped"
+  data-note="Cada problema junto a su campo: el día no tiene hueco para ese servicio y falta el nombre.">
+  <x-part name="shell" current="agenda" no-tabbar>
+    <div class="toolbar"><button class="icon-btn" type="button" aria-label="Atrás"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><p class="toolbar__title">Nueva cita</p></div>
+    <header class="page-head"><h1 class="page-head__title">Nueva cita</h1></header>
+    <div class="page-body" style="max-width:760px">
+      <div class="card">
+        <div class="form-grid form-grid--2">
+          <div class="field"><label class="field__label">Fecha</label><div class="field__control"><input class="field__input" type="text" value="Sábado 21 de noviembre" aria-label="Fecha"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div></div>
+          <div class="field"><label class="field__label">Servicio</label><div class="field__control field__control--select"><select class="field__select"><option>NEXO Experience · 1 h</option></select></div></div>
+          <div class="field field--error span-all"><label class="field__label">Hora</label><div class="field__control field__control--select"><select class="field__select" disabled><option>Sin horas libres</option></select></div><p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>No queda un hueco de 1 hora el sábado 21. Prueba otro día o un servicio más corto.</p></div>
+          <div class="field field--error span-all"><label class="field__label">Nombre del cliente</label><div class="field__control"><input class="field__input" type="text" placeholder="Nombre y apellido" aria-invalid="true"></div><p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Escribe el nombre del cliente.</p></div>
+        </div>
+      </div>
+      <div style="margin-top:var(--space-6)"><button class="btn btn--filled btn--large" type="button">Agendar cita</button></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-nueva-cita-ok" data-code="P18" data-group="Nueva cita" data-name="Nueva cita · Agendada" data-app="app--grouped"
+  data-note="Confirmación en línea con los siguientes pasos.">
+  <x-part name="shell" current="agenda" no-tabbar>
+    <div class="toolbar"><button class="icon-btn" type="button" aria-label="Atrás"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button><p class="toolbar__title">Nueva cita</p></div>
+    <header class="page-head"><h1 class="page-head__title">Nueva cita</h1></header>
+    <div class="page-body" style="max-width:760px">
+      <div class="empty">
+        <div class="empty__icon empty__icon--success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <p class="empty__title">Cita agendada</p>
+        <p class="empty__text">Pedro Zapata · NEXO Cut · viernes 20 de noviembre a las 3:15 p. m. con Sebastian.</p>
+        <div class="empty__actions"><button class="btn btn--filled" type="button">Ver en la agenda</button><button class="btn btn--gray" type="button">Agendar otra</button></div>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · HORARIO
+     ===================================================================== -->
+<template data-part="jornada">
+  <h3 class="list-header">Duración de cada turno</h3>
+  <div class="list"><label class="row"><span class="row__main"><span class="row__title">Turno</span></span><span class="field__control field__control--select" style="min-height:36px;background:transparent;padding:0"><select class="field__select" style="text-align:right;padding:0 var(--space-6) 0 0;color:var(--label-secondary)"><option>45 minutos</option></select></span></label></div>
+  <p class="list-footer">Las horas que ve el cliente se reparten según lo que dura cada servicio.</p>
+
+  <h3 class="list-header" style="margin-top:var(--space-6)">Jornada semanal</h3>
+  <ul class="list">
+    <li class="row hday"><span class="hday__name">Lunes</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Lunes, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Lunes, cierra"><span class="hday__break t-footnote t-secondary">Descanso 1:00 – 2:00 p. m.</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el lunes"></li>
+    <li class="row hday"><span class="hday__name">Martes</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Martes, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Martes, cierra"><span class="hday__break t-footnote t-secondary">Descanso 1:00 – 2:00 p. m.</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el martes"></li>
+    <li class="row hday"><span class="hday__name">Miércoles</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Miércoles, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Miércoles, cierra"><span class="hday__break t-footnote t-secondary">Sin descanso</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el miércoles"></li>
+    <li class="row hday"><span class="hday__name">Jueves</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Jueves, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Jueves, cierra"><span class="hday__break t-footnote t-secondary">Descanso 1:00 – 2:00 p. m.</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el jueves"></li>
+    <li class="row hday"><span class="hday__name">Viernes</span><span class="hday__times"><input class="time-input" type="time" value="07:00" aria-label="Viernes, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:45" aria-label="Viernes, cierra"><span class="hday__break t-footnote t-secondary">Descanso 1:00 – 2:00 p. m.</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el viernes"></li>
+    <li class="row hday"><span class="hday__name">Sábado</span><span class="hday__times"><input class="time-input" type="time" value="07:00" aria-label="Sábado, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Sábado, cierra"><span class="hday__break t-footnote t-secondary">Sin descanso</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el sábado"></li>
+    <li class="row hday"><span class="hday__name">Domingo</span><span class="hday__times t-secondary">Cerrado</span><input class="switch" type="checkbox" role="switch" aria-label="Atiende el domingo"></li>
+  </ul>
+  <p class="list-footer">Apaga un día para no atender. Toca un día para cambiar su descanso.</p>
+
+  <h3 class="list-header" style="margin-top:var(--space-6)">Turnos máximos al día</h3>
+  <div class="list"><label class="row"><span class="row__main"><span class="row__title">Poner un tope</span></span><input class="switch" type="checkbox" role="switch"></label></div>
+  <p class="list-footer">Sin tope: se aceptan todas las citas que quepan en la jornada.</p>
+</template>
+
+<template data-shot="panel-horario" data-code="P19" data-group="Horario" data-name="Horario · Jornada y servicios (barbero)" data-app="app--grouped" data-full="true"
+  data-note="Listas agrupadas tipo Ajustes. Interruptores solo dentro de filas (HIG › Toggles › iOS). El barbero ve su precio pero no lo cambia (solo el administrador). La barra de guardar flota sobre el contenido en vidrio.">
+  <x-part name="shell" current="horario">
+    <x-part name="toolbar" title="Horario" badge="2" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Horario</h1><p class="page-head__sub">Tu jornada, tus servicios y su duración.</p></header>
+    <div class="page-body" style="max-width:760px">
+      <x-part name="seg-horario" current="jornada"></x-part>
+      <x-part name="jornada"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Mis servicios</h3>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">NEXO Classic</span><span class="row__subtitle">Tu precio: $25.000</span></span><span class="field__control field__control--select" style="min-height:36px;width:auto;padding:0 var(--space-3)"><select class="field__select" aria-label="Duración de NEXO Classic" style="padding:6px 22px 6px 0"><option>40 min</option></select></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrezco NEXO Classic"></li>
+        <li class="row"><span class="row__main"><span class="row__title">NEXO Cut</span><span class="row__subtitle">Tu precio: $35.000</span></span><span class="field__control field__control--select" style="min-height:36px;width:auto;padding:0 var(--space-3)"><select class="field__select" aria-label="Duración de NEXO Cut" style="padding:6px 22px 6px 0"><option>50 min</option></select></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrezco NEXO Cut"></li>
+        <li class="row"><span class="row__main"><span class="row__title">09 Beard</span><span class="row__subtitle">Tu precio: $17.000</span></span><span class="field__control field__control--select" style="min-height:36px;width:auto;padding:0 var(--space-3)"><select class="field__select" aria-label="Duración de 09 Beard" style="padding:6px 22px 6px 0"><option>25 min</option></select></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrezco 09 Beard"></li>
+        <li class="row"><span class="row__main"><span class="row__title t-secondary">PRIME Ritual</span><span class="row__subtitle">No lo ofreces</span></span><input class="switch" type="checkbox" role="switch" aria-label="Ofrezco PRIME Ritual"></li>
+      </ul>
+      <p class="list-footer">La duración es tuya: otro barbero puede tardar distinto. Los precios los fija el administrador.</p>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Proponer un servicio nuevo</h3>
+      <div class="card">
+        <div class="form-grid form-grid--3">
+          <div class="field"><label class="field__label">Nombre</label><div class="field__control"><input class="field__input" type="text" placeholder="Ej. Mascarilla de carbón"></div></div>
+          <div class="field"><label class="field__label">Precio</label><div class="field__control"><span class="field__suffix">$</span><input class="field__input" type="text" inputmode="numeric" placeholder="20.000"></div></div>
+          <div class="field"><label class="field__label">Duración</label><div class="field__control"><input class="field__input" type="text" inputmode="numeric" value="45"><span class="field__suffix">min</span></div></div>
+          <div class="field span-all"><label class="field__label">Descripción para la web</label><div class="field__control field__control--textarea"><textarea class="field__textarea" rows="2" placeholder="Qué incluye el servicio"></textarea></div></div>
+        </div>
+        <button class="btn btn--gray" type="button" style="margin-top:var(--space-4)">Enviar al administrador</button>
+      </div>
+      <p class="list-footer">No aparece en la web hasta que el administrador lo apruebe.</p>
+      <x-part name="save-bar"></x-part>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-horario-admin" data-code="P20" data-group="Horario" data-name="Horario · Administrador (precios por barbero y propuestas)" data-app="app--grouped" data-full="true"
+  data-note="El administrador elige de qué barbero es la jornada y puede fijar un precio propio por servicio (vacío = precio del catálogo). Revisa propuestas con Aprobar / Rechazar. La barra muestra el resultado de guardar junto al botón.">
+  <x-part name="shell" current="horario" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Horario" badge="4" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Horario</h1><p class="page-head__sub">Jornada, servicios y precios de cada barbero.</p></header>
+    <div class="page-body" style="max-width:760px">
+      <x-part name="seg-horario" current="jornada"></x-part>
+      <div class="list" style="margin-bottom:var(--space-6)"><label class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="field__control field__control--select" style="min-height:36px;background:transparent;padding:0"><select class="field__select" style="padding:0 var(--space-6) 0 0;color:var(--label-secondary)"><option>Miguel Ángel Zuluaga</option></select></span></label></div>
+      <h3 class="list-header">Servicios y precio de Miguel Ángel</h3>
+      <ul class="list">
+        <li class="row row--stack-sm"><span class="row__main"><span class="row__title">NEXO Classic</span><span class="row__subtitle">40 min · catálogo $25.000</span></span><span class="field__control" style="min-height:36px;width:132px;padding:0 var(--space-3)"><span class="field__suffix">$</span><input class="field__input" type="text" inputmode="numeric" value="28.000" aria-label="Precio de NEXO Classic para Miguel Ángel" style="padding:6px 0"></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrece NEXO Classic"></li>
+        <li class="row row--stack-sm"><span class="row__main"><span class="row__title">NEXO Cut</span><span class="row__subtitle">50 min · catálogo $35.000</span></span><span class="field__control" style="min-height:36px;width:132px;padding:0 var(--space-3)"><span class="field__suffix">$</span><input class="field__input" type="text" inputmode="numeric" placeholder="35.000" aria-label="Precio de NEXO Cut para Miguel Ángel" style="padding:6px 0"></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrece NEXO Cut"></li>
+        <li class="row row--stack-sm"><span class="row__main"><span class="row__title">09 Beard</span><span class="row__subtitle">25 min · catálogo $17.000</span></span><span class="field__control" style="min-height:36px;width:132px;padding:0 var(--space-3)"><span class="field__suffix">$</span><input class="field__input" type="text" inputmode="numeric" placeholder="17.000" aria-label="Precio de 09 Beard para Miguel Ángel" style="padding:6px 0"></span><input class="switch" type="checkbox" role="switch" checked aria-label="Ofrece 09 Beard"></li>
+      </ul>
+      <p class="list-footer">Precio vacío: se cobra el del catálogo.</p>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Propuestas por revisar</h3>
+      <ul class="list">
+        <li class="row row--stack-sm"><span class="row__main"><span class="row__title row__title--strong">Mascarilla de carbón</span><span class="row__subtitle">$20.000 · 30 min · propuesta por James David</span></span><span class="cluster" style="--cluster-gap:var(--space-2)"><button class="btn btn--destructive btn--plain btn--small" type="button">Rechazar</button><button class="btn btn--tinted btn--small" type="button">Aprobar</button></span></li>
+      </ul>
+      <p class="list-footer">Al aprobar, el servicio se añade al catálogo de la web con su precio y duración.</p>
+      <div class="save-bar"><button class="btn btn--filled" type="button">Guardar cambios</button><button class="btn btn--plain" type="button">Descartar</button><span class="status-inline status-inline--success"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg>Guardado. Ya se aplica en la web.</span></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-horario-error" data-code="P21" data-group="Horario" data-name="Horario · Error al guardar" data-app="app--grouped"
+  data-note="La validación señala el día con el problema y lo explica; la barra no guarda hasta corregirlo.">
+  <x-part name="shell" current="horario">
+    <x-part name="toolbar" title="Horario" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Horario</h1></header>
+    <div class="page-body" style="max-width:760px">
+      <x-part name="seg-horario" current="jornada"></x-part>
+      <h3 class="list-header">Jornada semanal</h3>
+      <ul class="list">
+        <li class="row hday"><span class="hday__name">Lunes</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Lunes, abre"><span class="t-secondary">a</span><input class="time-input" type="time" value="19:00" aria-label="Lunes, cierra"></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el lunes"></li>
+        <li class="row hday hday--error"><span class="hday__name">Martes</span><span class="hday__times"><input class="time-input" type="time" value="10:00" aria-label="Martes, abre"><span class="t-secondary">a</span><input class="time-input is-error" type="time" value="09:00" aria-label="Martes, cierra" aria-invalid="true"><span class="field__error hday__break"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>La hora de cierre debe ser después de la de apertura.</span></span><input class="switch" type="checkbox" role="switch" checked aria-label="Atiende el martes"></li>
+      </ul>
+      <div class="save-bar"><button class="btn btn--filled" type="button">Guardar cambios</button><button class="btn btn--plain" type="button">Descartar</button><span class="status-inline status-inline--error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Revisa el martes antes de guardar.</span></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-bloquear" data-code="P22" data-group="Horario" data-name="Horario · Bloquear turnos" data-app="app--grouped" data-full="true"
+  data-note="Libre, bloqueado y con cita se distinguen por icono y texto además del color. Tocar un turno libre lo bloquea; tocar uno bloqueado lo libera.">
+  <x-part name="shell" current="horario">
+    <x-part name="toolbar" title="Horario" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Horario</h1></header>
+    <div class="page-body" style="max-width:760px">
+      <x-part name="seg-horario" current="bloquear"></x-part>
+      <div class="field" style="max-width:320px"><label class="field__label">Fecha</label><div class="field__control"><input class="field__input" type="text" value="Viernes 20 de noviembre" aria-label="Fecha"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div></div>
+      <div class="legend" style="margin:var(--space-5) 0 var(--space-3)"><span><i style="--dot:var(--fill)"></i>Libre</span><span><svg class="icon icon--sm" style="color:var(--red)" aria-hidden="true"><use href="#i-lock"/></svg>Bloqueado</span><span><svg class="icon icon--sm" style="color:var(--orange)" aria-hidden="true"><use href="#i-person"/></svg>Con cita</span></div>
+      <div class="slots">
+        <button class="slot" type="button">7:00 a. m.</button>
+        <button class="slot" type="button">7:45 a. m.</button>
+        <button class="slot" type="button">8:30 a. m.</button>
+        <button class="slot slot--booked" type="button" aria-disabled="true" aria-label="9:15 a. m., con cita"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-person"/></svg> 9:15</button>
+        <button class="slot" type="button">10:00 a. m.</button>
+        <button class="slot" type="button">10:45 a. m.</button>
+        <button class="slot" type="button">11:30 a. m.</button>
+        <button class="slot" type="button">12:15 p. m.</button>
+        <button class="slot slot--blocked" type="button" aria-pressed="true" aria-label="2:00 p. m., bloqueado"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-lock"/></svg> 2:00</button>
+        <button class="slot slot--blocked" type="button" aria-pressed="true" aria-label="2:45 p. m., bloqueado"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-lock"/></svg> 2:45</button>
+        <button class="slot slot--booked" type="button" aria-disabled="true" aria-label="3:15 p. m., con cita"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-person"/></svg> 3:15</button>
+        <button class="slot" type="button">4:00 p. m.</button>
+        <button class="slot" type="button">4:45 p. m.</button>
+        <button class="slot" type="button">5:30 p. m.</button>
+        <button class="slot" type="button">6:15 p. m.</button>
+        <button class="slot" type="button">7:00 p. m.</button>
+      </div>
+      <p class="list-footer" style="padding:0;margin-top:var(--space-3)">Los cambios se guardan al tocar.</p>
+    </div>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · BALANCE
+     ===================================================================== -->
+<template data-shot="panel-balance" data-code="P23" data-group="Balance" data-name="Balance (administrador)" data-app="app--grouped" data-full="true"
+  data-note="Cifras con números tabulares y una jerarquía clara: ingresos primero. El gráfico tiene etiqueta accesible por barra (HIG › Charts). «Sin registrar pago» enlaza a las citas a las que les falta el método.">
+  <x-part name="shell" current="balance" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Balance" badge="4" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Balance</h1><p class="page-head__sub">Solo suman las citas completadas.</p></header>
+    <div class="page-body">
+      <div class="cluster" style="margin-bottom:var(--space-3)">
+        <div class="segmented" role="tablist" aria-label="Período"><button class="segmented__item" role="tab" type="button">Hoy</button><button class="segmented__item" role="tab" type="button">Semana</button><button class="segmented__item" role="tab" aria-selected="true" type="button">Mes</button><button class="segmented__item" role="tab" type="button">Todo</button></div>
+        <button class="btn btn--gray btn--small" type="button"><span class="t-secondary" style="font-weight:400">Balance de</span> Todo el local<svg class="icon icon--sm" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+      </div>
+      <p class="t-footnote t-secondary" style="margin:0 0 var(--space-5)">Contando desde el 1 de noviembre · <button class="btn btn--plain btn--small" type="button" style="padding:0 4px">Cambiar</button></p>
+      <div class="stats">
+        <div class="card stat"><span class="stat__label">Ingresos</span><span class="stat__value">$2.415.000</span><span class="stat__note">78 citas completadas</span></div>
+        <div class="card stat"><span class="stat__label">Promedio por cita</span><span class="stat__value">$30.962</span></div>
+        <div class="card stat"><span class="stat__label"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-cash"/></svg> Efectivo</span><span class="stat__value">$1.380.000</span><span class="stat__note">57 %</span></div>
+        <div class="card stat"><span class="stat__label"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-transfer"/></svg> Transferencia</span><span class="stat__value">$1.035.000</span><span class="stat__note">43 %</span></div>
+      </div>
+      <a class="notice" href="#" style="margin-top:var(--space-3);color:inherit;text-decoration:none"><svg class="icon" style="color:var(--orange)" aria-hidden="true"><use href="#i-alert"/></svg><span class="notice__body"><strong>3 citas completadas sin registrar pago.</strong> No cuentan en efectivo ni transferencia.</span><svg class="icon" style="color:var(--label-tertiary)" aria-hidden="true"><use href="#i-chevron-right"/></svg></a>
+
+      <h3 class="list-header" style="margin-top:var(--space-8)">Por barbero</h3>
+      <div class="stats stats--3">
+        <div class="card"><div class="cluster" style="margin-bottom:var(--space-3)"><span class="avatar avatar--sm avatar--tone" style="--avatar-color:var(--barber-1)">SM</span><span class="t-headline">Sebastian</span></div><span class="stat__value">$1.190.000</span><p class="card__text">38 citas · efectivo $640.000 · transf. $550.000</p></div>
+        <div class="card"><div class="cluster" style="margin-bottom:var(--space-3)"><span class="avatar avatar--sm avatar--tone" style="--avatar-color:var(--barber-2)">MA</span><span class="t-headline">Miguel Ángel</span></div><span class="stat__value">$842.000</span><p class="card__text">27 citas · efectivo $512.000 · transf. $330.000</p></div>
+        <div class="card"><div class="cluster" style="margin-bottom:var(--space-3)"><span class="avatar avatar--sm avatar--tone" style="--avatar-color:var(--barber-3)">JD</span><span class="t-headline">James David</span></div><span class="stat__value">$383.000</span><p class="card__text">13 citas · efectivo $228.000 · transf. $155.000</p></div>
+      </div>
+
+      <h3 class="list-header" style="margin-top:var(--space-8)">Ingresos por día</h3>
+      <div class="card" role="img" aria-label="Ingresos por día del 1 al 19 de noviembre. El día más alto fue el sábado 14 con 268.000 pesos.">
+        <div class="bars"><span style="height:12%"></span><span style="height:28%"></span><span style="height:46%"></span><span style="height:31%"></span><span style="height:22%"></span><span style="height:60%"></span><span style="height:84%"></span><span style="height:10%"></span><span style="height:35%"></span><span style="height:41%"></span><span style="height:28%"></span><span style="height:52%"></span><span style="height:73%"></span><span style="height:100%"></span><span style="height:9%"></span><span style="height:38%"></span><span style="height:44%"></span><span style="height:30%"></span><span style="height:57%"></span></div>
+        <div class="bars-axis"><span>1</span><span></span><span>3</span><span></span><span>5</span><span></span><span>7</span><span></span><span>9</span><span></span><span>11</span><span></span><span>13</span><span></span><span>15</span><span></span><span>17</span><span></span><span>19</span></div>
+      </div>
+
+      <h3 class="list-header" style="margin-top:var(--space-8)">Desglose por servicio</h3>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th scope="col">Servicio</th><th scope="col" class="num">Citas</th><th scope="col" class="num">Ingresos</th></tr></thead>
+        <tbody>
+          <tr><td>NEXO Cut</td><td class="num">31</td><td class="num">$1.085.000</td></tr>
+          <tr><td>NEXO Classic</td><td class="num">26</td><td class="num">$676.000</td></tr>
+          <tr><td>09 Beard</td><td class="num">12</td><td class="num">$204.000</td></tr>
+          <tr><td>PRIME Ritual</td><td class="num">6</td><td class="num">$300.000</td></tr>
+          <tr><td>NEXO Experience</td><td class="num">2</td><td class="num">$130.000</td></tr>
+          <tr><td>09 Brow</td><td class="num">1</td><td class="num">$8.000</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-balance-vacio" data-code="P24" data-group="Balance" data-name="Balance · Sin datos en el período" data-app="app--grouped"
+  data-note="Dice por qué está vacío y qué hace que aparezcan cifras.">
+  <x-part name="shell" current="balance">
+    <x-part name="toolbar" title="Balance" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Balance</h1><p class="page-head__sub">Solo suman las citas completadas.</p></header>
+    <div class="page-body">
+      <div class="segmented" role="tablist" aria-label="Período"><button class="segmented__item" role="tab" aria-selected="true" type="button">Hoy</button><button class="segmented__item" role="tab" type="button">Semana</button><button class="segmented__item" role="tab" type="button">Mes</button><button class="segmented__item" role="tab" type="button">Todo</button></div>
+      <div class="empty">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg></div>
+        <p class="empty__title">Aún no hay ingresos hoy</p>
+        <p class="empty__text">Cuando marques una cita como completada y registres el pago, aparecerá aquí.</p>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · RESEÑAS
+     ===================================================================== -->
+<template data-shot="panel-resenas" data-code="P25" data-group="Reseñas" data-name="Reseñas y código QR" data-app="app--grouped" data-full="true"
+  data-note="El QR del barbero se imprime y se pone en el puesto. Copiar el enlace funciona aunque el QR no cargue. Calificación con número, estrellas y cantidad.">
+  <x-part name="shell" current="resenas">
+    <x-part name="toolbar" title="Reseñas" badge="2" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Reseñas</h1><p class="page-head__sub">Lo que dicen tus clientes y tu código QR.</p></header>
+    <div class="page-body">
+      <div class="reviews-top">
+        <div class="card qr-card">
+          <div class="qr-box" role="img" aria-label="Código QR de Sebastian"><svg class="icon" aria-hidden="true"><use href="#i-qr"/></svg></div>
+          <div>
+            <p class="card__title">Tu código QR</p>
+            <p class="card__text">Al escanearlo se abre la web con tu reseña lista.</p>
+            <p class="t-mono t-footnote" style="margin:var(--space-3) 0">9sm.site/?r=b1</p>
+            <div class="cluster" style="--cluster-gap:var(--space-2)"><button class="btn btn--gray btn--small" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copiar enlace</button><button class="btn btn--gray btn--small" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Descargar QR</button></div>
+          </div>
+        </div>
+        <div class="card" style="text-align:center">
+          <p class="stat__value" style="font-size:var(--text-display-2);margin:0">4,9</p>
+          <div class="stars" style="justify-content:center" aria-hidden="true"><span class="star is-on" style="width:28px;height:28px"><svg class="icon" style="width:22px;height:22px" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on" style="width:28px;height:28px"><svg class="icon" style="width:22px;height:22px"><use href="#i-star"/></svg></span><span class="star is-on" style="width:28px;height:28px"><svg class="icon" style="width:22px;height:22px"><use href="#i-star"/></svg></span><span class="star is-on" style="width:28px;height:28px"><svg class="icon" style="width:22px;height:22px"><use href="#i-star"/></svg></span><span class="star is-on" style="width:28px;height:28px"><svg class="icon" style="width:22px;height:22px"><use href="#i-star"/></svg></span></div>
+          <p class="card__text">32 reseñas · 4,9 de 5</p>
+        </div>
+      </div>
+      <h3 class="list-header" style="margin-top:var(--space-8)">Reseñas recientes</h3>
+      <ul class="list">
+        <li class="row" style="align-items:flex-start"><span class="row__main"><span class="t-footnote" style="color:var(--yellow)" aria-label="4 de 5 estrellas">★★★★<span style="color:var(--label-quaternary)">★</span></span><span class="row__title" style="margin-top:4px">Muy puntual y el degradado quedó perfecto.</span><span class="row__subtitle">Juan Pablo · hoy</span></span></li>
+        <li class="row" style="align-items:flex-start"><span class="row__main"><span class="t-footnote" style="color:var(--yellow)" aria-label="5 de 5 estrellas">★★★★★</span><span class="row__title" style="margin-top:4px">El mejor de Medellín, siempre salgo feliz.</span><span class="row__subtitle">Anónimo · 16 nov</span></span></li>
+        <li class="row" style="align-items:flex-start"><span class="row__main"><span class="t-footnote" style="color:var(--yellow)" aria-label="5 de 5 estrellas">★★★★★</span><span class="row__subtitle" style="margin-top:4px">Sin comentario · Carlos · 12 nov</span></span></li>
+      </ul>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-resenas-vacio" data-code="P26" data-group="Reseñas" data-name="Reseñas · Sin reseñas y QR no disponible" data-app="app--grouped"
+  data-note="Si el generador de QR no carga, se dice y se ofrece el enlace. Sin reseñas: qué hacer para conseguirlas.">
+  <x-part name="shell" current="resenas">
+    <x-part name="toolbar" title="Reseñas" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Reseñas</h1></header>
+    <div class="page-body">
+      <div class="notice notice--warning" style="margin-bottom:var(--space-4)"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>No se pudo crear el código QR.</strong> Tu enlace funciona igual: cópialo y genera el QR con cualquier herramienta.<br><button class="btn btn--gray btn--small" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copiar 9sm.site/?r=b3</button></div></div>
+      <div class="empty">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></div>
+        <p class="empty__title">Aún no tienes reseñas</p>
+        <p class="empty__text">Pon tu QR en el puesto: tus clientes lo escanean y califican en segundos.</p>
+      </div>
+    </div>
+  </x-part>
+</template>
+
+<!-- =====================================================================
+     P · ADMINISTRACIÓN
+     ===================================================================== -->
+<template data-shot="panel-clientes" data-code="P27" data-group="Administración" data-name="Clientes" data-app="app--grouped" data-full="true"
+  data-note="Tabla en el computador (encabezados descriptivos, HIG › Lists and tables › macOS); lista en el teléfono con la acción de escribir por WhatsApp.">
+  <x-part name="shell" current="clientes" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Clientes" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Clientes</h1><p class="page-head__sub">214 clientes han reservado</p></header>
+    <div class="page-body">
+      <div class="cluster" style="margin-bottom:var(--space-5)">
+        <div class="field__control" style="flex:1;min-width:220px;max-width:440px"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field__input" type="search" placeholder="Buscar por nombre o número" aria-label="Buscar clientes"></div>
+        <button class="btn btn--gray" type="button"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportar CSV</button>
+      </div>
+      <div class="regular-only"><div class="table-wrap"><table class="table">
+        <thead><tr><th scope="col">Nombre</th><th scope="col">WhatsApp</th><th scope="col">Última cita</th><th scope="col" class="num">Citas</th><th scope="col"><span class="sr-only">Acción</span></th></tr></thead>
+        <tbody>
+          <tr><td>Juan Pablo Restrepo</td><td class="t-num">300 123 4567</td><td>19 nov 2026</td><td class="num">6</td><td class="num"><a class="btn btn--gray btn--small" href="#"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Escribir</a></td></tr>
+          <tr><td>Andrés Gómez</td><td class="t-num">311 456 7890</td><td>19 nov 2026</td><td class="num">11</td><td class="num"><a class="btn btn--gray btn--small" href="#"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Escribir</a></td></tr>
+          <tr><td>Mateo Ríos</td><td class="t-num">315 222 3344</td><td>19 nov 2026</td><td class="num">2</td><td class="num"><a class="btn btn--gray btn--small" href="#"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Escribir</a></td></tr>
+          <tr><td>Hugo Pineda</td><td class="t-num">320 987 6543</td><td>14 nov 2026</td><td class="num">4</td><td class="num"><a class="btn btn--gray btn--small" href="#"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Escribir</a></td></tr>
+        </tbody>
+      </table></div></div>
+      <ul class="list compact-only">
+        <li class="row row--avatar"><span class="avatar">JP</span><span class="row__main"><span class="row__title">Juan Pablo Restrepo</span><span class="row__subtitle">19 nov · 6 citas</span></span><a class="icon-btn icon-btn--filled" href="#" aria-label="Escribir a Juan Pablo por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></a></li>
+        <li class="row row--avatar"><span class="avatar">AG</span><span class="row__main"><span class="row__title">Andrés Gómez</span><span class="row__subtitle">19 nov · 11 citas</span></span><a class="icon-btn icon-btn--filled" href="#" aria-label="Escribir a Andrés por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></a></li>
+        <li class="row row--avatar"><span class="avatar">MR</span><span class="row__main"><span class="row__title">Mateo Ríos</span><span class="row__subtitle">19 nov · 2 citas</span></span><a class="icon-btn icon-btn--filled" href="#" aria-label="Escribir a Mateo por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></a></li>
+        <li class="row row--avatar"><span class="avatar">HP</span><span class="row__main"><span class="row__title">Hugo Pineda</span><span class="row__subtitle">14 nov · 4 citas</span></span><a class="icon-btn icon-btn--filled" href="#" aria-label="Escribir a Hugo por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></a></li>
+      </ul>
+    </div>
+  </x-part>
+</template>
+
+<template data-part="inv">
+  <div class="card" style="margin-bottom:var(--space-6)">
+    <p class="card__title">Agregar producto</p>
+    <div class="form-grid form-grid--3" style="margin-top:var(--space-3)">
+      <div class="field"><label class="field__label">Producto</label><div class="field__control"><input class="field__input" type="text" placeholder="Ej. Pomada Suavecito"></div></div>
+      <div class="field"><label class="field__label">Cantidad</label><div class="field__control"><input class="field__input" type="text" inputmode="numeric" placeholder="0"></div></div>
+      <div class="field"><label class="field__label">Unidad</label><div class="field__control"><input class="field__input" type="text" value="unidades"></div></div>
+    </div>
+    <button class="btn btn--gray" type="button" style="margin-top:var(--space-4)"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Agregar</button>
+  </div>
+  <h3 class="list-header">Existencias</h3>
+  <ul class="list">
+    <li class="row"><span class="row__main"><span class="row__title">Pomada Suavecito</span><span class="row__subtitle">unidades</span></span><span class="stepper"><button class="icon-btn" type="button" aria-label="Quitar una"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><span class="t-headline t-num">12</span><button class="icon-btn" type="button" aria-label="Agregar una"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></span><button class="icon-btn" type="button" aria-label="Eliminar Pomada Suavecito" style="color:var(--red)"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+    <li class="row"><span class="row__main"><span class="row__title">Cera mate</span><span class="row__subtitle">unidades</span></span><span class="stepper"><button class="icon-btn" type="button" aria-label="Quitar una"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><span class="t-headline t-num">5</span><button class="icon-btn" type="button" aria-label="Agregar una"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></span><button class="icon-btn" type="button" aria-label="Eliminar Cera mate" style="color:var(--red)"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+    <li class="row"><span class="row__main"><span class="row__title">Cuchillas de afeitar</span><span class="row__subtitle">cajas</span></span><span class="stepper"><button class="icon-btn" type="button" aria-label="Quitar una"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><span class="t-headline t-num">3</span><button class="icon-btn" type="button" aria-label="Agregar una"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></span><button class="icon-btn" type="button" aria-label="Eliminar Cuchillas de afeitar" style="color:var(--red)"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+  </ul>
+</template>
+
+<template data-shot="panel-inventario" data-code="P28" data-group="Administración" data-name="Inventario" data-app="app--grouped" data-full="true"
+  data-note="Cantidad con botones de 44 × 44 a cada lado. Eliminar pide confirmación porque no se deshace.">
+  <x-part name="shell" current="inventario" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Inventario" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Inventario</h1><p class="page-head__sub">Productos del local y sus existencias.</p></header>
+    <div class="page-body" style="max-width:760px"><x-part name="inv"></x-part></div>
+  </x-part>
+</template>
+
+<template data-shot="panel-inventario-eliminar" data-code="P29" data-group="Administración" data-name="Inventario · Confirmar eliminación" data-app="app--grouped"
+  data-note="Aquí «Cancelar» no se confunde con nada, así que se usa el título estándar (HIG › Alerts).">
+  <x-part name="shell" current="inventario" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Inventario" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Inventario</h1></header>
+    <div class="page-body" style="max-width:760px"><x-part name="inv"></x-part></div>
+  </x-part>
+  <div class="scrim alert-scrim"></div>
+  <div class="alert" role="alertdialog" aria-modal="true" aria-label="¿Eliminar Pomada Suavecito?">
+    <p class="alert__title">¿Eliminar Pomada Suavecito?</p>
+    <p class="alert__text">Se quita del inventario con sus 12 unidades.</p>
+    <div class="alert__actions alert__actions--row">
+      <button class="btn btn--gray" type="button">Cancelar</button>
+      <button class="btn btn--destructive" type="button">Eliminar</button>
+    </div>
+  </div>
+</template>
+
+<template data-shot="panel-web" data-code="P30" data-group="Administración" data-name="Personalizar web" data-app="app--grouped" data-full="true"
+  data-note="Todo lo que se ve en la web, en secciones de Ajustes. Interruptores por sección. Barberos y servicios como filas que se editan en una sheet. «Guardar y publicar» es la única acción prominente y el resultado sale junto a ella.">
+  <x-part name="shell" current="web" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Web" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Personalizar web</h1><p class="page-head__sub">Textos, fotos, precios y secciones de 9sm.site.</p></header>
+    <div class="page-body" style="max-width:760px">
+      <h3 class="list-header">Secciones visibles</h3>
+      <ul class="list">
+        <li><label class="row"><span class="row__main"><span class="row__title">Portada con video</span></span><input class="switch" type="checkbox" role="switch" checked></label></li>
+        <li><label class="row"><span class="row__main"><span class="row__title">Sobre nosotros</span></span><input class="switch" type="checkbox" role="switch" checked></label></li>
+        <li><label class="row"><span class="row__main"><span class="row__title">Servicios</span></span><input class="switch" type="checkbox" role="switch" checked></label></li>
+        <li><label class="row"><span class="row__main"><span class="row__title">Galería</span></span><input class="switch" type="checkbox" role="switch" checked></label></li>
+        <li><label class="row"><span class="row__main"><span class="row__title">Reserva y contacto</span></span><input class="switch" type="checkbox" role="switch" checked></label></li>
+      </ul>
+      <p class="list-footer">Al apagar una sección desaparece también su enlace del menú.</p>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Foto del local</h3>
+      <div class="card cluster" style="--cluster-gap:var(--space-4)">
+        <div class="thumb thumb--empty"><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg></div>
+        <div class="stack" style="--stack-gap:var(--space-2);flex:1;min-width:200px"><p class="card__text">Sin foto: la web usa una foto de la galería en «Sobre nosotros».</p><div class="cluster" style="--cluster-gap:var(--space-2)"><button class="btn btn--gray btn--small" type="button"><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg>Subir foto</button></div></div>
+      </div>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Barberos</h3>
+      <ul class="list">
+        <li><button class="row row--avatar" type="button"><span class="avatar"><img src="assets/barber1.jpg" alt=""></span><span class="row__main"><span class="row__title">Sebastian Montoya Garcia</span><span class="row__subtitle">Head Barber · sebastian@9smnexo.co</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row row--avatar" type="button"><span class="avatar"><img src="assets/barber2.jpg" alt=""></span><span class="row__main"><span class="row__title">Miguel Angel Zuluaga</span><span class="row__subtitle">Barber · miguel@9smnexo.co</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row row--avatar" type="button"><span class="avatar">JD</span><span class="row__main"><span class="row__title">James David Mosquera</span><span class="row__subtitle">Barber · sin foto</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row row--icon" type="button"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir barbero</span></span></button></li>
+      </ul>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Servicios y precios del catálogo</h3>
+      <ul class="list">
+        <li><button class="row" type="button"><span class="row__main"><span class="row__title">09 Brow</span><span class="row__subtitle">Cejas · 15 min</span></span><span class="row__detail">$8.000</span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row" type="button"><span class="row__main"><span class="row__title">NEXO Classic</span><span class="row__subtitle">Cortes · 40 min</span></span><span class="row__detail">$25.000</span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row" type="button"><span class="row__main"><span class="row__title">NEXO Cut</span><span class="row__subtitle">Cortes · 50 min</span></span><span class="row__detail">$35.000</span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button></li>
+        <li><button class="row row--icon" type="button"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir servicio</span></span></button></li>
+      </ul>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Galería</h3>
+      <div class="card">
+        <div class="thumbs">
+          <div class="thumb"><img src="assets/g01.jpg" alt=""><button class="thumb__del" type="button" aria-label="Quitar foto 1"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+          <div class="thumb"><img src="assets/g02.jpg" alt=""><button class="thumb__del" type="button" aria-label="Quitar foto 2"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+          <div class="thumb"><img src="assets/g03.jpg" alt=""><button class="thumb__del" type="button" aria-label="Quitar foto 3"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+          <div class="thumb"><img src="assets/g04.jpg" alt=""><button class="thumb__del" type="button" aria-label="Quitar foto 4"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+          <div class="thumb"><img src="assets/g05.jpg" alt=""><button class="thumb__del" type="button" aria-label="Quitar foto 5"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div>
+        </div>
+        <div class="cluster" style="--cluster-gap:var(--space-2);margin-top:var(--space-4)"><button class="btn btn--gray btn--small" type="button"><svg class="icon" aria-hidden="true"><use href="#i-photo"/></svg>Subir fotos</button><span class="status-inline"><span class="spinner"></span>Procesando 2 de 3…</span></div>
+      </div>
+      <p class="list-footer">Se reparten en las 5 celdas de la galería; las celdas con varias fotos las alternan.</p>
+
+      <h3 class="list-header" style="margin-top:var(--space-6)">Datos del negocio</h3>
+      <div class="card">
+        <div class="form-grid form-grid--2">
+          <div class="field span-all"><label class="field__label">Dirección</label><div class="field__control"><input class="field__input" type="text" placeholder="Calle 00 #00-00, Medellín"></div></div>
+          <div class="field"><label class="field__label">Teléfono</label><div class="field__control"><input class="field__input" type="tel" placeholder="+57 300 000 0000"></div></div>
+          <div class="field"><label class="field__label">WhatsApp</label><div class="field__control"><input class="field__input" type="url" placeholder="https://wa.me/57300…"></div></div>
+          <div class="field span-all"><label class="field__label">Horario</label><div class="field__control"><input class="field__input" type="text" value="Lun–Jue 10:00–20:00 · Vie 07:00–21:00 · Sáb 07:00–20:00 · Dom 07:00–14:00"></div><p class="field__hint">Si lo dejas vacío, se calcula con las jornadas de los barberos.</p></div>
+          <div class="field"><label class="field__label">Instagram</label><div class="field__control"><input class="field__input" type="url" placeholder="https://instagram.com/…"></div></div>
+          <div class="field"><label class="field__label">TikTok</label><div class="field__control"><input class="field__input" type="url" placeholder="https://tiktok.com/@…"></div></div>
+        </div>
+      </div>
+      <div class="save-bar"><button class="btn btn--filled" type="button">Guardar y publicar</button><button class="btn btn--plain" type="button">Descartar</button><span class="status-inline">Cambios sin publicar</span></div>
+    </div>
+  </x-part>
+</template>
+
+<template data-shot="panel-mas" data-code="P31" data-group="Administración" data-name="Más (móvil)" data-app="app--grouped" data-only="phone"
+  data-note="Pestaña «Más» del teléfono: reseñas, administración y cerrar sesión. En el computador todo esto está en la sidebar.">
+  <x-part name="shell" current="mas" role="admin" user="Administrador" userrole="Administrador" initials="AD">
+    <x-part name="toolbar" title="Más" no-add></x-part>
+    <header class="page-head"><h1 class="page-head__title">Más</h1></header>
+    <div class="page-body">
+      <div class="list" style="margin-bottom:var(--space-6)"><div class="row row--avatar"><span class="avatar">AD</span><span class="row__main"><span class="row__title row__title--strong">Administrador</span><span class="row__subtitle">admin@9smnexo.co</span></span></div></div>
+      <ul class="list">
+        <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="row__main"><span class="row__title">Reseñas</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
+      </ul>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Administración</h3>
+      <ul class="list">
+        <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-persons"/></svg></span><span class="row__main"><span class="row__title">Clientes</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
+        <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></span><span class="row__main"><span class="row__title">Inventario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
+        <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg></span><span class="row__main"><span class="row__title">Personalizar web</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
+      </ul>
+      <ul class="list" style="margin-top:var(--space-6)">
+        <li><button class="row" type="button" style="justify-content:center;color:var(--red)">Cerrar sesión</button></li>
+      </ul>
+    </div>
+  </x-part>
+</template>
+
+<script src="maqueta.js"></script>
+</body>
+</html>

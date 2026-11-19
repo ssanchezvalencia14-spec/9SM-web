@@ -1,0 +1,534 @@
+/* ==========================================================================
+   9SM NEXO · tokens.css
+   Sistema visual basado en las Human Interface Guidelines de Apple.
+   Lo usan index.html (web pública) y panel-barbero.html (panel).
+
+   Cómo se usa:
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap">
+     <link rel="stylesheet" href="diseno/tokens.css">
+     <link rel="stylesheet" href="diseno/componentes.css">
+     <body><div class="app"> … </div></body>
+
+   Cada bloque cita la guía de la HIG que lo sustenta. La documentación
+   completa está en diseno/README.md.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Color semántico · modo claro
+   HIG › Color › "System colors" y "iOS, iPadOS": colores dinámicos definidos
+   por su función (fondo, etiqueta, separador), no por su valor.
+   HIG › Color › "Make sure all your app's colors work well in light, dark,
+   and increased contrast contexts".
+   Valores de referencia: colores del sistema publicados en la HIG
+   (tabla "System colors", junio 2025) y fondos/etiquetas de UIKit.
+   Ajuste web: la HIG pide contraste mínimo 4,5:1 (Accessibility › Vision);
+   donde el valor de iOS no llega (secondaryLabel al 60 % ≈ 3,4:1, azul
+   #0088FF = 3,5:1) se usa el valor de "Increased contrast" de la propia HIG.
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+
+  /* Fondos — systemBackground / secondary / tertiary */
+  --bg:                  #ffffff;
+  --bg-secondary:        #f2f2f7;
+  --bg-tertiary:         #ffffff;
+  /* Fondos agrupados — systemGroupedBackground (listas tipo Ajustes) */
+  --bg-grouped:          #f2f2f7;
+  --bg-grouped-secondary:#ffffff;
+  --bg-grouped-tertiary: #f2f2f7;
+  /* Fondo elevado (sheets, popovers, alerts). En claro coincide con --bg. */
+  --bg-elevated:         #ffffff;
+  --bg-elevated-secondary:#f2f2f7;
+  --sheet-grouped-bg:    #f2f2f7;
+  --sheet-grouped-cell:  #ffffff;
+  --segment-selected:    #ffffff;   /* segmento elegido del control segmentado */
+
+  /* Etiquetas — label / secondaryLabel / tertiaryLabel / quaternaryLabel */
+  --label:               #1d1d1f;   /* 16,8:1 sobre blanco */
+  --label-secondary:     #6e6e73;   /* 5,1:1  (AA en texto de cualquier tamaño) */
+  --label-tertiary:      #8e8e93;   /* 3,3:1  solo ≥ 18 px, iconos o estados inactivos */
+  --label-quaternary:    #c7c7cc;   /* decorativo, nunca texto que haya que leer */
+  --placeholder:         #737378;   /* 4,7:1: la pista se lee aunque no sea la etiqueta */
+  --label-on-dark:       #f5f5f7;   /* texto sobre el video del hero (siempre oscuro) */
+
+  /* Separadores — separator (translúcido) / opaqueSeparator */
+  --separator:           rgba(60, 60, 67, 0.29);
+  --separator-opaque:    #c6c6c8;
+
+  /* Rellenos de controles — systemFill … quaternarySystemFill */
+  --fill:                rgba(120, 120, 128, 0.20);
+  --fill-secondary:      rgba(120, 120, 128, 0.16);
+  --fill-tertiary:       rgba(118, 118, 128, 0.12);
+  --fill-quaternary:     rgba(116, 116, 128, 0.08);
+
+  /* Acento: GRAFITO (decisión de 9SM, 19-11-2026).
+     HIG › Color › Liquid Glass color: "If your app features colorful
+     backgrounds or visually rich content, prefer a monochromatic appearance".
+     HIG › Branding: "Apply your app's accent color judiciously".
+     Se usa solo para la acción principal, la pestaña seleccionada y la
+     selección. Los enlaces van en --label subrayados, no en otro color. */
+  --accent:              #1d1d1f;
+  --accent-hover:        #424245;
+  --accent-pressed:      #000000;
+  --on-accent:           #ffffff;
+  --accent-tint:         rgba(29, 29, 31, 0.08);  /* fondo de botón "tinted" y selección suave */
+
+  /* Foco de teclado: un color propio, distinto del acento, para que no
+     signifique dos cosas (HIG › Color › "Avoid using the same color to mean
+     different things"). Azul de alto contraste de la HIG. */
+  --focus:               #1e6ef4;
+
+  /* Colores de estado — HIG "System colors", columna Increased contrast
+     en claro (todos ≥ 4,5:1 sobre blanco). Siempre van con texto o icono:
+     HIG › Color › Inclusive color: "Avoid relying solely on color". */
+  --red:                 #e9152d;   /* 4,6:1  destructivo, cancelada, error */
+  --orange:              #c55300;   /* 4,6:1  pendiente, aviso */
+  --green:               #008932;   /* 4,5:1  completada, éxito */
+  --blue:                #1e6ef4;   /* 4,6:1  información, enlaces de sistema */
+  --yellow:              #a16a00;   /* 4,6:1  calificación (estrellas) */
+  --indigo:              #564ade;
+  --teal:                #008198;
+  --pink:                #e7124d;
+  --brown:               #956d51;
+  --gray:                #6c6c70;
+
+  /* Rellenos tintados de estado (fondo de insignias). El texto encima usa
+     el color sólido correspondiente. */
+  --red-fill:            rgba(255, 56, 60, 0.12);
+  --orange-fill:         rgba(255, 141, 40, 0.14);
+  --green-fill:          rgba(52, 199, 89, 0.14);
+  --blue-fill:           rgba(0, 136, 255, 0.12);
+  --yellow-fill:         rgba(255, 204, 0, 0.18);
+  --gray-fill:           rgba(120, 120, 128, 0.14);
+
+  /* Color de identidad de cada barbero en la agenda del administrador.
+     Nunca solo: siempre acompañado de sus iniciales. */
+  --barber-1:            var(--indigo);
+  --barber-2:            var(--teal);
+  --barber-3:            var(--brown);
+  --barber-any:          var(--gray);
+
+  /* Materiales — HIG › Materials. Aproximación web con backdrop-filter.
+     Liquid Glass ("glass") solo para la capa de controles que flota sobre
+     el contenido: barra de navegación, tab bar, barra de acción fija.
+     HIG › Materials: "Don't use Liquid Glass in the content layer".
+     Los materiales estándar (thin/regular/thick) son para el contenido. */
+  --material-ultrathin:  rgba(255, 255, 255, 0.50);
+  --material-thin:       rgba(255, 255, 255, 0.66);
+  --material-regular:    rgba(250, 250, 252, 0.78);
+  --material-thick:      rgba(250, 250, 252, 0.92);
+  --glass-bg:            rgba(255, 255, 255, 0.72);
+  --glass-border:        rgba(255, 255, 255, 0.60);
+  --glass-edge:          rgba(0, 0, 0, 0.06);
+  --material-blur:       saturate(180%) blur(20px);
+  --dim:                 rgba(0, 0, 0, 0.35);   /* capa de atenuación bajo sheets y alerts (HIG: 35 %) */
+  --scrim-media:         linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+
+  /* Sombras: pocas y suaves. En oscuro la profundidad la dan los fondos
+     elevados (HIG › Dark Mode › "base and elevated"). */
+  --shadow-1:            0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
+  --shadow-2:            0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-glass:        0 8px 32px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sheet:        0 -8px 40px rgba(0, 0, 0, 0.12);
+  --shadow-alert:        0 24px 64px rgba(0, 0, 0, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   2. Color semántico · modo oscuro
+   HIG › Dark Mode: "Avoid offering an app-specific appearance setting".
+   Decisión de 9SM: la web y el panel siguen el ajuste del sistema; no hay
+   interruptor propio. El atributo data-appearance existe solo para las
+   maquetas (ver la misma pantalla en claro y oscuro a la vez).
+   El bloque está duplicado a propósito: CSS no permite reutilizarlo entre
+   la media query y el atributo.
+   -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-appearance="light"]) {
+    --bg:                  #000000;
+    --bg-secondary:        #1c1c1e;
+    --bg-tertiary:         #2c2c2e;
+    --bg-grouped:          #000000;
+    --bg-grouped-secondary:#1c1c1e;
+    --bg-grouped-tertiary: #2c2c2e;
+    --bg-elevated:         #1c1c1e;
+    --bg-elevated-secondary:#2c2c2e;
+  --sheet-grouped-bg:    #1c1c1e;
+  --sheet-grouped-cell:  #2c2c2e;
+  --segment-selected:    #636366;
+    --label:               #f5f5f7;
+    --label-secondary:     #a1a1a6;   /* 8,1:1 sobre negro · 6,9:1 sobre #1c1c1e */
+    --label-tertiary:      #7c7c80;
+    --label-quaternary:    #48484a;
+    --placeholder:         #8e8e93;
+    --separator:           rgba(84, 84, 88, 0.65);
+    --separator-opaque:    #38383a;
+    --fill:                rgba(120, 120, 128, 0.36);
+    --fill-secondary:      rgba(120, 120, 128, 0.32);
+    --fill-tertiary:       rgba(118, 118, 128, 0.24);
+    --fill-quaternary:     rgba(118, 118, 128, 0.18);
+    --accent:              #f5f5f7;
+    --accent-hover:        #d2d2d7;
+    --accent-pressed:      #ffffff;
+    --on-accent:           #000000;
+    --accent-tint:         rgba(245, 245, 247, 0.12);
+    --focus:               #5cb8ff;
+    --red:                 #ff4245;
+    --orange:              #ff9230;
+    --green:               #30d158;
+    --blue:                #0091ff;
+    --yellow:              #ffd600;
+    --indigo:              #6d7cff;
+    --teal:                #00d2e0;
+    --pink:                #ff375f;
+    --brown:               #b78a66;
+    --gray:                #98989d;
+    --red-fill:            rgba(255, 66, 69, 0.20);
+    --orange-fill:         rgba(255, 146, 48, 0.20);
+    --green-fill:          rgba(48, 209, 88, 0.20);
+    --blue-fill:           rgba(0, 145, 255, 0.20);
+    --yellow-fill:         rgba(255, 214, 0, 0.18);
+    --gray-fill:           rgba(120, 120, 128, 0.28);
+    --material-ultrathin:  rgba(28, 28, 30, 0.50);
+    --material-thin:       rgba(28, 28, 30, 0.66);
+    --material-regular:    rgba(28, 28, 30, 0.78);
+    --material-thick:      rgba(28, 28, 30, 0.92);
+    --glass-bg:            rgba(30, 30, 32, 0.70);
+    --glass-border:        rgba(255, 255, 255, 0.10);
+    --glass-edge:          rgba(255, 255, 255, 0.06);
+    --dim:                 rgba(0, 0, 0, 0.55);
+    --shadow-1:            0 0 0 1px rgba(255, 255, 255, 0.04);
+    --shadow-2:            0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-glass:        0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --shadow-sheet:        0 -8px 40px rgba(0, 0, 0, 0.6);
+    --shadow-alert:        0 24px 64px rgba(0, 0, 0, 0.7);
+  }
+}
+
+[data-appearance="dark"] {
+  color-scheme: dark;
+  --bg:                  #000000;
+  --bg-secondary:        #1c1c1e;
+  --bg-tertiary:         #2c2c2e;
+  --bg-grouped:          #000000;
+  --bg-grouped-secondary:#1c1c1e;
+  --bg-grouped-tertiary: #2c2c2e;
+  --bg-elevated:         #1c1c1e;
+  --bg-elevated-secondary:#2c2c2e;
+  --sheet-grouped-bg:    #1c1c1e;
+  --sheet-grouped-cell:  #2c2c2e;
+  --segment-selected:    #636366;
+  --label:               #f5f5f7;
+  --label-secondary:     #a1a1a6;
+  --label-tertiary:      #7c7c80;
+  --label-quaternary:    #48484a;
+  --placeholder:         #8e8e93;
+  --separator:           rgba(84, 84, 88, 0.65);
+  --separator-opaque:    #38383a;
+  --fill:                rgba(120, 120, 128, 0.36);
+  --fill-secondary:      rgba(120, 120, 128, 0.32);
+  --fill-tertiary:       rgba(118, 118, 128, 0.24);
+  --fill-quaternary:     rgba(118, 118, 128, 0.18);
+  --accent:              #f5f5f7;
+  --accent-hover:        #d2d2d7;
+  --accent-pressed:      #ffffff;
+  --on-accent:           #000000;
+  --accent-tint:         rgba(245, 245, 247, 0.12);
+  --focus:               #5cb8ff;
+  --red:                 #ff4245;
+  --orange:              #ff9230;
+  --green:               #30d158;
+  --blue:                #0091ff;
+  --yellow:              #ffd600;
+  --indigo:              #6d7cff;
+  --teal:                #00d2e0;
+  --pink:                #ff375f;
+  --brown:               #b78a66;
+  --gray:                #98989d;
+  --red-fill:            rgba(255, 66, 69, 0.20);
+  --orange-fill:         rgba(255, 146, 48, 0.20);
+  --green-fill:          rgba(48, 209, 88, 0.20);
+  --blue-fill:           rgba(0, 145, 255, 0.20);
+  --yellow-fill:         rgba(255, 214, 0, 0.18);
+  --gray-fill:           rgba(120, 120, 128, 0.28);
+  --material-ultrathin:  rgba(28, 28, 30, 0.50);
+  --material-thin:       rgba(28, 28, 30, 0.66);
+  --material-regular:    rgba(28, 28, 30, 0.78);
+  --material-thick:      rgba(28, 28, 30, 0.92);
+  --glass-bg:            rgba(30, 30, 32, 0.70);
+  --glass-border:        rgba(255, 255, 255, 0.10);
+  --glass-edge:          rgba(255, 255, 255, 0.06);
+  --dim:                 rgba(0, 0, 0, 0.55);
+  --shadow-1:            0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-2:            0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-glass:        0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-sheet:        0 -8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-alert:        0 24px 64px rgba(0, 0, 0, 0.7);
+}
+
+/* data-appearance="light" solo se pone en <html> (maquetas). Fuerza claro
+   aunque el sistema esté en oscuro: los valores claros de :root aplican
+   porque el bloque oscuro excluye :root[data-appearance="light"].
+   data-appearance="dark" sí puede ir en cualquier elemento: el hero de la
+   web lo usa porque su video es siempre oscuro (HIG › Dark Mode: "it can
+   make sense for an app that supports immersive media viewing to use a
+   permanently dark appearance"). */
+:root[data-appearance="light"] { color-scheme: light; }
+
+/* --------------------------------------------------------------------------
+   3. Más contraste
+   HIG › Color: "supply … an increased contrast option for each variant".
+   HIG › Accessibility › Vision: si el contraste por defecto no basta,
+   "ensure it at least provides a higher contrast color scheme when the
+   system setting Increase Contrast is turned on".
+   -------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+  :root {
+    --label-secondary:   #3c3c43;
+    --label-tertiary:    #48484a;
+    --placeholder:       #48484a;
+    --separator:         #8e8e93;
+    --separator-opaque:  #8e8e93;
+    --glass-bg:          rgba(255, 255, 255, 0.95);
+  }
+  [data-appearance="dark"] {
+    --label-secondary:   #d1d1d6;
+    --label-tertiary:    #aeaeb2;
+    --placeholder:       #aeaeb2;
+    --separator:         #8e8e93;
+    --separator-opaque:  #8e8e93;
+    --glass-bg:          rgba(20, 20, 22, 0.95);
+  }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-appearance="light"]) {
+    --label-secondary:   #d1d1d6;
+    --label-tertiary:    #aeaeb2;
+    --placeholder:       #aeaeb2;
+    --separator:         #8e8e93;
+    --separator-opaque:  #8e8e93;
+    --glass-bg:          rgba(20, 20, 22, 0.95);
+  }
+}
+
+/* Reducir transparencia: los materiales se vuelven opacos.
+   HIG › Dark Mode: probar "with Increase Contrast and Reduce Transparency
+   turned on". */
+@media (prefers-reduced-transparency: reduce) {
+  :root, [data-appearance] {
+    --material-ultrathin: var(--bg-secondary);
+    --material-thin:      var(--bg-secondary);
+    --material-regular:   var(--bg-secondary);
+    --material-thick:     var(--bg-secondary);
+    --glass-bg:           var(--bg-elevated);
+    --material-blur:      none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Tipografía
+   HIG › Typography › Using system fonts: SF Pro es la fuente del sistema.
+   En la web: -apple-system la carga en iPhone, iPad y Mac. SF Pro no se
+   puede servir como webfont fuera de equipos Apple (licencia), así que en
+   Android y Windows cae a Inter (Google Fonts, eje de tamaño óptico).
+   HIG › Typography › "Minimize the number of typefaces": una sola familia.
+   Se retira Playfair Display.
+   -------------------------------------------------------------------------- */
+:root {
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                 "Inter", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-rounded: ui-rounded, "SF Pro Rounded", var(--font-system);
+  --font-mono:   ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Pesos — HIG: "prefer Regular, Medium, Semibold, or Bold … avoid
+     Ultralight, Thin, and Light". */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Escala Dynamic Type de iOS, tamaño "Large (default)".
+     HIG › Typography › Specifications › iOS, iPadOS Dynamic Type sizes.
+     Se expresa en rem con 1 rem = 17 pt (Body). Así, cuando la persona
+     cambia el tamaño de texto del sistema (Dynamic Type en iPhone, tamaño
+     de letra del navegador en Android), toda la escala crece junta.
+     Estilo          tamaño   interlineado   peso (enfatizado) */
+  --text-large-title: 2rem;        --leading-large-title: 1.2059;  /* 34 / 41  regular (bold) */
+  --text-title-1:     1.6471rem;   --leading-title-1:     1.2143;  /* 28 / 34  regular (bold) */
+  --text-title-2:     1.2941rem;   --leading-title-2:     1.2727;  /* 22 / 28  regular (bold) */
+  --text-title-3:     1.1765rem;   --leading-title-3:     1.25;    /* 20 / 25  regular (semibold) */
+  --text-headline:    1rem;        --leading-headline:    1.2941;  /* 17 / 22  semibold */
+  --text-body:        1rem;        --leading-body:        1.2941;  /* 17 / 22  regular (semibold) */
+  --text-callout:     0.9412rem;   --leading-callout:     1.3125;  /* 16 / 21 */
+  --text-subhead:     0.8824rem;   --leading-subhead:     1.3333;  /* 15 / 20 */
+  --text-footnote:    0.7647rem;   --leading-footnote:    1.3846;  /* 13 / 18 */
+  --text-caption-1:   0.7059rem;   --leading-caption-1:   1.3333;  /* 12 / 16 */
+  --text-caption-2:   0.6471rem;   --leading-caption-2:   1.1818;  /* 11 / 13  mínimo absoluto: 11 pt */
+
+  /* Interlineado amplio para párrafos largos.
+     HIG › Typography: "when you display text in wide columns or long
+     passages, more space between lines (loose leading) can make it easier". */
+  --leading-loose: 1.4706;   /* 25 / 17 */
+
+  /* Titulares grandes de la web (estilo apple.com). No son un text style de
+     iOS; crecen con el ancho del contenedor (unidad cqi) entre un mínimo y un
+     máximo. HIG › Typography › Conveying hierarchy: tamaño y peso marcan la
+     jerarquía. Tracking: HIG › "If necessary, adjust tracking in interface
+     mockups"; con -apple-system el navegador aplica el tamaño óptico. */
+  --text-display-1:   clamp(2.8235rem, 1.2rem + 6.4cqi, 4.7059rem);  /* 48 → 80 */
+  --leading-display-1: 1.05;
+  --text-display-2:   clamp(2rem, 1rem + 3.6cqi, 3.2941rem);         /* 34 → 56 */
+  --leading-display-2: 1.0714;
+  --text-lead:        clamp(1.1765rem, 1rem + 0.9cqi, 1.4118rem);    /* 20 → 24 */
+  --leading-lead:     1.3333;
+  --tracking-display: -0.015em;
+  --tracking-tight:   -0.01em;
+  --tracking-caps:    0.06em;   /* solo etiquetas cortas en mayúsculas (caption) */
+}
+
+/* --------------------------------------------------------------------------
+   5. Espaciado, márgenes y tamaños
+   HIG › Layout: márgenes y guías del sistema, safe areas.
+   Rejilla de 4 pt; los saltos grandes, en múltiplos de 8.
+   -------------------------------------------------------------------------- */
+:root {
+  --space-0-5: 2px;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-30:  120px;
+
+  /* Márgenes de página: 16 pt en iPhone (compact), 24–40 en pantallas
+     anchas. Siempre más la safe area (HIG › Layout › Guides and safe areas). */
+  --margin-compact: 16px;
+  --margin-regular: 32px;
+  --margin-wide:    40px;
+  --content-max:    1080px;  /* ancho máximo de lectura de la web */
+  --text-max:       40rem;   /* medida de párrafo cómoda */
+  --safe-top:       env(safe-area-inset-top, 0px);
+  --safe-bottom:    env(safe-area-inset-bottom, 0px);
+  --safe-left:      env(safe-area-inset-left, 0px);
+  --safe-right:     env(safe-area-inset-right, 0px);
+
+  /* Objetivos táctiles — HIG › Accessibility › Mobility:
+     "iOS, iPadOS 44x44 pt default, 28x28 pt minimum".
+     HIG › Buttons: "a button needs a hit region of at least 44x44 pt". */
+  --target-min:     44px;
+  --target-large:   50px;   /* botón principal de pie de sheet */
+  /* Separación entre controles — HIG › Accessibility › Mobility:
+     ~12 pt alrededor de elementos con borde, ~24 pt sin borde. */
+  --gap-bezeled:    12px;
+  --gap-borderless: 24px;
+
+  /* Alturas de barras */
+  --navbar-h:       52px;   /* barra superior de la web */
+  --toolbar-h:      52px;   /* barra superior del panel */
+  --tabbar-h:       64px;   /* tab bar flotante del panel en móvil */
+  --sidebar-w:      260px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Radios — concéntricos
+   HIG › Toolbars: "corner radii that are concentric with bar corners …
+   ensure that its corner radius is also concentric". Regla: radio interior
+   = radio exterior − separación. Los controles principales son cápsulas,
+   como los botones de iOS 26.
+   -------------------------------------------------------------------------- */
+:root {
+  --radius-xs:      6px;    /* insignias pequeñas, puntos del calendario */
+  --radius-sm:      10px;   /* chips de hora, celdas de día */
+  --radius-md:      12px;   /* campos de texto, tarjetas pequeñas */
+  --radius-lg:      20px;   /* listas agrupadas, tarjetas */
+  --radius-xl:      28px;   /* sheets y alerts (contenedor) */
+  --radius-media:   18px;   /* fotos de galería y del local */
+  --radius-capsule: 999px;  /* botones, segmented, tab bar, barra de navegación */
+}
+
+/* --------------------------------------------------------------------------
+   7. Movimiento
+   HIG › Motion: "Add motion purposefully", "Aim for brevity and precision",
+   "Let people cancel motion", "Make motion optional".
+   HIG › Accessibility › Cognitive: con Reducir movimiento, "Replacing
+   transitions in x-, y-, and z-axes with fades".
+   -------------------------------------------------------------------------- */
+:root {
+  --dur-instant: 100ms;   /* estado presionado */
+  --dur-fast:    200ms;   /* cambios de color, chips */
+  --dur-base:    300ms;   /* sheets, cambios de vista */
+  --dur-slow:    450ms;   /* aparición de secciones de la web */
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:      cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sheet:    cubic-bezier(0.32, 0.72, 0, 1);
+  --enter-offset:  16px;  /* desplazamiento de entrada; 0 con Reducir movimiento */
+  --press-scale:   0.97;  /* estado presionado (HIG › Buttons: "Always include a press state") */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --enter-offset: 0px;
+    --press-scale:  1;
+    --dur-slow:     var(--dur-fast);
+  }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Base mínima (comparte web y panel)
+   -------------------------------------------------------------------------- */
+html {
+  font-size: 106.25%;               /* 17 px con el tamaño por defecto del navegador */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+/* En iPhone y iPad el tamaño base sigue a Dynamic Type.
+   HIG › Typography › Supporting Dynamic Type. */
+@media (hover: none) and (pointer: coarse) {
+  @supports (font: -apple-system-body) {
+    html { font: -apple-system-body; }
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--label);
+  font-family: var(--font-system);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Foco visible solo con teclado — HIG › Accessibility › Speech: "Let people
+   use the keyboard alone to navigate". Nunca outline:none sin reemplazo. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+::selection { background: var(--accent-tint); }
+
+/* Texto solo para lectores de pantalla — HIG › Accessibility › VoiceOver. */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
