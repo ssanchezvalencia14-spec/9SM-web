@@ -423,6 +423,20 @@
     }
     .appt-badge.pending  { color: var(--yellow); border-color: rgba(234,179,8,0.3); }
     .appt-badge.done     { color: var(--green);  border-color: rgba(34,197,94,0.3); }
+
+    /* ── Cómo pagó el cliente (efectivo o transferencia) ── */
+    .pay-overlay { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center;
+                   background: rgba(0,0,0,0.72); padding: 20px; }
+    .pay-overlay.open { display: flex; }
+    .pay-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 26px 24px 22px;
+               width: 100%; max-width: 340px; text-align: center; }
+    .pay-title { font-size: 1rem; font-weight: 700; color: var(--white); margin: 0 0 6px; }
+    .pay-sub { font-size: 0.78rem; color: var(--text-muted); margin: 0 0 20px; line-height: 1.5; }
+    .pay-opts { display: flex; gap: 10px; margin-bottom: 14px; }
+    .pay-opt { flex: 1; background: none; border: 1px solid var(--border); color: var(--white); padding: 16px 8px;
+               border-radius: 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s; }
+    .pay-opt:hover { border-color: var(--green); background: rgba(34,197,94,0.08); }
+    .pay-cancel { background: none; border: none; color: var(--text-muted); font-size: 0.76rem; cursor: pointer; padding: 6px 12px; }
     .appt-badge.cancelled{ color: var(--red);    border-color: rgba(239,68,68,0.3); opacity:0.6; }
 
     .appt-action-btn {
@@ -2111,6 +2125,8 @@ function updateStats() {
 }
 
 function setTab(tab, btn) {
+  // Precios, servicios y textos de la web solo los cambia el administrador
+  if (tab === 'web' && !hasAdminRights(currentBarber)) { tab = 'calendario'; btn = null; }
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
@@ -2484,7 +2500,8 @@ function seriesBadge(a) {
 }
 
 function apptCardHtml(a) {
-  const statusLabel = { pending:'Pendiente', done:'Completada', cancelled:'Cancelada' }[a.status] || 'Pendiente';
+  const statusLabel = ({ pending:'Pendiente', done:'Completada', cancelled:'Cancelada' }[a.status] || 'Pendiente')
+    + (a.status === 'done' && payLabel(a.paymentMethod) ? ' · ' + payLabel(a.paymentMethod) : '');
   const statusClass = { pending:'pending',   done:'done',       cancelled:'cancelled'  }[a.status] || 'pending';
   const isAdmin = hasAdminRights(currentBarber);
   const wl = waLink(a);
@@ -2503,6 +2520,9 @@ function apptCardHtml(a) {
     if (wr) html += '    <a class="appt-action-btn wa-btn" href="' + wr + '" target="_blank" rel="noopener">Recordar</a>';
     html += '    <button class="appt-action-btn done-btn"   onclick="updateStatus(\'' + a._key + '\',\'done\')">Completar</button>';
     html += '    <button class="appt-action-btn cancel-btn" onclick="updateStatus(\'' + a._key + '\',\'cancelled\')">Cancelar</button>';
+  } else if (a.status === 'done' && !payLabel(a.paymentMethod)) {
+    // Citas completadas antes de que existiera el registro de pago
+    html += '    <button class="appt-action-btn done-btn" onclick="openPayModal(\'' + a._key + '\',false)">Registrar pago</button>';
   } else if (a.status === 'cancelled') {
     // Avisar al cliente de que su cita quedó cancelada
     const wc = waLink(a, 'cancelacion');
@@ -2722,7 +2742,61 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeDayModal();
 });
 
+/* ── Método de pago ──
+   Al completar una cita el barbero indica cómo pagó el cliente. Se guarda en
+   la propia cita (paymentMethod, paidAt, paidBy, paidAmount) y el balance
+   lo separa en efectivo y transferencia. */
+var PAY_METHODS = { efectivo: 'Efectivo', transferencia: 'Transferencia' };
+function payLabel(m) { return PAY_METHODS[m] || ''; }
+
+function openPayModal(key, marcarCompletada) {
+  var a = allAppointments.find(function(x){ return x._key === key; });
+  if (!a) return;
+  var ov = document.getElementById('payOverlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'payOverlay';
+    ov.className = 'pay-overlay';
+    ov.addEventListener('click', function(e){ if (e.target === ov) closePayModal(); });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML =
+      '<div class="pay-box">'
+    +   '<p class="pay-title">¿Cómo pagó el cliente?</p>'
+    +   '<p class="pay-sub">' + escHtml(a.nombre || 'Cliente') + ' · ' + escHtml(a.service || '')
+    +     ' · ' + formatCOP(servicePrice(a.service)) + '</p>'
+    +   '<div class="pay-opts">'
+    +     '<button class="pay-opt" onclick="savePayment(\'' + key + '\',\'efectivo\',' + (marcarCompletada ? 'true' : 'false') + ')">Efectivo</button>'
+    +     '<button class="pay-opt" onclick="savePayment(\'' + key + '\',\'transferencia\',' + (marcarCompletada ? 'true' : 'false') + ')">Transferencia</button>'
+    +   '</div>'
+    +   '<button class="pay-cancel" onclick="closePayModal()">Volver</button>'
+    + '</div>';
+  ov.classList.add('open');
+}
+
+function closePayModal() {
+  var ov = document.getElementById('payOverlay');
+  if (ov) ov.classList.remove('open');
+}
+
+function savePayment(key, metodo, marcarCompletada) {
+  if (!PAY_METHODS[metodo]) return;
+  var a = allAppointments.find(function(x){ return x._key === key; });
+  var upd = {
+    paymentMethod: metodo,
+    paidAt: Date.now(),
+    paidBy: (currentBarber && currentBarber.id) || 'barbero',
+    paidAmount: a ? servicePrice(a.service) : 0
+  };
+  if (marcarCompletada) upd.status = 'done';
+  db.ref('bookings/' + key).update(upd).then(closePayModal).catch(function() {
+    alert('No se pudo guardar el pago. Revisa tu conexión e inténtalo de nuevo.');
+  });
+}
+
 function updateStatus(key, status) {
+  // Completar una cita pide antes el método de pago
+  if (status === 'done') { openPayModal(key, true); return; }
   // Al cancelar se deja constancia de quién y cuándo, para los avisos
   if (status === 'cancelled') {
     db.ref('bookings/' + key).update({
@@ -3180,9 +3254,20 @@ function renderBalanceView() {
         '<div style="font-size:1.25rem;font-weight:700;color:var(--white)">' + valor + '</div>' +
       '</div>';
     };
+    // Cuánto entró en efectivo y cuánto por transferencia; las completadas
+    // antes de existir el registro de pago quedan aparte
+    const porMetodo = function(m) {
+      return filtered.filter(function(a){ return a.paymentMethod === m; })
+                     .reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
+    };
+    const sinPago = filtered.filter(function(a){ return !payLabel(a.paymentMethod); });
+    const sinPagoIng = sinPago.reduce(function(s,a){ return s + servicePrice(a.service); }, 0);
     totEl.innerHTML = kpi('Ingresos', formatCOP(totIng))
       + kpi('Citas completadas', String(totCitas))
-      + kpi('Promedio por cita', formatCOP(prom));
+      + kpi('Promedio por cita', formatCOP(prom))
+      + kpi('Efectivo', formatCOP(porMetodo('efectivo')))
+      + kpi('Transferencia', formatCOP(porMetodo('transferencia')))
+      + (sinPago.length ? kpi('Sin registrar pago', formatCOP(sinPagoIng) + ' <span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">(' + sinPago.length + ')</span>') : '');
   }
   const totals = {};
   barbers.forEach(function(b) {
@@ -4720,6 +4805,10 @@ function webMsg(text, cls) {
 }
 
 function webSave() {
+  if (!hasAdminRights(currentBarber)) {
+    webMsg('Solo el administrador puede publicar cambios en la web.', 'err');
+    return;
+  }
   webCollectRows('webBarbers', webCfg.barbers);
   webCollectRows('webServices', webCfg.services);
 
@@ -4800,7 +4889,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261009a';
+  var BUILD = '20261119a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
