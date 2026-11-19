@@ -111,7 +111,7 @@ Las maquetas se abren en el navegador. Cada pantalla tiene un ancla
 | Hoja de acción | `.action-sheet` | Action sheets: opciones ligadas a una acción que la persona inició. |
 | Popover | `.popover` | Avisos del panel en escritorio; en compact, sheet. |
 | Navegación web | `.navbar`, `.menu-sheet`, `.float-cta` | Materials: vidrio en la capa de controles. |
-| Navegación panel | `.shell`, `.sidebar`, `.tabbar`, `.toolbar`, `.page-head` | Tab bars (4 pestañas, nunca acciones), Sidebars (≤ 2 niveles), Toolbars (título grande, acción principal a la derecha). |
+| Navegación panel | `.shell`, `.sidebar`, `.tabbar`, `.toolbar`, `.page-head` | Las secciones del panel actual. Sidebars (≤ 2 niveles); Toolbars (título grande); tab bar flotante en vidrio. |
 | Agenda | `.appt`, `.summary-bar`, `.month`, `.mday`, `.legend` | Color: el color del barbero va siempre con su nombre o iniciales. |
 | Cifras y gráfico | `.stat`, `.stats`, `.bars` | Charts: `role="img"` con descripción. |
 | Web | `.hero`, `.about`, `.service`, `.gallery`, `.contact`, `.booking-cta`, `.footer` | Layout: jerarquía de arriba abajo; Accessibility › Cognitive: control de pausa del video. |
@@ -136,21 +136,23 @@ los dos hilos de implementación deben aplicarlos:
    error después.
 
 **Panel**
-1. Tab bar del teléfono con 4 pestañas: Agenda, Horario, Balance, Más.
-   «Nueva cita» pasa a la barra superior (es una acción).
-2. Agenda: Hoy / Semana / Mes / Todas en un control segmentado dentro de la
-   misma pestaña.
-3. Horario: «Mi horario» y «Bloquear espacios» se unen con un segmentado
-   («Jornada y servicios» / «Bloquear turnos»).
-4. Cada cita muestra una sola acción rápida (Completar, Registrar pago o
-   Avisar). Tocar el nombre abre el detalle con todas (Recordar, Completar,
-   Cancelar).
-5. Cancelar una cita pide confirmación (alerta). El método de pago se elige
-   en una hoja de acción.
-6. «Agenda de» y «Balance de» del administrador pasan de fichas a un botón
-   emergente.
-7. Personalizar web: barberos y servicios como filas que abren su editor en
-   una sheet.
+
+El panel conserva las mismas secciones, grupos, nombres, campos y botones del
+panel actual. Solo cambia el aspecto:
+
+- Sidebar en el computador: Agenda (Calendario, Hoy, Esta semana, Todas las
+  citas, Nueva cita), Mi trabajo (Mi horario, Bloquear espacios, Balance,
+  Reseñas) y Administración (Clientes, Inventario, Personalizar web).
+- Barra inferior en el teléfono: Agenda, Hoy, Nueva cita, Balance y Más, con
+  la hoja «Más» de siempre. La HIG pide no poner acciones en la tab bar
+  («Nueva cita» lo es), pero se mantiene porque es una sección del panel
+  actual y los barberos ya la usan así.
+- Cada cita conserva sus acciones: Recordar, Completar y Cancelar si está
+  pendiente; Registrar pago si se completó sin método; Avisar si se canceló.
+- Lo único nuevo en el panel es la confirmación al cancelar una cita
+  (alerta, HIG › Alerts), porque no se puede deshacer. El resto de ventanas
+  (método de pago, citas del día, eliminar producto) ya existen y solo
+  cambian de aspecto.
 
 ## Accesibilidad: lo que se verifica
 

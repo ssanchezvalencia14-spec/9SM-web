@@ -34,6 +34,8 @@
       if (slot) { while (x.firstChild) slot.appendChild(x.firstChild); slot.removeAttribute('data-slot'); }
       var current = x.getAttribute('current');
       if (current) frag.querySelectorAll('[data-nav="' + current + '"]').forEach(function (el) { el.setAttribute('aria-current', 'page'); });
+      var tab = x.getAttribute('tab') || current;
+      if (tab) frag.querySelectorAll('[data-tab="' + tab + '"]').forEach(function (el) { el.setAttribute('aria-current', 'page'); });
       if (x.getAttribute('role') !== 'admin') frag.querySelectorAll('[data-admin]').forEach(function (el) { el.remove(); });
       ['title', 'sub', 'user', 'userrole', 'initials'].forEach(function (k) {
         var v = x.getAttribute(k);

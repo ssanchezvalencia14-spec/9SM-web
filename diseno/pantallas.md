@@ -46,39 +46,44 @@ El código (W01, P01…) es solo para ordenar; el **id** es lo que no cambia.
 
 ## Panel del barbero (`panel.html`)
 
+Mismas secciones y nombres que el panel actual. Sidebar: Agenda (Calendario,
+Hoy, Esta semana, Todas las citas, Nueva cita), Mi trabajo (Mi horario,
+Bloquear espacios, Balance, Reseñas) y Administración (Clientes, Inventario,
+Personalizar web). Barra inferior del teléfono: Agenda, Hoy, Nueva cita,
+Balance y Más.
+
 | Código | id | Pantalla |
 |---|---|---|
 | P01 | `panel-login` | Entrar |
 | P02 | `panel-login-error` | Entrar · Datos incorrectos |
 | P03 | `panel-login-entrando` | Entrar · Entrando |
-| P04 | `panel-agenda-hoy` | Agenda · Hoy (barbero) |
-| P05 | `panel-agenda-semana` | Agenda · Semana (administrador, todo el local) |
-| P06 | `panel-agenda-mes` | Agenda · Mes (administrador) |
-| P07 | `panel-agenda-dia` | Agenda · Detalle de un día |
-| P08 | `panel-agenda-vacia` | Agenda · Sin citas |
-| P09 | `panel-agenda-cargando` | Agenda · Cargando |
-| P10 | `panel-agenda-todas` | Agenda · Todas las citas |
-| P11 | `panel-cita` | Cita · Detalle |
-| P12 | `panel-cita-pago` | Cita · ¿Cómo pagó? |
-| P13 | `panel-cita-cancelar` | Cita · Confirmar cancelación |
-| P14 | `panel-avisos` | Avisos |
-| P15 | `panel-avisos-vacio` | Avisos · Sin avisos |
-| P16 | `panel-nueva-cita` | Nueva cita |
-| P17 | `panel-nueva-cita-error` | Nueva cita · No cabe o faltan datos |
-| P18 | `panel-nueva-cita-ok` | Nueva cita · Agendada |
-| P19 | `panel-horario` | Horario · Jornada y servicios (barbero) |
-| P20 | `panel-horario-admin` | Horario · Administrador (precios por barbero y propuestas) |
-| P21 | `panel-horario-error` | Horario · Error al guardar |
-| P22 | `panel-bloquear` | Horario · Bloquear turnos |
-| P23 | `panel-balance` | Balance (administrador) |
-| P24 | `panel-balance-vacio` | Balance · Sin datos en el período |
-| P25 | `panel-resenas` | Reseñas y código QR |
-| P26 | `panel-resenas-vacio` | Reseñas · Sin reseñas y QR no disponible |
-| P27 | `panel-clientes` | Clientes |
-| P28 | `panel-inventario` | Inventario |
-| P29 | `panel-inventario-eliminar` | Inventario · Confirmar eliminación |
-| P30 | `panel-web` | Personalizar web |
-| P31 | `panel-mas` | Más (móvil) |
+| P04 | `panel-calendario` | Calendario (administrador) |
+| P05 | `panel-calendario-dia` | Calendario · Citas del día |
+| P06 | `panel-hoy` | Hoy (barbero) |
+| P07 | `panel-hoy-vacio` | Hoy · Sin citas |
+| P08 | `panel-hoy-cargando` | Hoy · Cargando citas |
+| P09 | `panel-semana` | Esta semana (administrador) |
+| P10 | `panel-todas` | Todas las citas |
+| P11 | `panel-cita-pago` | Completar cita · ¿Cómo pagó el cliente? |
+| P12 | `panel-cita-cancelar` | Cancelar cita · Confirmación |
+| P13 | `panel-avisos` | Avisos |
+| P14 | `panel-avisos-vacio` | Avisos · Sin avisos |
+| P15 | `panel-nueva-cita` | Nueva cita |
+| P16 | `panel-nueva-cita-error` | Nueva cita · No cabe o faltan datos |
+| P17 | `panel-nueva-cita-ok` | Nueva cita · Agendada |
+| P18 | `panel-horario` | Mi horario (barbero) |
+| P19 | `panel-horario-admin` | Mi horario · Administrador (precios por barbero y propuestas) |
+| P20 | `panel-horario-error` | Mi horario · Error al guardar |
+| P21 | `panel-bloquear` | Bloquear espacios |
+| P22 | `panel-balance` | Balance (administrador) |
+| P23 | `panel-balance-vacio` | Balance · Sin datos |
+| P24 | `panel-resenas` | Reseñas |
+| P25 | `panel-resenas-vacio` | Reseñas · Sin reseñas y QR no disponible |
+| P26 | `panel-clientes` | Clientes |
+| P27 | `panel-inventario` | Inventario |
+| P28 | `panel-inventario-eliminar` | Inventario · Confirmar eliminación |
+| P29 | `panel-web` | Personalizar web |
+| P30 | `panel-mas` | Más (móvil) |
 
 ## Correspondencia con lo que existe hoy
 
@@ -94,15 +99,18 @@ El código (W01, P01…) es solo para ordenar; el **id** es lo que no cambia.
 | `#resenaOverlay` (`resForm`, `resOk`) | W28–W32 |
 | Engranaje `.settings-wrap` y opción de tema del menú | Se retiran: la apariencia sigue al sistema |
 | `panel-barbero.html` · `#loginScreen` | P01–P03 |
-| `setTab('calendario' / 'hoy' / 'semana' / 'todas')`, `#dayModalOverlay`, `#resumenBar`, `#agendaScopeWrap` | P04–P10 |
-| `apptCardHtml`, `openPayModal`, `updateStatus` | P11–P13 |
-| `#notifPanel` | P14–P15 |
-| `setTab('nuevacita')` | P16–P18 |
-| `setTab('horario')` (incluye precios por barbero solo admin) | P19–P21 |
-| `setTab('bloquear')` | P22 |
-| `setTab('balance')` | P23–P24 |
-| `setTab('resenas')` | P25–P26 |
-| `setTab('clientes')` | P27 |
-| `setTab('inventario')` | P28–P29 |
-| `setTab('web')` | P30 |
-| `#mbnMoreSheet` | P31 |
+| `setTab('calendario')`, `#dayModalOverlay` | P04–P05 |
+| `setTab('hoy')`, `#resumenBar` | P06–P08 |
+| `setTab('semana')`, `#agendaScopeWrap` | P09 |
+| `setTab('todas')` | P10 |
+| `openPayModal`, `updateStatus` | P11–P12 |
+| `#notifPanel` | P13–P14 |
+| `setTab('nuevacita')` | P15–P17 |
+| `setTab('horario')` (con precios por barbero solo admin) | P18–P20 |
+| `setTab('bloquear')` | P21 |
+| `setTab('balance')` | P22–P23 |
+| `setTab('resenas')` | P24–P25 |
+| `setTab('clientes')` | P26 |
+| `setTab('inventario')` | P27–P28 |
+| `setTab('web')` | P29 |
+| `#mbnMoreSheet` | P30 |
