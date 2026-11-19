@@ -53,7 +53,7 @@
   var head = '<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
     + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;display=swap">'
     + '<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="componentes.css">';
-  var playScript = '<script>if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){'
+  var playScript = '<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a");if(a)e.preventDefault();});if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){'
     + 'document.querySelectorAll("video[data-hero]").forEach(function(v){v.muted=true;var p=v.play();if(p&&p.catch)p.catch(function(){});});}<\/script>';
 
   function docFor(html, appClass, fullHeight, viewportH) {
