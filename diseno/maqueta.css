@@ -48,21 +48,16 @@ body.viewer { background: var(--bg-secondary); }
 .frame-wrap > span { font-size: 11px; color: var(--label-secondary); font-weight: var(--weight-semibold); letter-spacing: 0.04em; }
 
 .frame {
-  position: relative;
-  contain: layout paint;   /* los position:fixed de sheets y barras quedan dentro del marco */
-  overflow: hidden auto;
+  position: relative; overflow: hidden;
   background: var(--bg);
   box-shadow: 0 0 0 1px var(--separator-opaque), 0 12px 40px rgba(0, 0, 0, 0.12);
-  scrollbar-width: thin;
 }
-.frame--phone { width: 390px; height: 844px; border-radius: 48px; }
-.frame--desktop { width: 1280px; height: 800px; border-radius: 14px; }
-.frame--auto { height: auto !important; overflow: visible; }
-.frame > .app { min-height: 100%; }
+.frame--phone { border-radius: 48px; }
+.frame--desktop { border-radius: 14px; }
+.frame iframe { display: block; border: 0; transform-origin: 0 0; background: transparent; }
 
 html[data-device="mobile"] .frame-wrap--desktop,
 html[data-device="desktop"] .frame-wrap--phone { display: none; }
-.frame-wrap--desktop .frame { zoom: var(--fit, 1); }
 html.is-solo .viewer-index { display: none; }
 html.is-solo .viewer-layout { grid-template-columns: 1fr; }
 html.is-solo .viewer-group { margin-top: 8px; }

@@ -38,10 +38,13 @@ Las maquetas se abren en el navegador. Cada pantalla tiene un ancla
   <div class="app app--grouped"> <!-- panel -->
 ```
 
-- Todo el contenido va dentro de `.app`. Es el contenedor de las *container
-  queries*: los componentes cambian según el ancho de `.app`, no del
-  dispositivo (HIG › Layout › Size classes). Cortes: compact < 734 px,
-  regular ≥ 734 px, wide ≥ 1068 px.
+- Todo el contenido va dentro de `.app`. Los componentes cambian con
+  media queries de ancho (HIG › Layout › Size classes): compact < 734 px,
+  regular ≥ 734 px, wide ≥ 1068 px. No uso container queries: un contenedor
+  con `container-type` se vuelve el bloque contenedor de los elementos
+  `position: fixed`, y la tab bar, las sheets y las alertas dejarían de
+  anclarse a la pantalla. Por eso el visor pinta cada marco en un iframe del
+  ancho del dispositivo.
 - Se retiran Playfair Display, la carga de Inter 300 y el `:root` actual de
   cada archivo. Ningún color, tamaño o radio se escribe a mano: siempre un
   token.
@@ -58,7 +61,7 @@ Las maquetas se abren en el navegador. Cada pantalla tiene un ancla
 | **Hero siempre oscuro** | El video es oscuro. Dark Mode: «it can make sense for an app that supports immersive media viewing to use a permanently dark appearance». |
 | **Una sola familia**: SF Pro (`-apple-system`) con Inter de respaldo | Typography: «Minimize the number of typefaces». SF Pro no puede servirse como webfont fuera de equipos Apple; Inter cubre Android y Windows. |
 | **Escala Dynamic Type en rem** (1 rem = 17 pt; en iPhone y iPad sigue el tamaño de texto del sistema con `font: -apple-system-body`) | Typography › Supporting Dynamic Type; Accessibility › Vision: «Support larger text sizes». |
-| **Colores de estado con los valores de alto contraste** de la HIG en modo claro | Accessibility › Vision: contraste mínimo 4,5:1. Los valores por defecto (#0088FF, #FF383C…) no llegan sobre blanco. |
+| **Colores de estado partiendo de los valores de alto contraste** de la HIG, oscurecidos (claro) o aclarados (oscuro) lo justo para pasar 4,5:1 donde se usan: sobre blanco, #F2F2F7 y su propio relleno translúcido | Accessibility › Vision: contraste mínimo 4,5:1. Los valores por defecto (#0088FF, #FF383C…) no llegan ni sobre blanco. |
 | **Iconos propios** con el estilo de SF Symbols | La licencia de SF Symbols limita su uso a plataformas Apple; la mayoría de clientes reserva desde Android. Icons: trazo y peso consistentes. |
 | **Se retiran** la cinta animada «9SM NEXO · BARBERÍA…», los números de sección y los iconos de cada servicio | Branding: «Ensure branding always defers to content». Accessibility › Cognitive: evitar animación repetitiva. |
 | **Horas en formato de Colombia**: «3:15 p. m.» (hoy «3:15 PM») | Writing: lenguaje consistente y para todos. `toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' })`. |
@@ -166,7 +169,6 @@ los dos hilos de implementación deben aplicarlos:
 - SF Pro solo se ve en equipos Apple; en Android se ve Inter.
 - El vidrio (Liquid Glass) es una aproximación con `backdrop-filter`; en
   navegadores sin soporte se ve el fondo semitransparente.
-- Las *container queries* necesitan Safari 16+, Chrome 105+ o Firefox 110+.
 
 ## Páginas de la HIG consultadas
 

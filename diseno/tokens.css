@@ -45,10 +45,10 @@
 
   /* Etiquetas — label / secondaryLabel / tertiaryLabel / quaternaryLabel */
   --label:               #1d1d1f;   /* 16,8:1 sobre blanco */
-  --label-secondary:     #6e6e73;   /* 5,1:1  (AA en texto de cualquier tamaño) */
+  --label-secondary:     #646469;   /* ≥ 4,6:1 también sobre #f2f2f7 y sobre --fill-tertiary */
   --label-tertiary:      #8e8e93;   /* 3,3:1  solo ≥ 18 px, iconos o estados inactivos */
   --label-quaternary:    #c7c7cc;   /* decorativo, nunca texto que haya que leer */
-  --placeholder:         #737378;   /* 4,7:1: la pista se lee aunque no sea la etiqueta */
+  --placeholder:         #646468;   /* ≥ 4,6:1 dentro del campo (sobre --fill-tertiary) */
   --label-on-dark:       #f5f5f7;   /* texto sobre el video del hero (siempre oscuro) */
 
   /* Separadores — separator (translúcido) / opaqueSeparator */
@@ -79,18 +79,19 @@
   --focus:               #1e6ef4;
 
   /* Colores de estado — HIG "System colors", columna Increased contrast
-     en claro (todos ≥ 4,5:1 sobre blanco). Siempre van con texto o icono:
+     en claro, oscurecidos lo justo para dar ≥ 4,6:1 sobre blanco, sobre
+     #f2f2f7 y sobre su propio relleno (*-fill), que es donde se usan. Siempre van con texto o icono:
      HIG › Color › Inclusive color: "Avoid relying solely on color". */
-  --red:                 #e9152d;   /* 4,6:1  destructivo, cancelada, error */
-  --orange:              #c55300;   /* 4,6:1  pendiente, aviso */
-  --green:               #008932;   /* 4,5:1  completada, éxito */
-  --blue:                #1e6ef4;   /* 4,6:1  información, enlaces de sistema */
-  --yellow:              #a16a00;   /* 4,6:1  calificación (estrellas) */
+  --red:                 #c41226;   /* destructivo, cancelada, error */
+  --orange:              #ab4800;   /* pendiente, aviso */
+  --green:               #00772c;   /* completada, éxito */
+  --blue:                #1a5ecf;   /* información */
+  --yellow:              #8f5e00;   /* calificación (estrellas) */
   --indigo:              #564ade;
   --teal:                #008198;
   --pink:                #e7124d;
   --brown:               #956d51;
-  --gray:                #6c6c70;
+  --gray:                #626266;
 
   /* Rellenos tintados de estado (fondo de insignias). El texto encima usa
      el color sólido correspondiente. */
@@ -156,10 +157,10 @@
   --sheet-grouped-cell:  #2c2c2e;
   --segment-selected:    #636366;
     --label:               #f5f5f7;
-    --label-secondary:     #a1a1a6;   /* 8,1:1 sobre negro · 6,9:1 sobre #1c1c1e */
+    --label-secondary:     #aaaaaf;   /* ≥ 4,6:1 también sobre #2c2c2e con --fill-tertiary */
     --label-tertiary:      #7c7c80;
     --label-quaternary:    #48484a;
-    --placeholder:         #8e8e93;
+    --placeholder:         #aaaaae;
     --separator:           rgba(84, 84, 88, 0.65);
     --separator-opaque:    #38383a;
     --fill:                rgba(120, 120, 128, 0.36);
@@ -172,16 +173,16 @@
     --on-accent:           #000000;
     --accent-tint:         rgba(245, 245, 247, 0.12);
     --focus:               #5cb8ff;
-    --red:                 #ff4245;
-    --orange:              #ff9230;
+    --red:                 #ff8082;
+    --orange:              #ff9c43;
     --green:               #30d158;
-    --blue:                #0091ff;
+    --blue:                #4ab1ff;
     --yellow:              #ffd600;
     --indigo:              #6d7cff;
     --teal:                #00d2e0;
     --pink:                #ff375f;
     --brown:               #b78a66;
-    --gray:                #98989d;
+    --gray:                #afafb3;
     --red-fill:            rgba(255, 66, 69, 0.20);
     --orange-fill:         rgba(255, 146, 48, 0.20);
     --green-fill:          rgba(48, 209, 88, 0.20);
@@ -218,10 +219,10 @@
   --sheet-grouped-cell:  #2c2c2e;
   --segment-selected:    #636366;
   --label:               #f5f5f7;
-  --label-secondary:     #a1a1a6;
+  --label-secondary:     #aaaaaf;
   --label-tertiary:      #7c7c80;
   --label-quaternary:    #48484a;
-  --placeholder:         #8e8e93;
+  --placeholder:         #aaaaae;
   --separator:           rgba(84, 84, 88, 0.65);
   --separator-opaque:    #38383a;
   --fill:                rgba(120, 120, 128, 0.36);
@@ -234,16 +235,16 @@
   --on-accent:           #000000;
   --accent-tint:         rgba(245, 245, 247, 0.12);
   --focus:               #5cb8ff;
-  --red:                 #ff4245;
-  --orange:              #ff9230;
+  --red:                 #ff8082;
+  --orange:              #ff9c43;
   --green:               #30d158;
-  --blue:                #0091ff;
+  --blue:                #4ab1ff;
   --yellow:              #ffd600;
   --indigo:              #6d7cff;
   --teal:                #00d2e0;
   --pink:                #ff375f;
   --brown:               #b78a66;
-  --gray:                #98989d;
+  --gray:                #afafb3;
   --red-fill:            rgba(255, 66, 69, 0.20);
   --orange-fill:         rgba(255, 146, 48, 0.20);
   --green-fill:          rgba(48, 209, 88, 0.20);
@@ -314,7 +315,7 @@
    HIG › Dark Mode: probar "with Increase Contrast and Reduce Transparency
    turned on". */
 @media (prefers-reduced-transparency: reduce) {
-  :root, [data-appearance] {
+  :root, [data-appearance], :root:not([data-appearance="light"]) {
     --material-ultrathin: var(--bg-secondary);
     --material-thin:      var(--bg-secondary);
     --material-regular:   var(--bg-secondary);
@@ -370,15 +371,15 @@
   --leading-loose: 1.4706;   /* 25 / 17 */
 
   /* Titulares grandes de la web (estilo apple.com). No son un text style de
-     iOS; crecen con el ancho del contenedor (unidad cqi) entre un mínimo y un
+     iOS; crecen con el ancho de la ventana (unidad vw) entre un mínimo y un
      máximo. HIG › Typography › Conveying hierarchy: tamaño y peso marcan la
      jerarquía. Tracking: HIG › "If necessary, adjust tracking in interface
      mockups"; con -apple-system el navegador aplica el tamaño óptico. */
-  --text-display-1:   clamp(2.8235rem, 1.2rem + 6.4cqi, 4.7059rem);  /* 48 → 80 */
+  --text-display-1:   clamp(2.8235rem, 1.2rem + 6.4vw, 4.7059rem);  /* 48 → 80 */
   --leading-display-1: 1.05;
-  --text-display-2:   clamp(2rem, 1rem + 3.6cqi, 3.2941rem);         /* 34 → 56 */
+  --text-display-2:   clamp(2rem, 1rem + 3.6vw, 3.2941rem);         /* 34 → 56 */
   --leading-display-2: 1.0714;
-  --text-lead:        clamp(1.1765rem, 1rem + 0.9cqi, 1.4118rem);    /* 20 → 24 */
+  --text-lead:        clamp(1.1765rem, 1rem + 0.9vw, 1.4118rem);    /* 20 → 24 */
   --leading-lead:     1.3333;
   --tracking-display: -0.015em;
   --tracking-tight:   -0.01em;
@@ -477,10 +478,11 @@
     --press-scale:  1;
     --dur-slow:     var(--dur-fast);
   }
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-iteration-count: 1 !important;
-  }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+  /* Las animaciones repetitivas se detienen; el indicador de actividad no,
+     porque es la única señal de que algo está pasando (HIG › Progress
+     indicators: "Keep progress indicators moving"). Gira más lento. */
+  *:not(.spinner), *::before, *::after { animation-iteration-count: 1 !important; }
 }
 
 /* --------------------------------------------------------------------------

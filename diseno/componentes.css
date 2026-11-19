@@ -2,21 +2,21 @@
    9SM NEXO · componentes.css
    Componentes del sistema. Requiere tokens.css antes.
 
-   Tamaños de pantalla (HIG › Layout › Size classes):
-   el contenedor .app es la referencia, no el dispositivo.
+   Tamaños de pantalla (HIG › Layout › Size classes), con @media:
      compact   < 734 px   iPhone, Android
      regular   ≥ 734 px   iPad, ventanas medianas
      wide      ≥ 1068 px  computador
-   Se usan container queries (@container app …) para que las mismas
-   reglas funcionen en la página real y dentro de los marcos de las
-   maquetas. En la página real .app ocupa toda la ventana, así que se
-   comportan igual que una media query.
+   No se usan container queries a propósito: un contenedor con
+   container-type crea contención de layout y se vuelve el bloque
+   contenedor de los position: fixed (tab bar, sheets, alertas), que
+   dejarían de anclarse a la pantalla. Las maquetas pintan cada marco en
+   un iframe del ancho del dispositivo para que estas media queries
+   respondan igual que en un teléfono.
    ========================================================================== */
 
 .app {
   /* Fondo de listas, tarjetas y fichas según dónde estén. */
   --cell-bg: var(--bg-secondary);
-  container: app / inline-size;
   position: relative;
   min-height: 100%;
   background: var(--bg);
@@ -115,10 +115,10 @@
 /* Prominente: fondo con el color de acento (HIG › Liquid Glass color: "To
    emphasize primary actions, apply color to the background"). */
 .btn--filled  { --btn-bg: var(--accent); --btn-fg: var(--on-accent); }
-.btn--filled:hover { --btn-bg: var(--accent-hover); }
+.btn--filled:hover:not([disabled]):not([aria-disabled="true"]) { --btn-bg: var(--accent-hover); }
 .btn--tinted  { --btn-bg: var(--accent-tint); --btn-fg: var(--label); }
 .btn--gray    { --btn-bg: var(--fill-tertiary); --btn-fg: var(--label); }
-.btn--gray:hover, .btn--tinted:hover { --btn-bg: var(--fill-secondary); }
+.btn--gray:hover:not([disabled]), .btn--tinted:hover:not([disabled]) { --btn-bg: var(--fill-secondary); }
 .btn--plain   { --btn-bg: transparent; --btn-fg: var(--label); padding: 0 var(--space-3); }
 .btn--plain:hover { --btn-bg: var(--fill-quaternary); }
 /* Destructivo: rojo del sistema (HIG › Buttons › Role: "a destructive
@@ -140,6 +140,7 @@
 .btn--block { display: flex; width: 100%; }
 .btn--icon { padding: 0; width: var(--target-min); }
 .btn--icon.btn--small { width: 34px; }
+.btn--icon.btn--small::after { inset: -5px; }
 
 .btn .spinner { --spinner-size: 18px; }
 .btn.is-loading { cursor: progress; }
@@ -170,7 +171,7 @@
   position: absolute; top: 4px; right: 2px;
   min-width: 18px; height: 18px; padding: 0 5px;
   border-radius: var(--radius-capsule);
-  background: #e9152d; color: #fff;
+  background: #d70015; color: #fff;   /* rojo fijo: 5,4:1 con blanco en los dos modos */
   font-size: 11px; font-weight: var(--weight-semibold); line-height: 18px; text-align: center;
   font-variant-numeric: tabular-nums;
   box-shadow: 0 0 0 2px var(--bg);
@@ -387,10 +388,14 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 /* Si el texto crece (Dynamic Type grande) la fila se apila. HIG ›
    Typography: "consider using a stacked layout where text appears above
    secondary items". */
-@container app (max-width: 420px) {
+@media (max-width: 420px) {
   .row--stack-sm { flex-wrap: wrap; }
   .row--stack-sm .row__detail { margin-left: 0; text-align: left; flex-basis: 100%; }
 }
+
+/* El anillo de foco va por dentro en filas y celdas: la lista recorta lo
+   que sale de sus bordes. */
+.list :focus-visible, .table-wrap :focus-visible, .sidebar__item:focus-visible, .tabbar__item:focus-visible { outline-offset: -3px; }
 
 /* --------------------------------------------------------------------------
    Tablas (panel en pantallas anchas) — HIG › Lists and tables › macOS:
@@ -420,7 +425,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
    -------------------------------------------------------------------------- */
 .form { display: grid; gap: var(--space-5); }
 .form-grid { display: grid; gap: var(--space-4); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .form-grid--2 { grid-template-columns: 1fr 1fr; }
   .form-grid--3 { grid-template-columns: repeat(3, 1fr); }
   .form-grid .span-all { grid-column: 1 / -1; }
@@ -467,9 +472,11 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
    Clear button in the trailing end of a text field". */
 .field__clear {
   display: grid; place-items: center; flex: none;
+  position: relative;
   width: 32px; height: 32px; margin-right: -8px;
   border: 0; border-radius: 50%; background: transparent; color: var(--label-tertiary); cursor: pointer;
 }
+.field__clear::after { content: ""; position: absolute; inset: -6px; }
 .field__clear .icon { width: 18px; height: 18px; }
 .field__suffix { color: var(--label-secondary); font-size: var(--text-body); flex: none; }
 
@@ -522,7 +529,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .segmented--block .segmented__item { flex: 1 1 0; padding: 0 var(--space-2); }
 .segmented__item {
   flex: 0 0 auto; min-width: 0;
-  min-height: 40px; padding: 0 var(--space-4);
+  min-height: var(--target-min); padding: 0 var(--space-4);
   border: 0; border-radius: var(--radius-capsule);
   background: transparent; color: var(--label);
   font: inherit; font-size: var(--text-subhead); font-weight: var(--weight-medium);
@@ -660,7 +667,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .navbar__actions { display: flex; align-items: center; gap: var(--space-1); }
 .navbar__desktop-only { display: none; }
 .navbar__menu-btn { color: inherit; }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .navbar__inner { padding: 0 var(--margin-regular); }
   .navbar__logo { margin-right: 0; }
   .navbar__links { display: flex; }
@@ -747,7 +754,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
   box-shadow: 0 -0.5px 0 var(--separator);
 }
 .sheet__footer .btn + .btn { margin-top: var(--space-2); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .sheet {
     left: 50%; right: auto; bottom: auto; top: 50%;
     width: min(560px, calc(100% - 48px));
@@ -838,7 +845,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .action-sheet__btn:hover { background: var(--fill-quaternary); }
 .action-sheet__btn--cancel { border-top: 0; font-weight: var(--weight-semibold); }
 .action-sheet__btn--destructive { color: var(--red); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .action-sheet { left: 50%; right: auto; top: 50%; bottom: auto; width: 340px; transform: translate(-50%, -50%); animation: alert-in var(--dur-fast) var(--ease-out); }
 }
 
@@ -877,11 +884,11 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .shell { display: block; min-height: 100%; background: var(--bg-grouped); }
 .shell__sidebar { display: none; }
 .shell__main { min-width: 0; padding-bottom: calc(var(--tabbar-h) + var(--space-8) + var(--safe-bottom)); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .shell { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
   .shell__sidebar { display: flex; }
   .shell__main { padding-bottom: var(--space-10); }
-  .tabbar { display: none !important; }
+  .shell .tabbar { display: none; }
 }
 
 .sidebar {
@@ -931,7 +938,9 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
   min-width: var(--target-min);
   border: 0; border-radius: var(--radius-capsule);
   background: transparent; color: var(--label-secondary);
-  font: inherit; font-size: 10px; font-weight: var(--weight-semibold); letter-spacing: 0.01em;
+  /* 11 pt fijo, el mínimo de la HIG. Las etiquetas de pestaña no crecen con
+     el texto (HIG › Typography: "they don't expect the tab titles to increase"). */
+  font: inherit; font-size: 11px; font-weight: var(--weight-semibold); letter-spacing: 0.01em;
   cursor: pointer; text-decoration: none;
 }
 .tabbar__item .icon { width: 24px; height: 24px; }
@@ -956,7 +965,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .page-head__title { margin: 0; font-size: var(--text-large-title); line-height: var(--leading-large-title); font-weight: var(--weight-bold); letter-spacing: var(--tracking-tight); }
 .page-head__sub { margin: var(--space-1) 0 0; font-size: var(--text-subhead); color: var(--label-secondary); }
 .page-body { padding: 0 var(--margin-compact); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .toolbar { padding: 0 var(--margin-regular); background: var(--bg-grouped); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
   .page-head { padding: var(--space-2) var(--margin-regular) var(--space-5); }
   .page-body { padding: 0 var(--margin-regular); max-width: 1100px; }
@@ -1005,7 +1014,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 }
 .mday:hover { background: var(--fill-quaternary); }
 .mday__num { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-size: var(--text-callout); font-variant-numeric: tabular-nums; }
-.mday.is-today .mday__num { background: var(--red); color: #fff; font-weight: var(--weight-semibold); }
+.mday.is-today .mday__num { background: #d70015; color: #fff; font-weight: var(--weight-semibold); }
 .mday.is-selected .mday__num { background: var(--accent); color: var(--on-accent); font-weight: var(--weight-semibold); }
 .mday.is-outside { color: var(--label-quaternary); }
 .mday.is-closed .mday__num { color: var(--label-tertiary); }
@@ -1013,7 +1022,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .mday__dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--dot, var(--gray)); }
 .mday__count { font-size: var(--text-caption-2); color: var(--label-secondary); font-variant-numeric: tabular-nums; }
 .mday__list { display: none; }
-@container app (min-width: 1068px) {
+@media (min-width: 1068px) {
   .mday { align-items: stretch; min-height: 104px; padding: 6px; }
   .mday__num { width: 28px; height: 28px; align-self: flex-end; font-size: var(--text-subhead); }
   .mday__dots, .mday__count { display: none; }
@@ -1032,10 +1041,10 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 
 /* Gráfico de barras (balance). HIG › Charts: ejes claros, valores
    accesibles; cada barra con aria-label. */
-.bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: end; gap: clamp(2px, 1cqi, 6px); height: 160px; padding-top: var(--space-2); }
+.bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: end; gap: clamp(2px, 1vw, 6px); height: 160px; padding-top: var(--space-2); }
 .bars span { display: block; border-radius: 4px 4px 1px 1px; background: var(--accent); min-height: 2px; }
 .bars span.is-transfer { background: var(--label-tertiary); }
-.bars-axis { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: clamp(2px, 1cqi, 6px); margin-top: var(--space-1); font-size: var(--text-caption-2); color: var(--label-secondary); text-align: center; font-variant-numeric: tabular-nums; }
+.bars-axis { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: clamp(2px, 1vw, 6px); margin-top: var(--space-1); font-size: var(--text-caption-2); color: var(--label-secondary); text-align: center; font-variant-numeric: tabular-nums; }
 
 /* Barra de acciones de guardado (formularios largos del panel). */
 .save-bar {
@@ -1047,16 +1056,16 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
   -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
   box-shadow: var(--shadow-glass);
 }
-@container app (min-width: 734px) { .save-bar { bottom: var(--space-4); } }
+@media (min-width: 734px) { .save-bar { bottom: var(--space-4); } }
 
 /* --------------------------------------------------------------------------
    Web pública: secciones estilo apple.com
    -------------------------------------------------------------------------- */
 .container { max-width: var(--content-max); margin: 0 auto; padding: 0 var(--margin-compact); }
-@container app (min-width: 734px) { .container { padding: 0 var(--margin-regular); } }
-@container app (min-width: 1068px) { .container { padding: 0 var(--margin-wide); } }
+@media (min-width: 734px) { .container { padding: 0 var(--margin-regular); } }
+@media (min-width: 1068px) { .container { padding: 0 var(--margin-wide); } }
 .section { padding: var(--space-16) 0; }
-@container app (min-width: 734px) { .section { padding: var(--space-24) 0; } }
+@media (min-width: 734px) { .section { padding: var(--space-24) 0; } }
 .section--alt { background: var(--bg-secondary); }
 .section-head { margin-bottom: var(--space-8); }
 .section-head__title { margin: var(--space-1) 0 0; }
@@ -1085,15 +1094,15 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 /* Control de reproducción — HIG › Accessibility › Cognitive: "Avoid
    autoplaying audio and video content without also providing controls". */
 .hero__playback { position: absolute; right: var(--margin-compact); bottom: var(--space-5); }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .hero__content { padding-bottom: var(--space-24); }
   .hero__playback { right: var(--margin-regular); bottom: var(--space-8); }
 }
 
 /* Tarjetas de servicio */
 .cards { display: grid; gap: var(--space-4); }
-@container app (min-width: 734px) { .cards--2 { grid-template-columns: repeat(2, 1fr); } .cards--3 { grid-template-columns: repeat(2, 1fr); } }
-@container app (min-width: 1068px) { .cards--3 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 734px) { .cards--2 { grid-template-columns: repeat(2, 1fr); } .cards--3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1068px) { .cards--3 { grid-template-columns: repeat(3, 1fr); } }
 .service {
   display: flex; flex-direction: column; gap: var(--space-2);
   padding: var(--space-6);
@@ -1115,7 +1124,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .gallery figure { position: relative; margin: 0; aspect-ratio: 3 / 4; border-radius: var(--radius-media); overflow: hidden; background: var(--fill-tertiary); }
 .gallery figure:first-child { grid-column: span 2; aspect-ratio: 4 / 3; }
 .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .gallery { grid-template-columns: repeat(6, 1fr); gap: var(--space-3); }
   .gallery figure, .gallery figure:first-child { grid-column: span 2; aspect-ratio: 3 / 4; }
   .gallery figure.is-wide { grid-column: span 3; aspect-ratio: 16 / 10; }
@@ -1142,7 +1151,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .float-cta__text { flex: 1; min-width: 0; font-size: var(--text-subhead); line-height: var(--leading-subhead); }
 .float-cta__text b { display: block; font-weight: var(--weight-semibold); }
 .float-cta__text span { color: var(--label-secondary); }
-@container app (min-width: 734px) { .float-cta { display: none; } }
+@media (min-width: 734px) { .float-cta { display: none; } }
 
 /* Utilidades mínimas */
 .stack { display: grid; gap: var(--stack-gap, var(--space-4)); }
@@ -1151,7 +1160,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .mt-0 { margin-top: 0 !important; } .mb-0 { margin-bottom: 0 !important; }
 .compact-only { display: revert; }
 .regular-only { display: none !important; }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .compact-only { display: none !important; }
   .regular-only { display: revert !important; }
 }
@@ -1171,11 +1180,11 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 }
 .about__media { margin: 0; border-radius: var(--radius-media); overflow: hidden; aspect-ratio: 4 / 5; background: var(--fill-tertiary); }
 .about__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@container app (min-width: 734px) { .about { grid-template-columns: 1.1fr 1fr; gap: var(--space-16); } }
+@media (min-width: 734px) { .about { grid-template-columns: 1.1fr 1fr; gap: var(--space-16); } }
 
 /* Contacto + reserva */
 .contact { display: grid; gap: var(--space-6); align-items: start; }
-@container app (min-width: 734px) { .contact { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+@media (min-width: 734px) { .contact { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
 .booking-cta { padding: var(--space-8) var(--space-6); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-2); }
 .section--alt { --cell-bg: var(--bg); }
 .checks { list-style: none; margin: var(--space-5) 0 var(--space-6); padding: 0; display: grid; gap: var(--space-3); font-size: var(--text-callout); }
@@ -1205,7 +1214,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .row__link:hover { text-decoration: underline; text-underline-offset: 0.18em; }
 .appt .row__main { display: flex; flex-direction: column; align-items: flex-start; }
 .appt .appt__series { margin: 4px 0 0; }
-@container app (max-width: 420px) {
+@media (max-width: 420px) {
   .appt { flex-wrap: wrap; }
   .appt__side { flex-basis: 100%; padding-left: 88px; justify-content: flex-start; flex-wrap: wrap; gap: var(--space-2); }
 }
@@ -1216,7 +1225,7 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
   width: min(400px, 100%); margin: 0 auto;
   padding: calc(var(--safe-top) + var(--space-16)) var(--margin-compact) var(--space-10);
 }
-@container app (min-width: 734px) {
+@media (min-width: 734px) {
   .login { margin-top: var(--space-16); padding: var(--space-10); border-radius: var(--radius-xl); background: var(--cell-bg); box-shadow: var(--shadow-2); }
 }
 
@@ -1226,13 +1235,13 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .hday__times { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
 .hday__break { flex-basis: 100%; }
 .time-input {
-  min-height: 36px; padding: 0 var(--space-2);
+  min-height: var(--target-min); padding: 0 var(--space-2);
   border: 0; border-radius: var(--radius-sm);
   background: var(--fill-tertiary); color: var(--label);
   font: inherit; font-size: var(--text-subhead); font-variant-numeric: tabular-nums;
 }
 .time-input.is-error { box-shadow: inset 0 0 0 1.5px var(--red); background: var(--red-fill); }
-@container app (max-width: 420px) {
+@media (max-width: 420px) {
   .hday__name { width: auto; flex: 1; }
   .hday__times { order: 3; flex-basis: 100%; }
 }
@@ -1246,14 +1255,14 @@ button.row:active, a.row:active, label.row:active { background: var(--fill-terti
 .stats .stat__value { font-size: var(--text-title-2); }
 .stats--3 { grid-template-columns: 1fr; }
 .stats--3 .stat__value { display: block; font-size: var(--text-title-2); font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; margin-bottom: var(--space-1); }
-@container app (min-width: 1068px) {
+@media (min-width: 1068px) {
   .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .stats--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* Reseñas: QR */
 .reviews-top { display: grid; gap: var(--space-3); }
-@container app (min-width: 734px) { .reviews-top { grid-template-columns: 2fr 1fr; } }
+@media (min-width: 734px) { .reviews-top { grid-template-columns: 2fr 1fr; } }
 .qr-card { display: flex; gap: var(--space-5); align-items: center; flex-wrap: wrap; }
 .qr-box {
   display: grid; place-items: center; flex: none;

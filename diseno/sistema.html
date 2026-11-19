@@ -131,9 +131,9 @@
       <tr><td><span class="sw" style="background:var(--bg-grouped-secondary)"></span></td><td><code>--bg-grouped-secondary</code></td><td>#FFFFFF</td><td>#1C1C1E</td><td>Celdas de lista</td><td>—</td></tr>
       <tr><td><span class="sw" style="background:var(--bg-elevated)"></span></td><td><code>--bg-elevated</code></td><td>#FFFFFF</td><td>#1C1C1E</td><td>Sheets y alerts (en oscuro suben de nivel)</td><td>—</td></tr>
       <tr><td><span class="sw" style="background:var(--label)"></span></td><td><code>--label</code></td><td>#1D1D1F</td><td>#F5F5F7</td><td>Texto principal</td><td>16,8:1 · 18,9:1</td></tr>
-      <tr><td><span class="sw" style="background:var(--label-secondary)"></span></td><td><code>--label-secondary</code></td><td>#6E6E73</td><td>#A1A1A6</td><td>Texto secundario</td><td>5,1:1 · 8,1:1</td></tr>
+      <tr><td><span class="sw" style="background:var(--label-secondary)"></span></td><td><code>--label-secondary</code></td><td>#646469</td><td>#AAAAAF</td><td>Texto secundario</td><td>≥ 4,6:1 sobre todos los fondos y rellenos</td></tr>
       <tr><td><span class="sw" style="background:var(--label-tertiary)"></span></td><td><code>--label-tertiary</code></td><td>#8E8E93</td><td>#7C7C80</td><td>Solo iconos, ≥ 18 px o inactivo</td><td>3,3:1 (no para texto pequeño)</td></tr>
-      <tr><td><span class="sw" style="background:var(--placeholder)"></span></td><td><code>--placeholder</code></td><td>#737378</td><td>#8E8E93</td><td>Pista dentro de un campo</td><td>4,7:1 · 6,5:1</td></tr>
+      <tr><td><span class="sw" style="background:var(--placeholder)"></span></td><td><code>--placeholder</code></td><td>#646468</td><td>#AAAAAE</td><td>Pista dentro de un campo</td><td>≥ 4,6:1 dentro del campo</td></tr>
       <tr><td><span class="sw" style="background:var(--separator)"></span></td><td><code>--separator</code></td><td>rgba(60,60,67,.29)</td><td>rgba(84,84,88,.65)</td><td>Líneas entre filas</td><td>decorativo</td></tr>
       <tr><td><span class="sw" style="background:var(--fill-tertiary)"></span></td><td><code>--fill-*</code></td><td>rgba(120,120,128,.20 → .08)</td><td>rgba(120,120,128,.36 → .18)</td><td>Fondos de controles</td><td>—</td></tr>
     </tbody>
@@ -151,7 +151,7 @@
   </table></div>
 
   <h3>Estado (siempre con icono y texto)</h3>
-  <p class="cite"><b>HIG › System colors</b>, columna «Increased contrast» en claro (≥ 4,5:1) y «Default» en oscuro. <b>Inclusive color</b>: «Avoid relying solely on color».</p>
+  <p class="cite"><b>HIG › System colors</b>, columna «Increased contrast», ajustada lo justo para pasar 4,5:1 sobre blanco, #F2F2F7 y su propio relleno (claro) o sobre negro, #1C1C1E y #2C2C2E con relleno (oscuro). <b>Inclusive color</b>: «Avoid relying solely on color».</p>
   <div class="demo-row" style="margin-bottom:12px">
     <span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span>
     <span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada</span>
@@ -162,10 +162,10 @@
   <div class="table-wrap"><table class="doc-table">
     <thead><tr><th>Muestra</th><th>Token</th><th>Claro</th><th>Oscuro</th><th>Significado</th></tr></thead>
     <tbody>
-      <tr><td><span class="sw" style="background:var(--red)"></span></td><td><code>--red</code></td><td>#E9152D (4,6:1)</td><td>#FF4245</td><td>Destructivo, cancelada, error</td></tr>
-      <tr><td><span class="sw" style="background:var(--orange)"></span></td><td><code>--orange</code></td><td>#C55300 (4,6:1)</td><td>#FF9230</td><td>Pendiente, aviso</td></tr>
-      <tr><td><span class="sw" style="background:var(--green)"></span></td><td><code>--green</code></td><td>#008932 (4,5:1)</td><td>#30D158</td><td>Completada, éxito, interruptor encendido</td></tr>
-      <tr><td><span class="sw" style="background:var(--yellow)"></span></td><td><code>--yellow</code></td><td>#A16A00 (4,6:1)</td><td>#FFD600</td><td>Estrellas de calificación</td></tr>
+      <tr><td><span class="sw" style="background:var(--red)"></span></td><td><code>--red</code></td><td>#C41226</td><td>#FF8082</td><td>Destructivo, cancelada, error</td></tr>
+      <tr><td><span class="sw" style="background:var(--orange)"></span></td><td><code>--orange</code></td><td>#AB4800</td><td>#FF9C43</td><td>Pendiente, aviso</td></tr>
+      <tr><td><span class="sw" style="background:var(--green)"></span></td><td><code>--green</code></td><td>#00772C</td><td>#30D158</td><td>Completada, éxito, interruptor encendido</td></tr>
+      <tr><td><span class="sw" style="background:var(--yellow)"></span></td><td><code>--yellow</code></td><td>#8F5E00</td><td>#FFD600</td><td>Estrellas de calificación</td></tr>
       <tr><td><span class="sw" style="background:var(--barber-1)"></span><span class="sw" style="background:var(--barber-2);margin-left:4px"></span><span class="sw" style="background:var(--barber-3);margin-left:4px"></span></td><td><code>--barber-1…3</code></td><td>índigo · teal · marrón</td><td>(versiones oscuras)</td><td>Identidad de cada barbero en la agenda, siempre con sus iniciales o nombre</td></tr>
     </tbody>
   </table></div>
@@ -195,7 +195,7 @@
 
   <!-- ============================================================ -->
   <h2>Espaciado, márgenes y objetivos táctiles</h2>
-  <p class="cite">Rejilla de 4 pt, saltos grandes en múltiplos de 8. <b>HIG › Layout</b>: márgenes y safe areas del sistema (<code>env(safe-area-inset-*)</code>). <b>Accessibility › Mobility</b>: controles de 44 × 44 pt en iOS (mínimo 28); ~12 pt entre controles con borde y ~24 sin borde. Tamaños por contenedor (Size classes): compact &lt; 734 px, regular ≥ 734, ancho ≥ 1068.</p>
+  <p class="cite">Rejilla de 4 pt, saltos grandes en múltiplos de 8. <b>HIG › Layout</b>: márgenes y safe areas del sistema (<code>env(safe-area-inset-*)</code>). <b>Accessibility › Mobility</b>: controles de 44 × 44 pt en iOS (mínimo 28); ~12 pt entre controles con borde y ~24 sin borde. Tamaños con media queries (Size classes): compact &lt; 734 px, regular ≥ 734, ancho ≥ 1068.</p>
   <div class="demo">
     <div class="space-bar"><i style="width:4px"></i>--space-1 · 4</div>
     <div class="space-bar"><i style="width:8px"></i>--space-2 · 8</div>
