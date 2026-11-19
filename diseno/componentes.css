@@ -145,6 +145,9 @@
 
 .btn .spinner { --spinner-size: 18px; }
 .btn.is-loading { cursor: progress; }
+/* Mientras carga, el botón conserva su estilo (no se ve como desactivado). */
+.btn--filled.is-loading { --btn-bg: var(--accent); --btn-fg: var(--on-accent); opacity: 0.85; }
+.btn--destructive.is-loading { --btn-bg: var(--red-fill); --btn-fg: var(--red); }
 
 /* Botón solo icono (barra de herramientas). HIG › Toolbars: "Prefer
    system-provided symbols without borders". */
