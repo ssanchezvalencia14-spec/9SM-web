@@ -1346,8 +1346,8 @@
 
       <!-- Servicios que ofrece este barbero -->
       <div class="web-card">
-        <p class="web-card-title">Mis servicios y duración</p>
-        <p class="web-card-sub">Elige cuáles ofreces y cuánto tardas en cada uno. La duración es tuya: otro barbero puede tardar distinto en el mismo servicio. Se redondea a turnos completos según tu duración de turno.</p>
+        <p class="web-card-title" id="horSvcTitle">Mis servicios y duración</p>
+        <p class="web-card-sub" id="horSvcSub">Los servicios que ofreces y cuánto dura cada uno. Los configura el administrador; si necesitas un cambio, pídeselo.</p>
         <div id="horServicios"></div>
       </div>
 
@@ -3398,8 +3398,9 @@ function horarioLoad(force) {
     horCfg = PANEL_CFG ? JSON.parse(JSON.stringify(PANEL_CFG)) : { barbers: [] };
     if (!Array.isArray(horCfg.barbers)) horCfg.barbers = [];
 
-    // Si el barbero no está en la configuración se añade, para poder guardarle horario
-    if (currentBarber && currentBarber.id && currentBarber.id !== 'any'
+    // Si el barbero no está en la configuración se añade, para poder guardarle horario.
+    // La cuenta de administrador no es un barbero: añadirla la publicaría en la web.
+    if (currentBarber && currentBarber.id && currentBarber.id !== 'any' && currentBarber.id !== 'admin'
         && !horCfg.barbers.some(function(b){ return b.id === currentBarber.id; })) {
       horCfg.barbers.push({
         id: currentBarber.id, name: currentBarber.name,
@@ -3631,32 +3632,50 @@ function horarioRenderServicios() {
   const cat = horCatalogo();
   if (!cat.length) { host.innerHTML = '<p class="web-card-sub" style="margin:0">Todavía no hay servicios en el catálogo.</p>'; return; }
 
+  // Qué servicios ofrece cada barbero y cuánto dura cada uno lo decide el
+  // administrador, igual que el precio; el barbero los ve sin poder cambiarlos
+  const esAdmin = hasAdminRights(currentBarber);
+  const titulo = document.getElementById('horSvcTitle');
+  const sub = document.getElementById('horSvcSub');
+  if (titulo) titulo.textContent = esAdmin ? 'Servicios y duración de ' + (b.name || b.id) : 'Mis servicios y duración';
+  if (sub) sub.textContent = esAdmin
+    ? 'Marca los servicios que ofrece este barbero y cuánto tarda en cada uno. La web solo le muestra los marcados, con esta duración y su precio. Se redondea a turnos completos según su duración de turno.'
+    : 'Los servicios que ofreces y cuánto dura cada uno. Los configura el administrador; si necesitas un cambio, pídeselo.';
+
   host.innerHTML = cat.map(function(s) {
     const a = horSvcAjuste(b, s);
     const turnos = Math.ceil(a.mins / horPasoActual());
+    const turnosTxt = turnos + ' turno' + (turnos === 1 ? '' : 's');
     return '<div class="hor-svc' + (a.on ? '' : ' off') + '" data-sid="' + s.id + '">'
-      + '<input type="checkbox" data-k="on"' + (a.on ? ' checked' : '') + ' onchange="horarioToggleSvc(this)">'
+      + (esAdmin
+          ? '<input type="checkbox" data-k="on"' + (a.on ? ' checked' : '') + ' onchange="horarioToggleSvc(this)">'
+          : '<span class="hor-svc-turnos" style="text-align:center">' + (a.on ? '✓' : '–') + '</span>')
       + '<div><span class="hor-svc-name">' + String(s.name).replace(/</g,'&lt;') + '</span>'
       +   '<span class="hor-svc-meta">Catálogo: ' + (s.mins || 45) + ' min · $'
       +   (Number(s.price) || 0).toLocaleString('es-CO') + '</span>'
       +   (a.on ? horSvcPrecioHtml(s, a) : '')
       + '</div>'
-      + (a.on
-          ? '<div class="hor-svc-mins"><input type="number" data-k="mins" min="15" max="240" step="5" value="'
-            + a.mins + '" onchange="horarioSvcMins(this)"><span class="hor-desc-sep">min</span></div>'
-            + '<span class="hor-svc-turnos">' + turnos + ' turno' + (turnos === 1 ? '' : 's') + '</span>'
-          : '<span class="hor-svc-turnos" style="grid-column:3 / -1">No lo ofreces</span>')
+      + (!a.on
+          ? '<span class="hor-svc-turnos" style="grid-column:3 / -1">' + (esAdmin ? 'No lo ofrece' : 'No lo ofreces') + '</span>'
+          : esAdmin
+            ? '<div class="hor-svc-mins"><input type="number" data-k="mins" min="15" max="240" step="5" value="'
+              + a.mins + '" onchange="horarioSvcMins(this)"><span class="hor-desc-sep">min</span></div>'
+              + '<span class="hor-svc-turnos">' + turnosTxt + '</span>'
+            : '<span class="hor-svc-name">' + a.mins + ' min</span>'
+              + '<span class="hor-svc-turnos">' + turnosTxt + '</span>')
       + '</div>';
   }).join('');
 }
 
 function horarioToggleSvc(input) {
+  if (!hasAdminRights(currentBarber)) return;
   horarioCollect();
   horarioRenderServicios();
 }
 
 /* Al cambiar la duración se recalcula cuántos turnos de 45 min ocupa */
 function horarioSvcMins(input) {
+  if (!hasAdminRights(currentBarber)) return;
   const fila = input.closest('.hor-svc');
   const mins = parseInt(input.value, 10) || 45;
   const turnos = Math.ceil(mins / horPasoActual());
@@ -3748,15 +3767,20 @@ function horarioCollect() {
 
   // Servicios propios: se guardan solo los que difieren o están apagados,
   // pero se escribe el mapa completo para que quede explícito
+  // Qué servicios ofrece y su duración también los toca solo el administrador:
+  // para el resto se conserva lo guardado, aunque haya campos inyectados
+  const esAdmin = hasAdminRights(currentBarber);
   const svc = {};
   document.querySelectorAll('#horServicios .hor-svc').forEach(function(fila) {
     const sid = fila.getAttribute('data-sid');
-    const on  = fila.querySelector('[data-k="on"]').checked;
-    const mi  = fila.querySelector('[data-k="mins"]');
     const prevSvc = (b.svc && b.svc[sid]) || {};
+    const chk = esAdmin ? fila.querySelector('[data-k="on"]') : null;
+    const mi  = esAdmin ? fila.querySelector('[data-k="mins"]') : null;
+    const cat = horCatalogo().find(function(s) { return s.id === sid; }) || {};
+    const prevMins = parseInt(prevSvc.mins, 10) || parseInt(cat.mins, 10) || 45;
     svc[sid] = {
-      on: on,
-      mins: mi ? (parseInt(mi.value, 10) || 45) : (parseInt(prevSvc.mins, 10) || 45)
+      on: chk ? chk.checked : prevSvc.on !== false,
+      mins: mi ? (parseInt(mi.value, 10) || 45) : prevMins
     };
     // El precio propio solo lo toca el administrador; para el resto se conserva
     // el que ya tenía, aunque la fila no lo muestre como campo editable
