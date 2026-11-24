@@ -4084,7 +4084,7 @@ function applyBarbers(barbers) {
   if (!Array.isArray(barbers) || !barbers.length) return;
   BARBERS.length = 0;
   barbers.forEach(function(b) {
-    if (!b || !b.id || b.id === 'any') return;
+    if (!b || !b.id || b.id === 'any' || b.id === 'admin') return;   // la cuenta admin no atiende
     if (b.active === false) return;
     BARBERS.push({
       id:    b.id,
