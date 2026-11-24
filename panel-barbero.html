@@ -957,48 +957,6 @@
       .hor-cerrado { grid-column: 2 / -1; text-align: left; }
     }
 
-    /* ── Reseñas y QR ── */
-    .res-qr-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 14px; }
-    .res-qr-card {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 11px;
-      padding: 16px; text-align: center;
-    }
-    .res-qr-lienzo {
-      background: #fff; border-radius: 8px; padding: 10px;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 150px; margin-bottom: 12px;
-    }
-    .res-qr-lienzo img, .res-qr-lienzo canvas { display: block; max-width: 100%; height: auto; }
-    .res-qr-nombre { font-size: 0.86rem; margin: 0 0 3px; }
-    .res-qr-link {
-      font-size: 0.6rem; color: var(--text-muted); word-break: break-all;
-      display: block; margin-bottom: 10px;
-    }
-    .res-qr-btn {
-      background: none; border: 1px solid var(--border); color: var(--text);
-      border-radius: 7px; padding: 8px 12px; font-size: 0.7rem;
-      cursor: pointer; font-family: inherit; width: 100%;
-    }
-    .res-qr-btn:hover { border-color: rgba(255,255,255,0.3); }
-
-    .res-resumen { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 12px; margin-bottom: 20px; }
-    .res-res-card {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px;
-    }
-    .res-res-nota { font-size: 1.5rem; color: #e7c04a; line-height: 1; }
-    .res-res-nombre { font-size: 0.78rem; margin: 6px 0 2px; }
-    .res-res-n { font-size: 0.64rem; color: var(--text-muted); }
-
-    .res-item {
-      padding: 12px 14px; margin-bottom: 8px;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
-    }
-    .res-item-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .res-item-stars { color: #e7c04a; font-size: 0.82rem; letter-spacing: 0.08em; }
-    .res-item-meta { font-size: 0.64rem; color: var(--text-muted); margin-left: auto; }
-    .res-item-texto { font-size: 0.8rem; color: var(--text-soft); margin: 8px 0 0; line-height: 1.6; }
-
     /* Distintivo de cita recurrente */
     .appt-series {
       display: inline-flex; align-items: center; gap: 4px;
@@ -1125,7 +1083,6 @@
         <button class="nav-item" id="navHorario" onclick="setTab('horario',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> <span class="nav-label">Mi horario</span></button>
         <button class="nav-item" id="navBloquear" onclick="setTab('bloquear',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> <span class="nav-label">Bloquear espacios</span></button>
         <button class="nav-item" id="navBalance" onclick="setTab('balance',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> <span class="nav-label">Balance</span></button>
-        <button class="nav-item" id="navResenas" onclick="setTab('resenas',this)" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg> <span class="nav-label">Reseñas</span></button>
 
         <!-- Administración: solo para quien lleva el local -->
         <div class="nav-sep" id="adminSep" style="display:none"></div>
@@ -1465,23 +1422,6 @@
       </div>
     </div>
 
-    <!-- ══ RESEÑAS Y CÓDIGOS QR ══ -->
-    <div id="resenasView" style="display:none">
-      <div id="resAviso" class="web-notice" style="display:none"></div>
-
-      <div class="web-card">
-        <p class="web-card-title">Código QR de cada barbero</p>
-        <p class="web-card-sub">Imprime el QR y ponlo en el puesto o en la tarjeta. Al escanearlo se abre la web con el formulario de reseña de ese barbero ya seleccionado.</p>
-        <div id="resQrGrid" class="res-qr-grid"></div>
-      </div>
-
-      <div class="web-card">
-        <p class="web-card-title">Reseñas recibidas</p>
-        <div id="resResumen" class="res-resumen"></div>
-        <div id="resLista"></div>
-      </div>
-    </div>
-
     <!-- ══ PERSONALIZAR WEB ══ -->
     <div id="webView" style="display:none">
 
@@ -1619,7 +1559,6 @@
     <div class="mbn-group mbn-barbero" style="display:none">
       <button class="mbn-more-item mbn-barbero" id="mmiHorario" onclick="mbnGo('horario',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Mi horario</button>
       <button class="mbn-more-item mbn-barbero" id="mmiBloquear" onclick="mbnGo('bloquear',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Bloquear espacios</button>
-      <button class="mbn-more-item mbn-barbero" id="mmiResenas" onclick="mbnGo('resenas',null);mbnCloseMore()" style="display:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6L12 2z"/></svg> Reseñas</button>
     </div>
 
     <span class="mbn-group-label mbn-admin" style="display:none">Administración</span>
@@ -1984,7 +1923,7 @@ function applyBarberUI(info) {
   // tanto en la barra lateral como en el menú móvil
   var propio = info.id && info.id !== 'any';
   var verPropias = (propio || esAdmin) ? '' : 'none';
-  ['navHorario','navNuevaCita','navBloquear','navResenas','navBalance','propioSep','propioNavLabel'].forEach(function(id) {
+  ['navHorario','navNuevaCita','navBloquear','navBalance','propioSep','propioNavLabel'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.display = verPropias;
   });
@@ -2024,7 +1963,7 @@ auth.onAuthStateChanged(function(user) {
     document.getElementById('navWeb').style.display = 'none';
     document.getElementById('adminSep').style.display = 'none';
     document.getElementById('adminNavLabel').style.display = 'none';
-    ['navHorario','navNuevaCita','navResenas'].forEach(function(id) {
+    ['navHorario','navNuevaCita'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
@@ -2152,7 +2091,7 @@ function setTab(tab, btn) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
-  const titles = { calendario:'Calendario', hoy:'Hoy', semana:'Esta semana', todas:'Todas las citas', bloquear:'Bloquear espacios', clientes:'Clientes', inventario:'Inventario', balance:'Balance', web:'Personalizar web', horario:'Mi horario', nuevacita:'Nueva cita', resenas:'Reseñas' };
+  const titles = { calendario:'Calendario', hoy:'Hoy', semana:'Esta semana', todas:'Todas las citas', bloquear:'Bloquear espacios', clientes:'Clientes', inventario:'Inventario', balance:'Balance', web:'Personalizar web', horario:'Mi horario', nuevacita:'Nueva cita' };
   var titleEl = document.getElementById('mainTitle');
   if (titleEl) titleEl.textContent = titles[tab] || tab;
   // Una frase corta por pantalla, para no tener que adivinar qué hace cada una
@@ -2165,7 +2104,6 @@ function setTab(tab, btn) {
     horario:    'Tu jornada, descansos y duración de los turnos.',
     bloquear:   'Cierra turnos sueltos en los que no vas a atender.',
     balance:    'Ingresos de las citas marcadas como completadas.',
-    resenas:    'Tu código QR y las reseñas que han dejado tus clientes.',
     clientes:   'Clientes que han reservado, con su última visita.',
     inventario: 'Productos del local y sus existencias.',
     web:        'Cambia textos, fotos, precios y secciones de la web.'
@@ -2180,8 +2118,7 @@ function setTab(tab, btn) {
   const isWeb     = tab === 'web';
   const isHor     = tab === 'horario';
   const isNC      = tab === 'nuevacita';
-  const isRes     = tab === 'resenas';
-  const isAppts   = !isCal && !isBlock && !isClients && !isInv && !isBal && !isWeb && !isHor && !isNC && !isRes;
+  const isAppts   = !isCal && !isBlock && !isClients && !isInv && !isBal && !isWeb && !isHor && !isNC;
   document.getElementById('appointmentsList').style.display = isAppts  ? 'block' : 'none';
   document.getElementById('calendarView').style.display     = isCal    ? 'block' : 'none';
   document.getElementById('blockView').style.display        = isBlock  ? 'block' : 'none';
@@ -2191,7 +2128,6 @@ function setTab(tab, btn) {
   document.getElementById('webView').style.display          = isWeb    ? 'block' : 'none';
   document.getElementById('horarioView').style.display      = isHor    ? 'block' : 'none';
   document.getElementById('nuevaCitaView').style.display    = isNC     ? 'block' : 'none';
-  document.getElementById('resenasView').style.display      = isRes    ? 'block' : 'none';
   renderAgendaScopeChips();
   const barraRes = document.getElementById('resumenBar');
   if (barraRes) {
@@ -2207,7 +2143,6 @@ function setTab(tab, btn) {
   else if (isWeb)     webLoad();
   else if (isHor)     horarioLoad();
   else if (isNC)      ncInit();
-  else if (isRes)     resInit();
   else                renderTab();
 }
 
@@ -3139,7 +3074,7 @@ var MBN_MAP = { calendario:'mbnCalendario', hoy:'mbnHoy', nuevacita:'mbnNuevaCit
 var NAV_MAP = {
   calendario:'navCalendario', hoy:'navHoy', semana:'navSemana', todas:'navTodas',
   nuevacita:'navNuevaCita', horario:'navHorario', bloquear:'navBloquear',
-  clientes:'navClientes', inventario:'navInventario', balance:'navBalance', web:'navWeb', resenas:'navResenas'
+  clientes:'navClientes', inventario:'navInventario', balance:'navBalance', web:'navWeb'
 };
 function mbnGo(tab, btn) {
   setTab(tab, document.getElementById(NAV_MAP[tab] || ''));
@@ -4201,160 +4136,6 @@ function ncSave() {
 }
 
 /* ══════════════════════════════════════════
-   RESEÑAS Y CÓDIGOS QR
-   Cada barbero tiene un QR que abre 9sm.site/?r=<id>,
-   el formulario de reseña ya asociado a él.
-══════════════════════════════════════════ */
-
-const RES_WEB = 'https://9sm.site/';
-let resData = null;
-
-function resLink(bid) { return RES_WEB + '?r=' + encodeURIComponent(bid); }
-
-function resAviso(msg) {
-  const el = document.getElementById('resAviso');
-  if (!el) return;
-  if (!msg) { el.style.display = 'none'; return; }
-  el.innerHTML = msg;
-  el.style.display = 'block';
-}
-
-/* La librería de QR se carga solo al abrir esta pestaña */
-function cargarQRLib() {
-  if (window.QRCode) return Promise.resolve(true);
-  return new Promise(function(resolve) {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-    s.onload = function() { resolve(!!window.QRCode); };
-    s.onerror = function() { resolve(false); };
-    document.head.appendChild(s);
-  });
-}
-
-function resInit() {
-  resAviso('');
-  resPintarQR();
-  resCargar();
-}
-
-/* Un barbero normal solo ve su QR; el administrador los ve todos */
-function resBarberos() {
-  const todos = barberList();
-  if (hasAdminRights(currentBarber)) return todos;
-  return todos.filter(function(b) { return b.id === (currentBarber && currentBarber.id); });
-}
-
-function resPintarQR() {
-  const grid = document.getElementById('resQrGrid');
-  const lista = resBarberos();
-  if (!lista.length) { grid.innerHTML = '<p class="web-card-sub" style="margin:0">No hay barberos configurados.</p>'; return; }
-
-  grid.innerHTML = lista.map(function(b) {
-    return '<div class="res-qr-card">'
-      + '<div class="res-qr-lienzo" id="qr-' + b.id + '"></div>'
-      + '<p class="res-qr-nombre">' + String(b.name || b.id).replace(/</g, '&lt;') + '</p>'
-      + '<span class="res-qr-link">' + resLink(b.id) + '</span>'
-      + '<button class="res-qr-btn" onclick="resDescargarQR(\'' + b.id + '\')">Descargar PNG</button>'
-      + '</div>';
-  }).join('');
-
-  cargarQRLib().then(function(ok) {
-    if (!ok) {
-      resAviso('No se pudo cargar el generador de códigos QR (sin conexión o bloqueado). '
-        + 'Los enlaces de abajo funcionan igual: puedes generar el QR con cualquier herramienta.');
-      return;
-    }
-    lista.forEach(function(b) {
-      const host = document.getElementById('qr-' + b.id);
-      if (!host) return;
-      host.innerHTML = '';
-      new QRCode(host, { text: resLink(b.id), width: 160, height: 160,
-        colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-    });
-  });
-}
-
-function resDescargarQR(bid) {
-  const host = document.getElementById('qr-' + bid);
-  const canvas = host && host.querySelector('canvas');
-  const img = host && host.querySelector('img');
-  const url = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
-  if (!url) { resAviso('El QR aún no está generado. Espera un momento y vuelve a intentarlo.'); return; }
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'qr-resena-' + bid + '.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-function resCargar() {
-  const resumen = document.getElementById('resResumen');
-  const lista   = document.getElementById('resLista');
-  lista.innerHTML = '<p class="web-card-sub" style="margin:0">Cargando…</p>';
-
-  db.ref('reviews').once('value')
-    .then(function(snap) { resData = snap.val() || {}; resPintarResenas(); })
-    .catch(function(err) {
-      resumen.innerHTML = '';
-      lista.innerHTML = '';
-      resAviso('No se pueden leer las reseñas (' + (err && err.code ? err.code : 'error') + '). '
-        + 'Añade este nodo en Firebase Console → Realtime Database → Reglas:<br><br>'
-        + '<code>"reviews": { ".read": true, ".write": true }</code>');
-    });
-}
-
-function resEstrellas(n) {
-  let s = '';
-  for (let i = 1; i <= 5; i++) s += (i <= n ? '★' : '☆');
-  return s;
-}
-
-function resPintarResenas() {
-  const resumen = document.getElementById('resResumen');
-  const lista   = document.getElementById('resLista');
-  const mios    = resBarberos().map(function(b) { return b.id; });
-
-  const todas = Object.keys(resData || {})
-    .map(function(k) { return resData[k]; })
-    .filter(function(r) { return r && r.barber && mios.indexOf(r.barber) !== -1; })
-    .sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-
-  // Media por barbero
-  const acc = {};
-  todas.forEach(function(r) {
-    if (!acc[r.barber]) acc[r.barber] = { suma: 0, n: 0 };
-    acc[r.barber].suma += Number(r.stars) || 0;
-    acc[r.barber].n++;
-  });
-  resumen.innerHTML = resBarberos().map(function(b) {
-    const a = acc[b.id];
-    return '<div class="res-res-card">'
-      + '<div class="res-res-nota">' + (a ? (a.suma / a.n).toFixed(1) : '—') + '</div>'
-      + '<p class="res-res-nombre">' + String(b.name || b.id).replace(/</g, '&lt;') + '</p>'
-      + '<span class="res-res-n">' + (a ? a.n + ' reseña' + (a.n === 1 ? '' : 's') : 'sin reseñas') + '</span>'
-      + '</div>';
-  }).join('');
-
-  if (!todas.length) {
-    lista.innerHTML = '<p class="web-card-sub" style="margin:0">Todavía no hay reseñas. Comparte el QR con los clientes al terminar el servicio.</p>';
-    return;
-  }
-  lista.innerHTML = todas.map(function(r) {
-    const f = r.ts ? new Date(r.ts) : null;
-    const fecha = f ? (f.getDate() + '/' + (f.getMonth() + 1) + '/' + f.getFullYear()) : '';
-    return '<div class="res-item">'
-      + '<div class="res-item-top">'
-      +   '<span class="res-item-stars">' + resEstrellas(Number(r.stars) || 0) + '</span>'
-      +   '<span style="font-size:0.78rem">' + (r.autor ? String(r.autor).replace(/</g, '&lt;') : 'Anónimo') + '</span>'
-      +   '<span class="res-item-meta">' + (r.barberName || r.barber) + ' · ' + fecha + '</span>'
-      + '</div>'
-      + (r.texto ? '<p class="res-item-texto">' + String(r.texto).replace(/</g, '&lt;') + '</p>' : '')
-      + '</div>';
-  }).join('');
-}
-
-/* ══════════════════════════════════════════
    PERSONALIZAR WEB
    Escribe en /siteConfig, que la web pública lee
    al cargar. Requiere esta regla en Realtime Database:
@@ -4945,7 +4726,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261120a';
+  var BUILD = '20261124a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
