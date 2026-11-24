@@ -1,0 +1,1291 @@
+/* ==========================================================================
+   9SM NEXO · componentes.css
+   Componentes del sistema. Requiere tokens.css antes.
+
+   Tamaños de pantalla (HIG › Layout › Size classes), con @media:
+     compact   < 734 px   iPhone, Android
+     regular   ≥ 734 px   iPad, ventanas medianas
+     wide      ≥ 1068 px  computador
+   No se usan container queries a propósito: un contenedor con
+   container-type crea contención de layout y se vuelve el bloque
+   contenedor de los position: fixed (tab bar, sheets, alertas), que
+   dejarían de anclarse a la pantalla. Las maquetas pintan cada marco en
+   un iframe del ancho del dispositivo para que estas media queries
+   respondan igual que en un teléfono.
+   ========================================================================== */
+
+.app {
+  /* Fondo de listas, tarjetas y fichas según dónde estén. */
+  --cell-bg: var(--bg-secondary);
+  position: relative;
+  display: flow-root;   /* los márgenes de los hijos no se escapan por arriba */
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--label);
+}
+.app--grouped { background: var(--bg-grouped); --cell-bg: var(--bg-grouped-secondary); }
+
+/* --------------------------------------------------------------------------
+   Iconos — HIG › Icons: trazo, tamaño y peso consistentes; el peso del
+   trazo acompaña al del texto. SF Symbols solo puede usarse en
+   plataformas Apple, así que la web usa glifos propios del mismo estilo
+   (trazo 1,75, puntas redondas, rejilla de 24). Siempre con texto visible
+   o aria-label (HIG › Icons: "Provide alternative text labels").
+   -------------------------------------------------------------------------- */
+.icon {
+  width: 1.1765em; height: 1.1765em;     /* 20 px junto a texto de 17 */
+  flex: none;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -0.2em;
+}
+.icon--fill { fill: currentColor; stroke: none; }
+.icon--sm { width: 1em; height: 1em; }
+.icon--lg { width: 1.6em; height: 1.6em; }
+
+/* --------------------------------------------------------------------------
+   Texto — estilos de la escala Dynamic Type
+   -------------------------------------------------------------------------- */
+.t-large-title { font-size: var(--text-large-title); line-height: var(--leading-large-title); font-weight: var(--weight-bold); letter-spacing: var(--tracking-tight); }
+.t-title-1  { font-size: var(--text-title-1); line-height: var(--leading-title-1); font-weight: var(--weight-bold); }
+.t-title-2  { font-size: var(--text-title-2); line-height: var(--leading-title-2); font-weight: var(--weight-bold); }
+.t-title-3  { font-size: var(--text-title-3); line-height: var(--leading-title-3); font-weight: var(--weight-semibold); }
+.t-headline { font-size: var(--text-headline); line-height: var(--leading-headline); font-weight: var(--weight-semibold); }
+.t-body     { font-size: var(--text-body); line-height: var(--leading-body); }
+.t-callout  { font-size: var(--text-callout); line-height: var(--leading-callout); }
+.t-subhead  { font-size: var(--text-subhead); line-height: var(--leading-subhead); }
+.t-footnote { font-size: var(--text-footnote); line-height: var(--leading-footnote); }
+.t-caption  { font-size: var(--text-caption-1); line-height: var(--leading-caption-1); }
+.t-display-1 { font-size: var(--text-display-1); line-height: var(--leading-display-1); font-weight: var(--weight-bold); letter-spacing: var(--tracking-display); }
+.t-display-2 { font-size: var(--text-display-2); line-height: var(--leading-display-2); font-weight: var(--weight-bold); letter-spacing: var(--tracking-display); }
+.t-lead     { font-size: var(--text-lead); line-height: var(--leading-lead); }
+.t-secondary { color: var(--label-secondary); }
+.t-tertiary  { color: var(--label-tertiary); }
+.t-num { font-variant-numeric: tabular-nums; }
+.t-mono { font-family: var(--font-mono); letter-spacing: 0.04em; }
+.t-eyebrow {
+  font-size: var(--text-subhead); line-height: var(--leading-subhead);
+  font-weight: var(--weight-semibold); color: var(--label-secondary);
+}
+.prose { max-width: var(--text-max); line-height: var(--leading-loose); }
+.prose p { margin: 0 0 var(--space-4); }
+
+/* Enlaces: mismo color que el texto, subrayados. Con el acento grafito
+   el subrayado es lo que dice "esto es un enlace" (HIG › Color › Inclusive
+   color: no depender solo del color). */
+.link {
+  color: var(--label);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--label-tertiary);
+}
+.link:hover { text-decoration-color: currentColor; }
+
+/* --------------------------------------------------------------------------
+   Botones — HIG › Buttons
+   · Un solo botón prominente (filled) por vista: "Keep the number of
+     prominent buttons to one or two per view".
+   · Estilo, no tamaño, para marcar la opción preferida.
+   · Área táctil ≥ 44 × 44 y estado presionado siempre.
+   · Si la acción tarda, indicador de actividad dentro del botón y etiqueta
+     en gerundio ("Guardando…").
+   -------------------------------------------------------------------------- */
+.btn {
+  --btn-bg: var(--fill-tertiary);
+  --btn-fg: var(--label);
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-5);
+  border: 0; border-radius: var(--radius-capsule);
+  background: var(--btn-bg); color: var(--btn-fg);
+  font: inherit; font-size: var(--text-body); font-weight: var(--weight-semibold);
+  line-height: 1.2; text-decoration: none; white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-instant) var(--ease-standard),
+              background-color var(--dur-fast) var(--ease-standard),
+              opacity var(--dur-fast) var(--ease-standard);
+}
+.btn:active { transform: scale(var(--press-scale)); }
+.btn[disabled], .btn[aria-disabled="true"] {
+  cursor: default; transform: none;
+  --btn-bg: var(--fill-quaternary); --btn-fg: var(--label-tertiary);
+}
+/* Prominente: fondo con el color de acento (HIG › Liquid Glass color: "To
+   emphasize primary actions, apply color to the background"). */
+.btn--filled  { --btn-bg: var(--accent); --btn-fg: var(--on-accent); }
+.btn--filled:hover:not([disabled]):not([aria-disabled="true"]) { --btn-bg: var(--accent-hover); }
+.btn--tinted  { --btn-bg: var(--accent-tint); --btn-fg: var(--label); }
+.btn--gray    { --btn-bg: var(--fill-tertiary); --btn-fg: var(--label); }
+.btn--gray:hover:not([disabled]), .btn--tinted:hover:not([disabled]) { --btn-bg: var(--fill-secondary); }
+.btn--plain   { --btn-bg: transparent; --btn-fg: var(--label); padding: 0 var(--space-3); }
+.btn--plain:hover { --btn-bg: var(--fill-quaternary); }
+/* Destructivo: rojo del sistema (HIG › Buttons › Role: "a destructive
+   button uses the system red color"). Nunca con rol primario. */
+.btn--destructive { --btn-bg: var(--red-fill); --btn-fg: var(--red); }
+.btn--destructive.btn--plain { --btn-bg: transparent; }
+/* Sobre medios oscuros (hero): vidrio claro, HIG › Materials › clear. */
+.btn--glass {
+  --btn-bg: rgba(255, 255, 255, 0.16); --btn-fg: #fff;
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+.btn--on-media { --btn-bg: #f5f5f7; --btn-fg: #000; }   /* primario sobre el video */
+
+.btn--small { min-height: 34px; padding: 0 var(--space-4); font-size: var(--text-subhead); }
+/* El botón pequeño conserva un área táctil de 44 con un ::after invisible. */
+.btn--small::after { content: ""; position: absolute; inset: -5px -2px; }
+.btn--large { min-height: var(--target-large); padding: 0 var(--space-6); font-size: var(--text-body); }
+.btn--block { display: flex; width: 100%; }
+.btn--icon { padding: 0; width: var(--target-min); }
+.btn--icon.btn--small { width: 34px; }
+.btn--icon.btn--small::after { inset: -5px; }
+
+.btn .spinner { --spinner-size: 18px; }
+.btn.is-loading { cursor: progress; }
+/* Mientras carga, el botón conserva su estilo (no se ve como desactivado). */
+.btn--filled.is-loading { --btn-bg: var(--accent); --btn-fg: var(--on-accent); opacity: 0.85; }
+.btn--destructive.is-loading { --btn-bg: var(--red-fill); --btn-fg: var(--red); }
+
+/* Botón solo icono (barra de herramientas). HIG › Toolbars: "Prefer
+   system-provided symbols without borders". */
+.icon-btn {
+  position: relative;
+  display: inline-grid; place-items: center;
+  width: var(--target-min); height: var(--target-min);
+  border: 0; border-radius: var(--radius-capsule);
+  background: transparent; color: var(--label);
+  cursor: pointer; font: inherit;
+  transition: background-color var(--dur-fast) var(--ease-standard), transform var(--dur-instant);
+}
+.icon-btn:hover { background: var(--fill-quaternary); }
+.icon-btn:active { transform: scale(var(--press-scale)); }
+.icon-btn .icon { width: 22px; height: 22px; }
+.icon-btn--filled { background: var(--fill-tertiary); }
+.icon-btn--glass {
+  background: var(--glass-bg); box-shadow: var(--shadow-glass);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+}
+
+/* Contador sobre un icono (avisos). HIG › Tab bars: "a red oval containing
+   white text … Reserve badges for critical information". */
+.count-badge {
+  position: absolute; top: 4px; right: 2px;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: var(--radius-capsule);
+  background: #d70015; color: #fff;   /* rojo fijo: 5,4:1 con blanco en los dos modos */
+  font-size: 11px; font-weight: var(--weight-semibold); line-height: 18px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* --------------------------------------------------------------------------
+   Indicadores de actividad y carga — HIG › Progress indicators, Loading
+   "Show something as soon as possible": esqueletos donde llegará contenido,
+   indicador giratorio solo para esperas cortas dentro de un control.
+   -------------------------------------------------------------------------- */
+.spinner {
+  --spinner-size: 20px;
+  display: inline-block; width: var(--spinner-size); height: var(--spinner-size);
+  flex: none;
+  background: conic-gradient(from 0deg, transparent 0 10%, currentColor 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  opacity: 0.7;
+}
+.spinner--lg { --spinner-size: 32px; }
+@keyframes spin { to { transform: rotate(1turn); } }
+
+.skeleton {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: var(--fill-tertiary);
+  animation: pulse 1.6s var(--ease-standard) infinite alternate;
+}
+.skeleton--text { height: 0.9em; margin: 0.25em 0; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .spinner { animation-duration: 1.8s; }
+}
+
+.loading-block {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3);
+  padding: var(--space-12) var(--space-4);
+  color: var(--label-secondary); font-size: var(--text-subhead); text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Estado vacío y de error — HIG › Writing: "Provide clear next steps on any
+   blank screens"; "Write clear error messages … avoid blame, and be clear
+   about what someone can do to fix it".
+   -------------------------------------------------------------------------- */
+.empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-12) var(--space-6);
+  max-width: 26rem; margin: 0 auto;
+}
+.empty__icon {
+  display: grid; place-items: center;
+  width: 56px; height: 56px; margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: var(--fill-tertiary); color: var(--label-secondary);
+}
+.empty__icon .icon { width: 28px; height: 28px; }
+.empty__icon--success { background: var(--green-fill); color: var(--green); }
+.empty__icon--error   { background: var(--red-fill);   color: var(--red); }
+.empty__title { margin: 0; font-size: var(--text-title-3); line-height: var(--leading-title-3); font-weight: var(--weight-semibold); }
+.empty__text  { margin: 0; color: var(--label-secondary); font-size: var(--text-callout); line-height: var(--leading-callout); }
+.empty__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-4); }
+
+/* Aviso en línea, junto a lo que describe (HIG › Feedback: "Consider
+   integrating status feedback into your interface"). Siempre con icono. */
+.notice {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--fill-quaternary);
+  font-size: var(--text-subhead); line-height: var(--leading-subhead);
+}
+.notice .icon { margin-top: 1px; }
+.notice--error   { background: var(--red-fill); }
+.notice--error .icon { color: var(--red); }
+.notice--warning { background: var(--orange-fill); }
+.notice--warning .icon { color: var(--orange); }
+.notice--success { background: var(--green-fill); }
+.notice--success .icon { color: var(--green); }
+.notice--info .icon { color: var(--label-secondary); }
+.notice__body { flex: 1; min-width: 0; }
+.notice__body strong { font-weight: var(--weight-semibold); }
+.notice .btn { margin-top: var(--space-2); }
+
+.status-inline {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-subhead); color: var(--label-secondary);
+}
+.status-inline--success { color: var(--green); }
+.status-inline--error   { color: var(--red); }
+
+/* --------------------------------------------------------------------------
+   Insignias de estado — siempre texto + icono, el color refuerza.
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 24px; padding: 0 var(--space-2) 0 6px;
+  border-radius: var(--radius-capsule);
+  font-size: var(--text-caption-1); font-weight: var(--weight-semibold); line-height: 1;
+  white-space: nowrap;
+  background: var(--gray-fill); color: var(--label-secondary);
+}
+.badge .icon { width: 14px; height: 14px; stroke-width: 2.2; }
+.badge--pending   { background: var(--orange-fill); color: var(--orange); }
+.badge--done      { background: var(--green-fill);  color: var(--green); }
+.badge--cancelled { background: var(--red-fill);    color: var(--red); }
+.badge--blocked   { background: var(--gray-fill);   color: var(--label-secondary); }
+.badge--confirmed { background: var(--green-fill);  color: var(--green); }
+.badge--neutral   { background: var(--fill-tertiary); color: var(--label); }
+.badge--plain     { background: transparent; padding: 0; height: auto; color: var(--label-secondary); font-weight: var(--weight-medium); }
+
+/* --------------------------------------------------------------------------
+   Avatar con iniciales o foto
+   -------------------------------------------------------------------------- */
+.avatar {
+  --avatar-size: 44px;
+  --avatar-color: var(--gray);
+  position: relative;
+  display: inline-grid; place-items: center; flex: none;
+  width: var(--avatar-size); height: var(--avatar-size);
+  border-radius: 50%; overflow: hidden;
+  background: var(--fill-tertiary); color: var(--label);
+  font-size: calc(var(--avatar-size) * 0.38); font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar--sm { --avatar-size: 32px; }
+.avatar--lg { --avatar-size: 64px; }
+.avatar--xl { --avatar-size: 80px; }
+.avatar--tone { background: color-mix(in srgb, var(--avatar-color) 18%, transparent); color: var(--avatar-color); }
+
+/* --------------------------------------------------------------------------
+   Listas — HIG › Lists and tables
+   Estilo agrupado e insertado (insetGrouped), como Ajustes: encabezado,
+   filas de 44 pt mínimo, separador insertado, pie explicativo.
+   -------------------------------------------------------------------------- */
+.list-section { margin: 0 0 var(--space-8); }
+.list-header {
+  margin: 0 0 var(--space-2); padding: 0 var(--space-4);
+  font-size: var(--text-footnote); line-height: var(--leading-footnote);
+  font-weight: var(--weight-semibold); color: var(--label-secondary);
+}
+.list-header--large {
+  padding: 0 var(--space-1); margin-bottom: var(--space-3);
+  font-size: var(--text-title-3); line-height: var(--leading-title-3); color: var(--label);
+}
+.list-footer {
+  margin: var(--space-2) 0 0; padding: 0 var(--space-4);
+  font-size: var(--text-footnote); line-height: var(--leading-footnote); color: var(--label-secondary);
+}
+.list {
+  margin: 0; padding: 0; list-style: none;
+  border-radius: var(--radius-lg);
+  background: var(--cell-bg);
+  overflow: hidden;
+}
+.list--plain { border-radius: 0; background: transparent !important; }
+
+.row {
+  position: relative;
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  color: inherit; text-decoration: none; text-align: left;
+  width: 100%; border: 0; background: transparent; font: inherit;
+}
+/* Separador insertado: empieza donde empieza el texto. */
+.row + .row::before, li + li > .row::before {
+  content: ""; position: absolute; top: 0; right: 0;
+  left: var(--row-inset, var(--space-4));
+  border-top: 0.5px solid var(--separator);
+}
+.row--icon { --row-inset: 60px; }
+.row--avatar { --row-inset: 72px; }
+button.row, a.row, label.row { cursor: pointer; transition: background-color var(--dur-fast); }
+button.row:hover, a.row:hover, label.row:hover { background: var(--fill-quaternary); }
+button.row:active, a.row:active, label.row:active { background: var(--fill-tertiary); }
+.row__icon {
+  display: grid; place-items: center; flex: none;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--fill-tertiary); color: var(--label);
+}
+.row__icon .icon { width: 18px; height: 18px; }
+.row__main { flex: 1; min-width: 0; }
+.row__title { display: block; font-size: var(--text-body); line-height: var(--leading-body); }
+.row__title--strong { font-weight: var(--weight-semibold); }
+.row__subtitle {
+  display: block; margin-top: 2px;
+  font-size: var(--text-subhead); line-height: var(--leading-subhead); color: var(--label-secondary);
+}
+.row__detail {
+  flex: none; margin-left: auto;
+  font-size: var(--text-body); color: var(--label-secondary); text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.row__detail--strong { color: var(--label); font-weight: var(--weight-semibold); }
+.row__chevron { flex: none; color: var(--label-tertiary); }
+.row__chevron .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+/* Selección dentro de una lista de opciones: marca de verificación.
+   HIG › Lists: "highlights a row only briefly before adding an image —
+   such as a checkmark — indicating that the item is selected". */
+.row__check { flex: none; color: var(--accent); visibility: hidden; }
+.row__check .icon { stroke-width: 2.4; }
+.row[aria-checked="true"] .row__check,
+.row[aria-selected="true"] .row__check,
+.row.is-selected .row__check { visibility: visible; }
+.row.is-selected .row__title { font-weight: var(--weight-semibold); }
+/* Fila de navegación seleccionada (sidebar, lista maestra). */
+.row.is-current { background: var(--accent-tint); }
+/* Si el texto crece (Dynamic Type grande) la fila se apila. HIG ›
+   Typography: "consider using a stacked layout where text appears above
+   secondary items". */
+@media (max-width: 420px) {
+  .row--stack-sm { flex-wrap: wrap; }
+  .row--stack-sm .row__detail { margin-left: 0; text-align: left; flex-basis: 100%; }
+}
+
+/* El anillo de foco va por dentro en filas y celdas: la lista recorta lo
+   que sale de sus bordes. */
+.list :focus-visible, .table-wrap :focus-visible, .sidebar__item:focus-visible, .tabbar__item:focus-visible { outline-offset: -3px; }
+
+/* --------------------------------------------------------------------------
+   Tablas (panel en pantallas anchas) — HIG › Lists and tables › macOS:
+   encabezados descriptivos, filas alternas opcionales. En compact cada
+   tabla se presenta como lista.
+   -------------------------------------------------------------------------- */
+.table-wrap { border-radius: var(--radius-lg); background: var(--cell-bg); overflow: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: var(--text-subhead); }
+.table th {
+  position: sticky; top: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--cell-bg);
+  text-align: left; font-weight: var(--weight-semibold);
+  font-size: var(--text-footnote); color: var(--label-secondary);
+  border-bottom: 0.5px solid var(--separator);
+}
+.table td { padding: var(--space-3) var(--space-4); border-bottom: 0.5px solid var(--separator); vertical-align: middle; }
+.table tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.table tbody tr:hover { background: var(--fill-quaternary); }
+
+/* --------------------------------------------------------------------------
+   Formularios — HIG › Text fields, Entering data
+   · Etiqueta visible siempre (el placeholder desaparece al escribir).
+   · Teclado adecuado: type="tel", inputmode, autocomplete.
+   · Error junto al campo, en frase que diga cómo arreglarlo.
+   -------------------------------------------------------------------------- */
+.form { display: grid; gap: var(--space-5); }
+.form-grid { display: grid; gap: var(--space-4); }
+@media (min-width: 734px) {
+  .form-grid--2 { grid-template-columns: 1fr 1fr; }
+  .form-grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .form-grid .span-all { grid-column: 1 / -1; }
+}
+.field { display: grid; gap: var(--space-2); }
+.field__label { font-size: var(--text-subhead); line-height: var(--leading-subhead); font-weight: var(--weight-semibold); }
+.field__optional { font-weight: var(--weight-regular); color: var(--label-secondary); }
+.field__control {
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--fill-tertiary);
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur-fast), background-color var(--dur-fast);
+}
+.field__control:focus-within { background: var(--bg-elevated); box-shadow: inset 0 0 0 1.5px var(--label-secondary); }
+.field__control .icon { color: var(--label-secondary); }
+.field__input, .field__select, .field__textarea {
+  flex: 1; min-width: 0; width: 100%;
+  border: 0; outline: 0; background: transparent;
+  color: var(--label); font: inherit; font-size: var(--text-body);
+  padding: var(--space-3) 0;
+}
+.field__input::placeholder, .field__textarea::placeholder { color: var(--placeholder); opacity: 1; }
+.field__textarea { resize: vertical; min-height: 88px; line-height: var(--leading-loose); }
+.field__control--textarea { align-items: stretch; }
+.field__select { appearance: none; -webkit-appearance: none; cursor: pointer; }
+.field__control--select { position: relative; }
+.field__control--select::after {
+  content: ""; width: 8px; height: 8px; margin-left: auto; flex: none;
+  border-right: 2px solid var(--label-secondary); border-bottom: 2px solid var(--label-secondary);
+  transform: translateY(-2px) rotate(45deg);
+  pointer-events: none;
+}
+.field__hint { font-size: var(--text-footnote); line-height: var(--leading-footnote); color: var(--label-secondary); margin: 0; }
+.field__error {
+  display: flex; align-items: flex-start; gap: var(--space-2); margin: 0;
+  font-size: var(--text-footnote); line-height: var(--leading-footnote); color: var(--red);
+}
+.field__error .icon { width: 16px; height: 16px; margin-top: 1px; }
+.field--error .field__control { box-shadow: inset 0 0 0 1.5px var(--red); background: var(--red-fill); }
+/* Botón de borrar dentro del campo — HIG › Text fields › iOS: "Display a
+   Clear button in the trailing end of a text field". */
+.field__clear {
+  display: grid; place-items: center; flex: none;
+  position: relative;
+  width: 32px; height: 32px; margin-right: -8px;
+  border: 0; border-radius: 50%; background: transparent; color: var(--label-tertiary); cursor: pointer;
+}
+.field__clear::after { content: ""; position: absolute; inset: -6px; }
+.field__clear .icon { width: 18px; height: 18px; }
+.field__suffix { color: var(--label-secondary); font-size: var(--text-body); flex: none; }
+
+/* Interruptor — HIG › Toggles › iOS: "Use the switch toggle style only in a
+   list row". Verde del sistema (versión de alto contraste) al encenderse;
+   el estado también se ve por la posición del botón. */
+.switch {
+  appearance: none; -webkit-appearance: none;
+  position: relative; flex: none;
+  width: 51px; height: 31px; margin: 0;
+  border-radius: var(--radius-capsule);
+  background: var(--fill); cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 27px; height: 27px; border-radius: 50%;
+  background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16);
+  transition: transform var(--dur-base) var(--ease-sheet);
+}
+.switch:checked { background: var(--green); }
+.switch:checked::after { transform: translateX(20px); }
+.switch:disabled { opacity: 0.4; cursor: default; }
+/* Área táctil completa: la fila entera es <label>. */
+
+/* Casilla (para listas de selección múltiple en escritorio). */
+.check {
+  appearance: none; -webkit-appearance: none; flex: none;
+  width: 22px; height: 22px; margin: 0; border-radius: 6px;
+  box-shadow: inset 0 0 0 1.5px var(--label-tertiary); cursor: pointer;
+  display: grid; place-items: center;
+}
+.check:checked { background: var(--accent); box-shadow: none; }
+.check:checked::after {
+  content: ""; width: 6px; height: 11px; margin-top: -2px;
+  border-right: 2.4px solid var(--on-accent); border-bottom: 2.4px solid var(--on-accent);
+  transform: rotate(45deg);
+}
+
+/* Control segmentado — HIG › Segmented controls: opciones muy
+   relacionadas, todas del mismo ancho, ≤ 5 en iPhone, solo texto o solo
+   iconos. Se marca con aria-pressed / aria-selected. */
+.segmented {
+  display: inline-flex; padding: 2px; gap: 2px;
+  border-radius: var(--radius-capsule);
+  background: var(--fill-tertiary);
+  max-width: 100%;
+}
+.segmented--block { display: flex; width: 100%; }
+.segmented--block .segmented__item { flex: 1 1 0; padding: 0 var(--space-2); }
+.segmented__item {
+  flex: 0 0 auto; min-width: 0;
+  min-height: var(--target-min); padding: 0 var(--space-4);
+  border: 0; border-radius: var(--radius-capsule);
+  background: transparent; color: var(--label);
+  font: inherit; font-size: var(--text-subhead); font-weight: var(--weight-medium);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.segmented__item[aria-selected="true"], .segmented__item[aria-pressed="true"], .segmented__item.is-selected {
+  background: var(--segment-selected); font-weight: var(--weight-semibold);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+
+/* Fichas seleccionables (botón que se comporta como interruptor).
+   HIG › Toggles › iOS: "Outside of a list, use a button that behaves like a
+   toggle"; "Make sure the visual differences in a toggle's state are
+   obvious … Avoid relying solely on different colors". Seleccionada: fondo
+   de acento + marca. */
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chips--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.chips--scroll::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: var(--target-min); padding: 0 var(--space-4);
+  border: 0; border-radius: var(--radius-capsule);
+  background: var(--fill-tertiary); color: var(--label);
+  font: inherit; font-size: var(--text-subhead); font-weight: var(--weight-medium);
+  white-space: nowrap; cursor: pointer;
+  transition: background-color var(--dur-fast), color var(--dur-fast), transform var(--dur-instant);
+}
+.chip:active { transform: scale(var(--press-scale)); }
+.chip .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+.chip[aria-pressed="true"], .chip[aria-checked="true"], .chip.is-selected {
+  background: var(--accent); color: var(--on-accent); font-weight: var(--weight-semibold);
+}
+.chip__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--gray)); flex: none; }
+
+/* Tarjeta seleccionable grande (barbero). */
+.choice {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-4) var(--space-3);
+  border: 0; border-radius: var(--radius-lg);
+  background: var(--cell-bg); color: var(--label);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  font: inherit; text-align: center; cursor: pointer;
+  transition: box-shadow var(--dur-fast), transform var(--dur-instant);
+}
+.choice:active { transform: scale(var(--press-scale)); }
+.choice[aria-checked="true"], .choice.is-selected { box-shadow: inset 0 0 0 2px var(--accent); }
+.choice__mark {
+  position: absolute; top: var(--space-2); right: var(--space-2);
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  opacity: 0; transform: scale(0.6); transition: opacity var(--dur-fast), transform var(--dur-fast) var(--ease-out);
+}
+.choice__mark .icon { width: 14px; height: 14px; stroke-width: 2.8; }
+.choice[aria-checked="true"] .choice__mark, .choice.is-selected .choice__mark { opacity: 1; transform: none; }
+.choice__title { font-size: var(--text-subhead); font-weight: var(--weight-semibold); line-height: var(--leading-subhead); }
+.choice__meta { font-size: var(--text-footnote); color: var(--label-secondary); line-height: var(--leading-footnote); }
+
+/* Rejilla de horas. Ocupada: tachada y en tono terciario, no solo gris. */
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--space-2); }
+.slot {
+  min-height: var(--target-min);
+  border: 0; border-radius: var(--radius-sm);
+  background: var(--fill-tertiary); color: var(--label);
+  font: inherit; font-size: var(--text-subhead); font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: background-color var(--dur-fast), transform var(--dur-instant);
+}
+.slot:active { transform: scale(var(--press-scale)); }
+.slot[aria-pressed="true"], .slot.is-selected { background: var(--accent); color: var(--on-accent); font-weight: var(--weight-semibold); }
+.slot[disabled] { background: transparent; color: var(--label-tertiary); text-decoration: line-through; cursor: default; box-shadow: inset 0 0 0 1px var(--separator); }
+.slot--blocked { background: var(--red-fill); color: var(--red); }
+.slot--booked { background: var(--orange-fill); color: var(--orange); }
+
+/* Tira de días (reserva). */
+.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+.day {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 64px; padding: var(--space-2) 0;
+  border: 0; border-radius: var(--radius-md);
+  background: transparent; color: var(--label); font: inherit; cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+.day:hover { background: var(--fill-quaternary); }
+.day__name { font-size: var(--text-caption-1); font-weight: var(--weight-medium); color: var(--label-secondary); text-transform: capitalize; }
+.day__num { font-size: var(--text-title-3); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.day__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.day.is-today .day__name { color: var(--label); font-weight: var(--weight-bold); }
+.day[aria-pressed="true"], .day.is-selected { background: var(--accent); color: var(--on-accent); }
+.day[aria-pressed="true"] .day__name, .day.is-selected .day__name { color: inherit; opacity: 0.8; }
+.day[aria-pressed="true"] .day__dot, .day.is-selected .day__dot { background: var(--on-accent); }
+.day[disabled] { color: var(--label-quaternary); cursor: default; }
+.day[disabled] .day__name { color: var(--label-quaternary); }
+
+/* Estrellas de calificación (radiogroup). Cada estrella, 44 × 44. */
+.stars { display: flex; gap: 0; }
+.star {
+  display: grid; place-items: center;
+  width: var(--target-min); height: var(--target-min);
+  border: 0; background: transparent; color: var(--label-quaternary); cursor: pointer; padding: 0;
+}
+.star .icon { width: 32px; height: 32px; }
+.star[aria-checked="true"], .star.is-on { color: var(--yellow); }
+
+/* --------------------------------------------------------------------------
+   Barra de navegación de la web (estilo apple.com) — vidrio fijo arriba.
+   HIG › Materials: Liquid Glass para la capa de controles que flota.
+   HIG › Layout › "Differentiate controls from content".
+   -------------------------------------------------------------------------- */
+.navbar {
+  position: sticky; top: 0; z-index: 50;
+  padding-top: var(--safe-top);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: 0 0.5px 0 var(--separator);
+}
+.navbar--on-media { background: rgba(0, 0, 0, 0.32); box-shadow: none; color: #f5f5f7; }
+.navbar__inner {
+  display: flex; align-items: center; gap: var(--space-2);
+  height: var(--navbar-h);
+  max-width: var(--content-max); margin: 0 auto;
+  padding: 0 max(var(--margin-compact), var(--safe-left));
+}
+.navbar__logo { display: flex; align-items: center; height: var(--target-min); margin-right: auto; }
+.navbar__logo img { height: 26px; width: auto; }
+.navbar__links { display: none; gap: var(--space-1); margin: 0 auto; padding: 0; list-style: none; }
+.navbar__links a {
+  display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-3);
+  color: inherit; text-decoration: none; font-size: var(--text-footnote); opacity: 0.88;
+}
+.navbar__links a:hover, .navbar__links a[aria-current] { opacity: 1; }
+.navbar__actions { display: flex; align-items: center; gap: var(--space-1); }
+.navbar__desktop-only { display: none; }
+.navbar__menu-btn { color: inherit; }
+@media (min-width: 734px) {
+  .navbar__inner { padding: 0 var(--margin-regular); }
+  .navbar__logo { margin-right: 0; }
+  .navbar__links { display: flex; }
+  .navbar__desktop-only { display: inline-flex; }
+  .navbar__menu-btn { display: none; }
+}
+
+/* Logo: PNG negro; en oscuro se invierte. La marca vive en el logo, las
+   fotos y el video (HIG › Branding: "Ensure branding always defers to
+   content"). */
+.logo { display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-appearance="light"]) .logo { filter: invert(1); } }
+[data-appearance="dark"] .logo { filter: invert(1); }
+
+/* Menú de la web en móvil: hoja a pantalla completa con la lista de
+   secciones, como el menú de apple.com. */
+.menu-sheet {
+  position: fixed; inset: 0; z-index: 60;
+  padding: calc(var(--safe-top) + var(--space-2)) var(--margin-compact) var(--space-8);
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  overflow-y: auto;
+}
+.menu-sheet__top { display: flex; justify-content: space-between; align-items: center; height: var(--navbar-h); }
+.menu-sheet__links { list-style: none; margin: var(--space-6) 0 var(--space-8); padding: 0 var(--space-2); }
+.menu-sheet__links a {
+  display: flex; align-items: center; min-height: 52px;
+  font-size: var(--text-title-1); font-weight: var(--weight-semibold); line-height: 1.1;
+  color: var(--label); text-decoration: none; letter-spacing: var(--tracking-tight);
+}
+.menu-sheet__actions { display: grid; gap: var(--space-3); padding: 0 var(--space-2); }
+
+/* --------------------------------------------------------------------------
+   Sheets — HIG › Sheets, Modality
+   · Una sola sheet a la vez.
+   · iPhone: hoja inferior con agarrador; en pantallas anchas, form sheet
+     centrada.
+   · Barra superior: Cancelar a la izquierda, Listo a la derecha; en pasos,
+     flecha atrás (sin la palabra "Atrás") a la izquierda.
+   · Se cierra con el botón, con Esc y deslizando hacia abajo.
+   -------------------------------------------------------------------------- */
+.scrim {
+  position: fixed; inset: 0; z-index: 80;
+  background: var(--dim);
+  animation: fade-in var(--dur-base) var(--ease-standard);
+}
+.sheet {
+  position: fixed; z-index: 81;
+  left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column;
+  max-height: calc(100% - var(--safe-top) - 12px);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sheet);
+  animation: sheet-in var(--dur-base) var(--ease-sheet);
+  overflow: hidden;
+}
+.sheet--full { top: calc(var(--safe-top) + 12px); }
+/* Sheet con listas agrupadas: en oscuro las celdas suben un nivel
+   (HIG › Dark Mode › iOS: fondos "elevated" en lo que está delante). */
+.sheet--grouped { background: var(--sheet-grouped-bg); --cell-bg: var(--sheet-grouped-cell); }
+.sheet__grabber {
+  flex: none; width: 36px; height: 5px; margin: 6px auto 0;
+  border-radius: 3px; background: var(--label-quaternary);
+}
+.sheet__bar {
+  flex: none;
+  display: grid; grid-template-columns: minmax(var(--target-min), 1fr) auto minmax(var(--target-min), 1fr);
+  align-items: center; gap: var(--space-2);
+  min-height: 56px; padding: 0 var(--space-3);
+}
+.sheet__bar > :first-child { justify-self: start; }
+.sheet__bar > :last-child { justify-self: end; }
+.sheet__title { margin: 0; font-size: var(--text-headline); font-weight: var(--weight-semibold); text-align: center; }
+.sheet__body {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--space-2) var(--margin-compact) var(--space-6);
+}
+.sheet__footer {
+  flex: none;
+  padding: var(--space-3) var(--margin-compact) calc(var(--space-4) + var(--safe-bottom));
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: 0 -0.5px 0 var(--separator);
+}
+.sheet__footer .btn + .btn { margin-top: var(--space-2); }
+@media (min-width: 734px) {
+  .sheet {
+    left: 50%; right: auto; bottom: auto; top: 50%;
+    width: min(560px, calc(100% - 48px));
+    max-height: min(760px, calc(100% - 48px));
+    border-radius: var(--radius-xl);
+    transform: translate(-50%, -50%);
+    animation: sheet-pop var(--dur-base) var(--ease-sheet);
+  }
+  .sheet--wide { width: min(720px, calc(100% - 48px)); }
+  .sheet__grabber { display: none; }
+  .sheet__body { padding: var(--space-2) var(--space-6) var(--space-6); }
+  .sheet__footer { padding: var(--space-4) var(--space-6) var(--space-5); }
+}
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes sheet-in { from { transform: translateY(100%); } }
+@keyframes sheet-pop { from { opacity: 0; transform: translate(-50%, calc(-50% + var(--enter-offset))) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet { animation: fade-in var(--dur-fast) var(--ease-standard); }
+}
+
+/* Pasos dentro de una sheet: "Paso 2 de 3" + barra determinada.
+   HIG › Progress indicators: "When possible, use a determinate progress
+   indicator". */
+.steps { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); }
+.steps__label { font-size: var(--text-footnote); font-weight: var(--weight-semibold); color: var(--label-secondary); }
+.steps__bar { display: grid; grid-auto-flow: column; gap: var(--space-1); }
+.steps__bar span { height: 4px; border-radius: 2px; background: var(--fill); }
+.steps__bar span.is-done { background: var(--accent); }
+
+/* Resumen de selección (barbero · servicio) */
+.summary-pill {
+  display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-capsule); background: var(--fill-quaternary);
+  font-size: var(--text-subhead); color: var(--label-secondary);
+}
+.summary-pill strong { color: var(--label); font-weight: var(--weight-semibold); }
+
+/* --------------------------------------------------------------------------
+   Alertas y hojas de acción — HIG › Alerts, Action sheets
+   · Alert: título claro, texto solo si aporta, hasta 3 botones; el
+     destructivo en rojo y siempre con una salida segura.
+   · Action sheet: opciones ligadas a una acción que la persona inició;
+     en iPhone abajo, en pantallas anchas como popover/diálogo.
+   -------------------------------------------------------------------------- */
+.alert {
+  position: fixed; z-index: 91; left: 50%; top: 50%;
+  width: min(300px, calc(100% - 48px));
+  transform: translate(-50%, -50%);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-alert);
+  text-align: center;
+  animation: alert-in var(--dur-fast) var(--ease-out);
+}
+.alert__title { margin: 0; font-size: var(--text-headline); line-height: var(--leading-headline); font-weight: var(--weight-semibold); }
+.alert__text { margin: var(--space-2) 0 0; font-size: var(--text-footnote); line-height: var(--leading-footnote); color: var(--label-secondary); }
+.alert__actions { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
+.alert__actions--row { grid-template-columns: 1fr 1fr; }
+.alert .btn { min-height: var(--target-min); }
+.alert-scrim { z-index: 90; }
+@keyframes alert-in { from { opacity: 0; transform: translate(-50%, -50%) scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .alert { animation: fade-in var(--dur-fast); } }
+
+.action-sheet {
+  position: fixed; z-index: 91; left: var(--space-2); right: var(--space-2);
+  bottom: calc(var(--space-2) + var(--safe-bottom));
+  display: grid; gap: var(--space-2);
+  animation: sheet-in var(--dur-base) var(--ease-sheet);
+}
+.action-sheet__group {
+  border-radius: var(--radius-xl); overflow: hidden;
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+}
+.action-sheet__head { padding: var(--space-4) var(--space-5) var(--space-3); text-align: center; }
+.action-sheet__title { margin: 0; font-size: var(--text-footnote); font-weight: var(--weight-semibold); color: var(--label-secondary); }
+.action-sheet__text { margin: 2px 0 0; font-size: var(--text-footnote); color: var(--label-secondary); }
+.action-sheet__btn {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  width: 100%; min-height: 56px; border: 0;
+  border-top: 0.5px solid var(--separator);
+  background: transparent; color: var(--label);
+  font: inherit; font-size: var(--text-title-3); cursor: pointer;
+}
+.action-sheet__btn:hover { background: var(--fill-quaternary); }
+.action-sheet__btn--cancel { border-top: 0; font-weight: var(--weight-semibold); }
+.action-sheet__btn--destructive { color: var(--red); }
+@media (min-width: 734px) {
+  .action-sheet { left: 50%; right: auto; top: 50%; bottom: auto; width: 340px; transform: translate(-50%, -50%); animation: alert-in var(--dur-fast) var(--ease-out); }
+}
+
+/* Popover (avisos del panel en escritorio). En compact se muestra como sheet. */
+.popover {
+  position: absolute; z-index: 70;
+  width: 360px; max-height: 480px; overflow: auto;
+  border-radius: var(--radius-lg);
+  background: var(--material-thick);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-alert), 0 0 0 0.5px var(--separator);
+}
+
+/* --------------------------------------------------------------------------
+   Tarjetas y cifras
+   -------------------------------------------------------------------------- */
+.card {
+  border-radius: var(--radius-lg);
+  background: var(--cell-bg);
+  padding: var(--space-5);
+}
+.card__title { margin: 0 0 var(--space-1); font-size: var(--text-headline); font-weight: var(--weight-semibold); }
+.card__text { margin: 0; font-size: var(--text-subhead); line-height: var(--leading-subhead); color: var(--label-secondary); }
+
+.stat { display: grid; gap: 2px; }
+.stat__label { font-size: var(--text-footnote); color: var(--label-secondary); font-weight: var(--weight-medium); }
+.stat__value { font-size: var(--text-title-1); line-height: var(--leading-title-1); font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight); }
+.stat__note { font-size: var(--text-footnote); color: var(--label-secondary); }
+
+/* --------------------------------------------------------------------------
+   Panel: estructura tipo app — HIG › Tab bars, Sidebars, Toolbars
+   · compact: tab bar flotante abajo (vidrio), título grande arriba.
+   · regular/wide: sidebar a la izquierda (HIG › Layout: "switch from a
+     Tab bar to a Sidebar" con más espacio). Misma funcionalidad.
+   -------------------------------------------------------------------------- */
+.shell { display: block; min-height: 100%; background: var(--bg-grouped); }
+.shell__sidebar { display: none; }
+.shell__main { min-width: 0; padding-bottom: calc(var(--tabbar-h) + var(--space-8) + var(--safe-bottom)); }
+@media (min-width: 734px) {
+  .shell { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+  .shell__sidebar { display: flex; }
+  .shell__main { padding-bottom: var(--space-10); }
+  .shell .tabbar { display: none; }
+}
+
+.sidebar {
+  position: sticky; top: 0; align-self: start;
+  flex-direction: column; gap: var(--space-1);
+  height: 100%; min-height: 100%;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  background: var(--material-regular);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: 0.5px 0 0 var(--separator);
+}
+.sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-4); }
+.sidebar__brand img { height: 22px; width: auto; }
+.sidebar__section {
+  margin: var(--space-4) 0 var(--space-1); padding: 0 var(--space-3);
+  font-size: var(--text-footnote); font-weight: var(--weight-semibold); color: var(--label-secondary);
+}
+.sidebar__item {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: var(--target-min); padding: 0 var(--space-3);
+  border: 0; border-radius: var(--radius-md);
+  background: transparent; color: var(--label);
+  font: inherit; font-size: var(--text-body); text-align: left; text-decoration: none; cursor: pointer;
+}
+.sidebar__item .icon { color: var(--label-secondary); width: 20px; height: 20px; }
+.sidebar__item:hover { background: var(--fill-quaternary); }
+.sidebar__item[aria-current="page"] { background: var(--accent-tint); font-weight: var(--weight-semibold); }
+.sidebar__item[aria-current="page"] .icon { color: var(--label); }
+.sidebar__item .sidebar__count { margin-left: auto; font-size: var(--text-footnote); color: var(--label-secondary); font-variant-numeric: tabular-nums; }
+.sidebar__footer { margin-top: auto; padding-top: var(--space-4); border-top: 0.5px solid var(--separator); }
+.sidebar__user { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2); }
+
+.tabbar {
+  position: fixed; z-index: 40;
+  left: var(--space-4); right: var(--space-4);
+  bottom: calc(var(--space-3) + var(--safe-bottom));
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  height: var(--tabbar-h); padding: var(--space-1);
+  border-radius: var(--radius-capsule);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-glass), inset 0 0 0 0.5px var(--glass-border);
+}
+.tabbar__item {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-width: var(--target-min);
+  border: 0; border-radius: var(--radius-capsule);
+  background: transparent; color: var(--label-secondary);
+  /* 11 pt fijo, el mínimo de la HIG. Las etiquetas de pestaña no crecen con
+     el texto (HIG › Typography: "they don't expect the tab titles to increase"). */
+  font: inherit; font-size: 11px; font-weight: var(--weight-semibold); letter-spacing: 0.01em;
+  cursor: pointer; text-decoration: none;
+}
+.tabbar__item .icon { width: 24px; height: 24px; }
+.tabbar__item[aria-current="page"] { color: var(--label); background: var(--fill-tertiary); }
+.tabbar__item .count-badge { top: 2px; right: calc(50% - 22px); }
+
+/* Barra superior del panel con título grande.
+   HIG › Toolbars › iOS: "Use a large title to help people stay oriented";
+   título corto (< 15 caracteres); la acción principal, a la derecha. */
+.toolbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: var(--toolbar-h);
+  padding: var(--safe-top) var(--margin-compact) 0;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: 0 0.5px 0 var(--separator);
+}
+.toolbar__title { margin: 0 auto 0 0; font-size: var(--text-headline); font-weight: var(--weight-semibold); }
+.toolbar__actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+.page-head { padding: var(--space-4) var(--margin-compact) var(--space-4); }
+.page-head__title { margin: 0; font-size: var(--text-large-title); line-height: var(--leading-large-title); font-weight: var(--weight-bold); letter-spacing: var(--tracking-tight); }
+.page-head__sub { margin: var(--space-1) 0 0; font-size: var(--text-subhead); color: var(--label-secondary); }
+.page-body { padding: 0 var(--margin-compact); }
+@media (min-width: 734px) {
+  .toolbar { padding: 0 var(--margin-regular); background: var(--bg-grouped); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  .page-head { padding: var(--space-2) var(--margin-regular) var(--space-5); }
+  .page-body { padding: 0 var(--margin-regular); max-width: 1100px; }
+  .toolbar__title--compact-only { visibility: hidden; }
+}
+
+/* Barra de resumen del día (panel) — HIG › Feedback: estado integrado
+   cerca de lo que describe, sin interrumpir. */
+.summary-bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--cell-bg);
+  font-size: var(--text-subhead); line-height: var(--leading-subhead);
+}
+.summary-bar strong { font-weight: var(--weight-semibold); }
+.summary-bar .icon { color: var(--label-secondary); }
+
+/* Cita en lista (panel) */
+.appt { --row-inset: 100px; align-items: flex-start; }
+.appt__time {
+  flex: none; width: 76px; padding-top: 1px; white-space: nowrap;
+  font-size: var(--text-subhead); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums;
+  line-height: var(--leading-subhead);
+}
+.appt__time small { display: block; font-weight: var(--weight-regular); color: var(--label-secondary); font-size: var(--text-caption-1); }
+.appt__barber { display: inline-flex; align-items: center; gap: 6px; }
+.appt__barber::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--gray)); }
+.appt__side { display: flex; align-items: center; gap: var(--space-3); flex: none; align-self: center; }
+.appt__series { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; font-size: var(--text-caption-1); color: var(--label-secondary); font-weight: var(--weight-medium); }
+.appt__series .icon { width: 13px; height: 13px; }
+.day-group { margin-bottom: var(--space-6); }
+
+/* Calendario mensual (panel) */
+.month { border-radius: var(--radius-lg); background: var(--cell-bg); padding: var(--space-2) var(--space-2) var(--space-3); }
+.month__head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-1) var(--space-2) var(--space-2); }
+.month__title { margin: 0; font-size: var(--text-title-3); font-weight: var(--weight-semibold); text-transform: capitalize; }
+.month__weekdays, .month__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.month__weekdays span { padding: var(--space-1) 0; text-align: center; font-size: var(--text-caption-1); font-weight: var(--weight-semibold); color: var(--label-secondary); }
+.mday {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  min-height: 52px; padding: 6px 2px;
+  border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--label); font: inherit; cursor: pointer;
+}
+.mday:hover { background: var(--fill-quaternary); }
+.mday__num { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-size: var(--text-callout); font-variant-numeric: tabular-nums; }
+.mday.is-today .mday__num { background: #d70015; color: #fff; font-weight: var(--weight-semibold); }
+.mday.is-selected .mday__num { background: var(--accent); color: var(--on-accent); font-weight: var(--weight-semibold); }
+.mday.is-outside { color: var(--label-quaternary); }
+.mday.is-closed .mday__num { color: var(--label-tertiary); }
+.mday__dots { display: flex; gap: 2px; height: 6px; }
+.mday__dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--dot, var(--gray)); }
+.mday__count { font-size: var(--text-caption-2); color: var(--label-secondary); font-variant-numeric: tabular-nums; }
+.mday__list { display: none; }
+@media (min-width: 1068px) {
+  .mday { align-items: stretch; min-height: 104px; padding: 6px; }
+  .mday__num { width: 28px; height: 28px; align-self: flex-end; font-size: var(--text-subhead); }
+  .mday__dots, .mday__count { display: none; }
+  .mday__list { display: grid; gap: 2px; text-align: left; }
+  .mday__list span {
+    display: block; padding: 1px 6px; border-radius: 4px;
+    background: color-mix(in srgb, var(--dot, var(--gray)) 16%, transparent);
+    font-size: var(--text-caption-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mday__list span b { font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--text-footnote); color: var(--label-secondary); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--gray)); }
+
+/* Gráfico de barras (balance). HIG › Charts: ejes claros, valores
+   accesibles; cada barra con aria-label. */
+.bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); align-items: end; gap: clamp(2px, 1vw, 6px); height: 160px; padding-top: var(--space-2); }
+.bars span { display: block; border-radius: 4px 4px 1px 1px; background: var(--accent); min-height: 2px; }
+.bars span.is-transfer { background: var(--label-tertiary); }
+.bars-axis { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: clamp(2px, 1vw, 6px); margin-top: var(--space-1); font-size: var(--text-caption-2); color: var(--label-secondary); text-align: center; font-variant-numeric: tabular-nums; }
+
+/* Barra de acciones de guardado (formularios largos del panel). */
+.save-bar {
+  position: sticky; bottom: calc(var(--tabbar-h) + var(--space-5) + var(--safe-bottom)); z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
+  margin-top: var(--space-6); padding: var(--space-3);
+  border-radius: var(--radius-capsule);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-glass);
+}
+@media (min-width: 734px) { .save-bar { bottom: var(--space-4); } }
+
+/* --------------------------------------------------------------------------
+   Web pública: secciones estilo apple.com
+   -------------------------------------------------------------------------- */
+.container { max-width: var(--content-max); margin: 0 auto; padding: 0 var(--margin-compact); }
+@media (min-width: 734px) { .container { padding: 0 var(--margin-regular); } }
+@media (min-width: 1068px) { .container { padding: 0 var(--margin-wide); } }
+.section { padding: var(--space-16) 0; }
+@media (min-width: 734px) { .section { padding: var(--space-24) 0; } }
+.section--alt { background: var(--bg-secondary); }
+.section-head { margin-bottom: var(--space-8); }
+.section-head__title { margin: var(--space-1) 0 0; }
+.section-head__lead { margin: var(--space-3) 0 0; color: var(--label-secondary); max-width: 36rem; }
+
+/* Aparición al hacer scroll: solo opacidad + 16 px; con Reducir
+   movimiento, solo opacidad (--enter-offset = 0). */
+.reveal { opacity: 0; transform: translateY(var(--enter-offset)); transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out); }
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* Hero con video (siempre oscuro). */
+.hero {
+  position: relative; isolation: isolate;
+  min-height: min(92vh, 860px);
+  display: flex; align-items: flex-end;
+  background: #000; color: #f5f5f7;
+  overflow: hidden;
+}
+.hero__media { position: absolute; inset: 0; z-index: -1; }
+.hero__media video, .hero__media img { width: 100%; height: 100%; object-fit: cover; }
+.hero__media::after { content: ""; position: absolute; inset: 0; background: var(--scrim-media); }
+.hero__content { width: 100%; padding-bottom: var(--space-16); }
+.hero__title { margin: 0; max-width: 12ch; }
+.hero__lead { margin: var(--space-4) 0 0; max-width: 28rem; color: rgba(245, 245, 247, 0.86); }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+/* Control de reproducción — HIG › Accessibility › Cognitive: "Avoid
+   autoplaying audio and video content without also providing controls". */
+.hero__playback { position: absolute; right: var(--margin-compact); bottom: var(--space-5); }
+@media (min-width: 734px) {
+  .hero__content { padding-bottom: var(--space-24); }
+  .hero__playback { right: var(--margin-regular); bottom: var(--space-8); }
+}
+
+/* Tarjetas de servicio */
+.cards { display: grid; gap: var(--space-4); }
+@media (min-width: 734px) { .cards--2 { grid-template-columns: repeat(2, 1fr); } .cards--3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1068px) { .cards--3 { grid-template-columns: repeat(3, 1fr); } }
+.service {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+}
+.section--alt .service { background: var(--bg); }
+.service__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.service__name { margin: 0; font-size: var(--text-title-3); line-height: var(--leading-title-3); font-weight: var(--weight-semibold); }
+.service__desc { margin: 0; color: var(--label-secondary); font-size: var(--text-callout); line-height: var(--leading-callout); flex: 1; }
+.service__meta { display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-3); font-variant-numeric: tabular-nums; }
+.service__price { font-size: var(--text-title-3); font-weight: var(--weight-semibold); }
+.service__time { font-size: var(--text-subhead); color: var(--label-secondary); }
+.service__action { margin-top: var(--space-4); align-self: flex-start; }
+
+/* Galería: en móvil, la primera foto ancha y las demás de dos en dos;
+   desde 734 px, tres arriba y dos anchas abajo. */
+.gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+.gallery figure { position: relative; margin: 0; aspect-ratio: 3 / 4; border-radius: var(--radius-media); overflow: hidden; background: var(--fill-tertiary); }
+.gallery figure:first-child { grid-column: span 2; aspect-ratio: 4 / 3; }
+.gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (min-width: 734px) {
+  .gallery { grid-template-columns: repeat(6, 1fr); gap: var(--space-3); }
+  .gallery figure, .gallery figure:first-child { grid-column: span 2; aspect-ratio: 3 / 4; }
+  .gallery figure.is-wide { grid-column: span 3; aspect-ratio: 16 / 10; }
+}
+
+.footer { padding: var(--space-10) 0 calc(var(--space-10) + var(--safe-bottom)); background: var(--bg-secondary); font-size: var(--text-footnote); color: var(--label-secondary); }
+.footer__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.footer__links { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.footer__links a { display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-3); color: var(--label); text-decoration: none; }
+.footer__links a:hover { text-decoration: underline; }
+
+/* Barra fija inferior en móvil con la acción principal (Reservar). Vidrio
+   flotante; aparece cuando el hero sale de pantalla. */
+.float-cta {
+  position: fixed; z-index: 45;
+  left: var(--space-4); right: var(--space-4); bottom: calc(var(--space-4) + var(--safe-bottom));
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  border-radius: var(--radius-capsule);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur);
+  box-shadow: var(--shadow-glass), inset 0 0 0 0.5px var(--glass-border);
+}
+.float-cta__text { flex: 1; min-width: 0; font-size: var(--text-subhead); line-height: var(--leading-subhead); }
+.float-cta__text b { display: block; font-weight: var(--weight-semibold); }
+.float-cta__text span { color: var(--label-secondary); }
+@media (min-width: 734px) { .float-cta { display: none; } }
+
+/* Utilidades mínimas */
+.stack { display: grid; gap: var(--stack-gap, var(--space-4)); }
+.cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cluster-gap, var(--space-3)); }
+.spread { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.mt-0 { margin-top: 0 !important; } .mb-0 { margin-bottom: 0 !important; }
+.compact-only { display: revert; }
+.regular-only { display: none !important; }
+@media (min-width: 734px) {
+  .compact-only { display: none !important; }
+  .regular-only { display: revert !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Web pública: bloques de sección
+   -------------------------------------------------------------------------- */
+.hero--short { min-height: 520px; }
+
+/* Nosotros: texto + foto del local. Sin foto del local se usa una foto de
+   la galería (nunca un recuadro gris de marcador). */
+.about { display: grid; gap: var(--space-10); align-items: center; }
+.about__quote {
+  margin: var(--space-8) 0 0; padding: 0;
+  font-size: var(--text-title-2); line-height: var(--leading-title-2); font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+.about__media { margin: 0; border-radius: var(--radius-media); overflow: hidden; aspect-ratio: 4 / 5; background: var(--fill-tertiary); }
+.about__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (min-width: 734px) { .about { grid-template-columns: 1.1fr 1fr; gap: var(--space-16); } }
+
+/* Contacto + reserva */
+.contact { display: grid; gap: var(--space-6); align-items: start; }
+@media (min-width: 734px) { .contact { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+.booking-cta { padding: var(--space-8) var(--space-6); border-radius: var(--radius-lg); background: var(--bg); box-shadow: var(--shadow-2); }
+.section--alt { --cell-bg: var(--bg); }
+.checks { list-style: none; margin: var(--space-5) 0 var(--space-6); padding: 0; display: grid; gap: var(--space-3); font-size: var(--text-callout); }
+.checks li { display: flex; align-items: center; gap: var(--space-3); }
+.checks .icon { color: var(--green); stroke-width: 2.4; width: 18px; height: 18px; }
+
+/* Rejilla de barberos en la reserva */
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+
+/* --------------------------------------------------------------------------
+   Panel: piezas propias
+   -------------------------------------------------------------------------- */
+/* Segmento marcado como página actual (cuando el segmentado navega). */
+.segmented__item[aria-current="page"] {
+  background: var(--segment-selected); font-weight: var(--weight-semibold);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+
+/* Nombre del cliente: abre el detalle de la cita. Objetivo táctil de 44. */
+.row__link {
+  display: inline-flex; align-items: center; min-height: 28px; padding: 0; margin: -8px 0;
+  border: 0; background: transparent; color: var(--label);
+  font: inherit; font-size: var(--text-body); font-weight: var(--weight-semibold); text-align: left;
+  cursor: pointer; position: relative;
+}
+.row__link::after { content: ""; position: absolute; inset: -8px -4px; }
+.row__link:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+.appt .row__main { display: flex; flex-direction: column; align-items: flex-start; }
+.appt .appt__series { margin: 4px 0 0; }
+@media (max-width: 420px) {
+  .appt { flex-wrap: wrap; }
+  .appt__side { flex-basis: 100%; padding-left: 88px; justify-content: flex-start; flex-wrap: wrap; gap: var(--space-2); }
+}
+
+/* Entrar */
+.login {
+  display: flex; flex-direction: column;
+  width: min(400px, 100%); margin: 0 auto;
+  padding: calc(var(--safe-top) + var(--space-16)) var(--margin-compact) var(--space-10);
+}
+@media (min-width: 734px) {
+  .login { margin-top: var(--space-16); padding: var(--space-10); border-radius: var(--radius-xl); background: var(--cell-bg); box-shadow: var(--shadow-2); }
+}
+
+/* Jornada: nombre del día, horas y su interruptor */
+.hday { flex-wrap: wrap; }
+.hday__name { width: 96px; flex: none; font-weight: var(--weight-medium); }
+.hday__times { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
+.hday__break { flex-basis: 100%; }
+.time-input {
+  min-height: var(--target-min); padding: 0 var(--space-2);
+  border: 0; border-radius: var(--radius-sm);
+  background: var(--fill-tertiary); color: var(--label);
+  font: inherit; font-size: var(--text-subhead); font-variant-numeric: tabular-nums;
+}
+.time-input.is-error { box-shadow: inset 0 0 0 1.5px var(--red); background: var(--red-fill); }
+@media (max-width: 420px) {
+  .hday__name { width: auto; flex: 1; }
+  .hday__times { order: 3; flex-basis: 100%; }
+}
+
+/* Contador +/− (inventario) */
+.stepper { display: inline-flex; align-items: center; gap: var(--space-1); border-radius: var(--radius-capsule); background: var(--fill-quaternary); }
+.stepper .t-num { min-width: 2ch; text-align: center; }
+
+/* Cifras del balance */
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.stats .stat__value { font-size: var(--text-title-2); }
+.stats--3 { grid-template-columns: 1fr; }
+.stats--3 .stat__value { display: block; font-size: var(--text-title-2); font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; margin-bottom: var(--space-1); }
+@media (min-width: 1068px) {
+  .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .stats--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Reseñas: QR */
+.reviews-top { display: grid; gap: var(--space-3); }
+@media (min-width: 734px) { .reviews-top { grid-template-columns: 2fr 1fr; } }
+.qr-card { display: flex; gap: var(--space-5); align-items: center; flex-wrap: wrap; }
+.qr-box {
+  display: grid; place-items: center; flex: none;
+  width: 132px; height: 132px; border-radius: var(--radius-md);
+  background: #fff; color: #000; box-shadow: inset 0 0 0 1px var(--separator);
+}
+.qr-box .icon { width: 96px; height: 96px; stroke-width: 1.2; }
+
+/* Miniaturas (personalizar web) */
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: var(--space-2); }
+.thumb { position: relative; aspect-ratio: 3 / 4; border-radius: var(--radius-sm); overflow: hidden; background: var(--fill-tertiary); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb--empty { display: grid; place-items: center; width: 96px; flex: none; color: var(--label-tertiary); }
+.thumb--empty .icon { width: 32px; height: 32px; }
+.thumb__del {
+  position: absolute; top: 4px; right: 4px;
+  display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55); color: #fff; cursor: pointer;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.thumb__del::after { content: ""; position: absolute; inset: -8px; }
+.thumb__del .icon { width: 14px; height: 14px; stroke-width: 2.4; }

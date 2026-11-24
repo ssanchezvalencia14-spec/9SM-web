@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9SM NEXO · Maquetas de la web pública</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="componentes.css">
+<link rel="stylesheet" href="maqueta.css">
+</head>
+<body class="viewer">
+<!--ICONOS-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!-- Iconos de interfaz 9SM. Rejilla 24, trazo 1,75 (lo pone .icon), puntas redondas.
+       Equivalencias con SF Symbols (HIG › Icons › Standard icons) en el nombre. -->
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-calendar-plus" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.8v5M9.5 15.3h5"/></symbol>
+  <symbol id="i-calendar-today" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><rect x="8" y="13" width="3.5" height="3.5" rx=".8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 5.5l6.5 6.5-6.5 6.5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M5.5 9.5L12 16l6.5-6.5"/></symbol>
+  <symbol id="i-xmark" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"/></symbol>
+  <symbol id="i-persons" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M2.8 19.5c.7-3.2 3.1-5 6.2-5s5.5 1.8 6.2 5M15.5 5.6a3.2 3.2 0 0 1 0 6M17.6 14.6c2 .6 3.3 2.2 3.7 4.9"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6.5" cy="17" r="2.8"/><circle cx="6.5" cy="7" r="2.8"/><path d="M8.8 8.6L20 17M8.8 15.4L20 7"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M20 11.5c0 4.1-3.6 7.5-8 7.5-1.2 0-2.3-.2-3.3-.6L4 19.5l1.3-3.7A7.2 7.2 0 0 1 4 11.5C4 7.4 7.6 4 12 4s8 3.4 8 7.5z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.8l2.6-.3 1.6 4-1.9 1.4a11 11 0 0 0 6.2 6.2l1.4-1.9 4 1.6-.3 2.6a2 2 0 0 1-2.1 1.8C10.4 18.8 5.2 13.6 4.8 6a2 2 0 0 1 1.8-2.2z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l.9 13a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13M10 10.5v6M14 10.5v6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4.5 19.5l1-4L16 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/><path d="M14 7l3 3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5v-5M12 16.5V7M17 16.5v-8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><path d="M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.3 3.5 5.2 3.5 8.5s-1.2 6.2-3.5 8.5c-2.3-2.3-3.5-5.2-3.5-8.5S9.7 5.8 12 3.5z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3.5l7.5 4v9L12 20.5l-7.5-4v-9z"/><path d="M4.5 7.5L12 11.5l7.5-4M12 11.5v9"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1M19.5 14h.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-ellipsis" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.4h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6h.01"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M19 4.5V8h-3.5"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 8.5h14M14.5 5L18 8.5 14.5 12M20 15.5H6M9.5 12L6 15.5 9.5 19"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 4.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h7M11 12h9.5M17 8.5l3.5 3.5-3.5 3.5"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11M8 7l4-4 4 4M8 10.5H6.5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H16"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 19.5h14"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5L16 11l-8 8"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4.5 9h15M4.5 15h15"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 4.5L19.5 7 17 9.5M19.5 7H8a3.5 3.5 0 0 0-3.5 3.5V12M7 19.5L4.5 17 7 14.5M4.5 17H16a3.5 3.5 0 0 0 3.5-3.5V12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="12.5" rx="2.2"/><path d="M16 8V5.7a2.2 2.2 0 0 0-2.2-2.2H6.7a2.2 2.2 0 0 0-2.2 2.2v8.1A2.2 2.2 0 0 0 6.7 16H8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13.5l2.2-7.3a2 2 0 0 1 1.9-1.4h7.8a2 2 0 0 1 1.9 1.4l2.2 7.3v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M4 9.5a12 12 0 0 1 5-2.6M14.5 6.8A12 12 0 0 1 20 9.5M7 13a7.5 7.5 0 0 1 3.4-1.8M17 13a7.5 7.5 0 0 0-2-1.3M10 16.3a3 3 0 0 1 4 0M12 19.5h.01M4 4l16 16"/></symbol>
+</svg>
+<!--/ICONOS-->
+
+<header class="viewer-top">
+  <h1>9SM NEXO · Web pública<small>Maquetas para aprobar · cada pantalla en móvil y escritorio</small></h1>
+  <div class="segmented" role="group" aria-label="Dispositivo">
+    <button class="segmented__item" data-set-device="mobile" aria-pressed="false">Móvil</button>
+    <button class="segmented__item" data-set-device="desktop" aria-pressed="false">Escritorio</button>
+    <button class="segmented__item" data-set-device="both" aria-pressed="false">Ambos</button>
+  </div>
+  <div class="segmented" role="group" aria-label="Apariencia de la maqueta">
+    <button class="segmented__item" data-set-appearance="light" aria-pressed="false">Claro</button>
+    <button class="segmented__item" data-set-appearance="dark" aria-pressed="false">Oscuro</button>
+  </div>
+</header>
+
+<div class="viewer-layout">
+  <nav class="viewer-index" id="index" aria-label="Pantallas"></nav>
+  <main class="viewer-main" id="shots">
+    <p class="viewer-intro">Estas son <strong>todas las pantallas y estados de la web pública</strong> con el nuevo sistema (HIG de Apple, acento grafito, apariencia según el sistema). El nombre y el código de cada pantalla son los que usa la matriz de flujos (<code>pruebas/flujos.md</code>). Los botones Claro y Oscuro de arriba solo existen en este visor: la web real sigue el ajuste del teléfono o del computador. En las pantallas de página completa el marco mide toda la página, así que las barras fijas (tab bar, «Reservar» flotante) aparecen al final; en el teléfono real quedan pegadas al borde de la pantalla.</p>
+  </main>
+</div>
+
+<!-- =====================================================================
+     PIEZAS COMPARTIDAS
+     ===================================================================== -->
+
+<!-- Barra de navegación -->
+<template data-part="navbar">
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a class="navbar__logo" href="#top" aria-label="9SM NEXO, inicio"><img class="logo" src="assets/9sm-logo.png" alt=""></a>
+      <ul class="navbar__links">
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+      <div class="navbar__actions">
+        <a class="btn btn--plain btn--small navbar__desktop-only" href="#mis-citas">Mis citas</a>
+        <button class="btn btn--filled btn--small" type="button"><span class="compact-only">Reservar</span><span class="regular-only">Reservar cita</span></button>
+        <button class="icon-btn navbar__menu-btn" type="button" aria-label="Menú" aria-expanded="false"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      </div>
+    </div>
+  </header>
+</template>
+
+<!-- Página detrás de una sheet: barra + parte alta del hero -->
+<template data-part="behind">
+  <x-part name="navbar"></x-part>
+  <section class="hero hero--short" data-appearance="dark" aria-hidden="true">
+    <div class="hero__media"><img src="assets/hero-poster.jpg" alt=""></div>
+    <div class="container hero__content">
+      <h1 class="hero__title t-display-1">El corte que te define.</h1>
+      <p class="hero__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
+    </div>
+  </section>
+</template>
+
+<!-- Barra superior de la sheet de reserva, paso 1 -->
+<template data-part="bar-step1">
+  <div class="sheet__grabber" aria-hidden="true"></div>
+  <div class="sheet__bar">
+    <button class="btn btn--plain" type="button">Cancelar</button>
+    <h2 class="sheet__title">Reservar cita</h2>
+    <span></span>
+  </div>
+</template>
+<!-- Pasos 2 y 3: atrás (flecha) y cerrar (aspa). HIG › Toolbars: "don't use a text label that says Back or Close" -->
+<template data-part="bar-step">
+  <div class="sheet__grabber" aria-hidden="true"></div>
+  <div class="sheet__bar">
+    <button class="icon-btn icon-btn--filled" type="button" aria-label="Atrás"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+    <h2 class="sheet__title">Reservar cita</h2>
+    <button class="icon-btn icon-btn--filled" type="button" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button>
+  </div>
+</template>
+<template data-part="bar-close">
+  <div class="sheet__grabber" aria-hidden="true"></div>
+  <div class="sheet__bar">
+    <span></span>
+    <h2 class="sheet__title" data-fill="title">Mis citas</h2>
+    <button class="icon-btn icon-btn--filled" type="button" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button>
+  </div>
+</template>
+
+<template data-part="steps-1"><div class="steps"><span class="steps__label">Paso 1 de 3 · Barbero y servicio</span><div class="steps__bar" aria-hidden="true"><span class="is-done"></span><span></span><span></span></div></div></template>
+<template data-part="steps-2"><div class="steps"><span class="steps__label">Paso 2 de 3 · Día y hora</span><div class="steps__bar" aria-hidden="true"><span class="is-done"></span><span class="is-done"></span><span></span></div></div></template>
+<template data-part="steps-3"><div class="steps"><span class="steps__label">Paso 3 de 3 · Confirmar</span><div class="steps__bar" aria-hidden="true"><span class="is-done"></span><span class="is-done"></span><span class="is-done"></span></div></div></template>
+
+<!-- Barberos (paso 1) -->
+<template data-part="barbers-none">
+  <h3 class="list-header list-header--large">Barbero</h3>
+  <div class="choices" role="radiogroup" aria-label="Barbero">
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span></button>
+  </div>
+</template>
+<template data-part="barbers-seb">
+  <h3 class="list-header list-header--large">Barbero</h3>
+  <div class="choices" role="radiogroup" aria-label="Barbero">
+    <button class="choice" role="radio" aria-checked="true" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span></button>
+  </div>
+</template>
+
+<!-- Paso 2: semana y días -->
+<template data-part="week">
+  <div class="summary-pill"><strong>Sebastian Montoya</strong> · NEXO Cut · 50 min</div>
+  <div class="spread" style="margin:var(--space-5) 0 var(--space-2)">
+    <button class="icon-btn" type="button" aria-label="Semana anterior" disabled style="opacity:.3"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+    <span class="t-headline">16 – 22 de noviembre</span>
+    <button class="icon-btn" type="button" aria-label="Semana siguiente"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+  </div>
+  <div class="days" role="group" aria-label="Días">
+    <button class="day" type="button" disabled><span class="day__name">lun</span><span class="day__num">16</span></button>
+    <button class="day" type="button" disabled><span class="day__name">mar</span><span class="day__num">17</span></button>
+    <button class="day" type="button" disabled><span class="day__name">mié</span><span class="day__num">18</span></button>
+    <button class="day is-today" type="button" aria-label="Hoy, jueves 19"><span class="day__name">Hoy</span><span class="day__num">19</span><span class="day__dot"></span></button>
+    <button class="day" type="button" aria-pressed="true" aria-label="Viernes 20"><span class="day__name">vie</span><span class="day__num">20</span><span class="day__dot"></span></button>
+    <button class="day" type="button"><span class="day__name">sáb</span><span class="day__num">21</span><span class="day__dot"></span></button>
+    <button class="day" type="button"><span class="day__name">dom</span><span class="day__num">22</span><span class="day__dot"></span></button>
+  </div>
+</template>
+<template data-part="week-none">
+  <div class="summary-pill"><strong>Sebastian Montoya</strong> · NEXO Cut · 50 min</div>
+  <div class="spread" style="margin:var(--space-5) 0 var(--space-2)">
+    <button class="icon-btn" type="button" aria-label="Semana anterior" disabled style="opacity:.3"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+    <span class="t-headline">16 – 22 de noviembre</span>
+    <button class="icon-btn" type="button" aria-label="Semana siguiente"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+  </div>
+  <div class="days" role="group" aria-label="Días">
+    <button class="day" type="button" disabled><span class="day__name">lun</span><span class="day__num">16</span></button>
+    <button class="day" type="button" disabled><span class="day__name">mar</span><span class="day__num">17</span></button>
+    <button class="day" type="button" disabled><span class="day__name">mié</span><span class="day__num">18</span></button>
+    <button class="day is-today" type="button" aria-label="Hoy, jueves 19"><span class="day__name">Hoy</span><span class="day__num">19</span><span class="day__dot"></span></button>
+    <button class="day" type="button"><span class="day__name">vie</span><span class="day__num">20</span><span class="day__dot"></span></button>
+    <button class="day" type="button" aria-pressed="true" aria-label="Sábado 21"><span class="day__name">sáb</span><span class="day__num">21</span></button>
+    <button class="day" type="button"><span class="day__name">dom</span><span class="day__num">22</span><span class="day__dot"></span></button>
+  </div>
+</template>
+
+<template data-part="slots">
+  <h3 class="list-header" style="margin-top:var(--space-6)">Mañana</h3>
+  <div class="slots">
+    <button class="slot" type="button" disabled aria-label="9:15 a. m., ocupada">9:15 a. m.</button>
+    <button class="slot" type="button">10:00 a. m.</button>
+    <button class="slot" type="button">10:45 a. m.</button>
+    <button class="slot" type="button" disabled aria-label="11:30 a. m., ocupada">11:30 a. m.</button>
+    <button class="slot" type="button">12:15 p. m.</button>
+    <button class="slot" type="button">1:00 p. m.</button>
+  </div>
+  <h3 class="list-header" style="margin-top:var(--space-5)">Tarde</h3>
+  <div class="slots">
+    <button class="slot" type="button">2:30 p. m.</button>
+    <button class="slot" type="button" aria-pressed="true">3:15 p. m.</button>
+    <button class="slot" type="button">4:00 p. m.</button>
+    <button class="slot" type="button" disabled aria-label="4:45 p. m., ocupada">4:45 p. m.</button>
+    <button class="slot" type="button">5:30 p. m.</button>
+    <button class="slot" type="button">6:15 p. m.</button>
+  </div>
+</template>
+
+<!-- Paso 3: resumen -->
+<template data-part="summary">
+  <ul class="list">
+    <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+    <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut · 50 min</span></li>
+    <li class="row"><span class="row__main"><span class="row__title">Fecha</span></span><span class="row__detail">Viernes 20 de noviembre</span></li>
+    <li class="row"><span class="row__main"><span class="row__title">Hora</span></span><span class="row__detail">3:15 p. m.</span></li>
+    <li class="row"><span class="row__main"><span class="row__title row__title--strong">Precio</span></span><span class="row__detail row__detail--strong">$35.000</span></li>
+  </ul>
+</template>
+<template data-part="recur-none">
+  <h3 class="list-header" style="margin-top:var(--space-6)">¿Quieres repetir esta cita?</h3>
+  <div class="chips" role="radiogroup" aria-label="Repetir">
+    <button class="chip" role="radio" aria-checked="true" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Solo esta vez</button>
+    <button class="chip" role="radio" aria-checked="false" type="button">Cada semana</button>
+    <button class="chip" role="radio" aria-checked="false" type="button">Cada 15 días</button>
+    <button class="chip" role="radio" aria-checked="false" type="button">Cada mes</button>
+  </div>
+</template>
+<template data-part="client-new">
+  <h3 class="list-header" style="margin-top:var(--space-6)">Tus datos</h3>
+  <div class="form">
+    <div class="field"><label class="field__label">Nombre</label><div class="field__control"><input class="field__input" type="text" autocomplete="name" placeholder="Nombre y apellido"></div></div>
+    <div class="field"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="300 123 4567"></div><p class="field__hint">Te confirmamos la cita por este número.</p></div>
+  </div>
+</template>
+
+<!-- =====================================================================
+     W · INICIO
+     ===================================================================== -->
+<template data-shot="web-inicio" data-code="W01" data-group="Inicio" data-name="Inicio" data-full="true"
+  data-note="Página completa. <b>Hero</b> siempre oscuro (el video es oscuro; HIG › Dark Mode permite apariencia fija para medios). El video avanza con el scroll como hoy; con <b>Reducir movimiento</b> se muestra el póster quieto y el botón de pausa siempre está (HIG › Accessibility › Cognitive). Se retiran la cinta animada «9SM NEXO · BARBERÍA…», los números de sección y Playfair Display (HIG › Branding: la marca vive en el logo, las fotos y el video). En móvil, la barra flotante «Reservar» aparece cuando el hero sale de pantalla.">
+  <x-part name="navbar"></x-part>
+  <section class="hero" data-appearance="dark">
+    <div class="hero__media"><video data-hero src="assets/hero.mp4" poster="assets/hero-poster.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
+    <div class="container hero__content">
+      <h1 class="hero__title t-display-1">El corte que te define.</h1>
+      <p class="hero__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
+      <div class="hero__actions">
+        <button class="btn btn--on-media btn--large" type="button">Reservar cita</button>
+        <a class="btn btn--glass btn--large" href="#servicios">Ver servicios</a>
+      </div>
+    </div>
+    <button class="icon-btn icon-btn--glass hero__playback" type="button" aria-label="Pausar video" style="color:#fff"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg></button>
+  </section>
+
+  <section class="section" id="nosotros">
+    <div class="container about">
+      <div class="about__text">
+        <p class="t-eyebrow">Sobre nosotros</p>
+        <h2 class="t-display-2 section-head__title">Artesanía en cada detalle.</h2>
+        <div class="prose t-lead t-secondary" style="margin-top:var(--space-5)"><p>En 9SM NEXO somos más que una barbería: somos un espacio donde el cuidado personal se convierte en ritual. Cada cliente recibe atención personalizada y el mejor resultado.</p></div>
+        <blockquote class="about__quote">«El corte perfecto no es solo técnica. Es conocerte.»</blockquote>
+        <div class="stat" style="margin-top:var(--space-8)"><span class="stat__value t-display-2">+1.800</span><span class="stat__label t-callout">clientes satisfechos</span></div>
+      </div>
+      <figure class="about__media"><img src="assets/g03.jpg" alt="Interior de 9SM NEXO durante un corte"></figure>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="servicios">
+    <div class="container">
+      <div class="section-head">
+        <p class="t-eyebrow">Servicios</p>
+        <h2 class="t-display-2 section-head__title">Cortes, barba y cuidado facial.</h2>
+        <p class="section-head__lead t-lead">Precio por servicio. La duración puede variar un poco según tu barbero.</p>
+      </div>
+
+      <h3 class="list-header list-header--large">Cejas</h3>
+      <div class="cards cards--3" style="margin-bottom:var(--space-10)">
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">09 Brow</h4></div>
+          <p class="service__desc">Diseño y definición de cejas con técnica precisa para un acabado limpio y natural.</p>
+          <div class="service__meta"><span class="service__price">$8.000</span><span class="service__time">· 15 min</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> 09 Brow</span></button>
+        </article>
+      </div>
+
+      <h3 class="list-header list-header--large">Cortes</h3>
+      <div class="cards cards--3" style="margin-bottom:var(--space-10)">
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">NEXO Classic</h4></div>
+          <p class="service__desc">Corte clásico adaptado a tu estilo y tipo de cara, con acabado prolijo y atención al detalle.</p>
+          <div class="service__meta"><span class="service__price">$25.000</span><span class="service__time">· 40 min</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> NEXO Classic</span></button>
+        </article>
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">NEXO Cut</h4><span class="badge badge--neutral"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>Más pedido</span></div>
+          <p class="service__desc">Corte personalizado con lavado y styling incluido, para un resultado de barbería completo.</p>
+          <div class="service__meta"><span class="service__price">$35.000</span><span class="service__time">· 50 min</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> NEXO Cut</span></button>
+        </article>
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">09 Beard</h4></div>
+          <p class="service__desc">Perfilado y arreglo de barba con navaja, para una línea definida y un acabado impecable.</p>
+          <div class="service__meta"><span class="service__price">$17.000</span><span class="service__time">· 25 min</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> 09 Beard</span></button>
+        </article>
+      </div>
+
+      <h3 class="list-header list-header--large">Limpieza facial</h3>
+      <div class="cards cards--3">
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">PRIME Ritual</h4></div>
+          <p class="service__desc">Limpieza facial profunda con productos especializados para piel sana, poros limpios y aspecto luminoso.</p>
+          <div class="service__meta"><span class="service__price">$50.000</span><span class="service__time">· 45 min</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> PRIME Ritual</span></button>
+        </article>
+        <article class="service">
+          <div class="service__top"><h4 class="service__name">NEXO Experience</h4></div>
+          <p class="service__desc">Tratamiento facial premium de mayor duración, pensado para una piel renovada de principio a fin.</p>
+          <div class="service__meta"><span class="service__price">$60.000 – $70.000</span><span class="service__time">· 1 h</span></div>
+          <button class="btn btn--tinted btn--small service__action" type="button">Reservar<span class="sr-only"> NEXO Experience</span></button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="galeria">
+    <div class="container">
+      <div class="section-head">
+        <p class="t-eyebrow">Galería</p>
+        <h2 class="t-display-2 section-head__title">Nuestro trabajo.</h2>
+      </div>
+      <div class="gallery">
+        <figure><img src="assets/g01.jpg" alt="Corte con flequillo y degradado bajo" loading="lazy"></figure>
+        <figure><img src="assets/g02.jpg" alt="Trabajo de 9SM NEXO, foto 2" loading="lazy"></figure>
+        <figure><img src="assets/g03.jpg" alt="Trabajo de 9SM NEXO, foto 3" loading="lazy"></figure>
+        <figure class="is-wide"><img src="assets/g04.jpg" alt="Trabajo de 9SM NEXO, foto 4" loading="lazy"></figure>
+        <figure class="is-wide"><img src="assets/g05.jpg" alt="Trabajo de 9SM NEXO, foto 5" loading="lazy"></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt" id="contacto">
+    <div class="container">
+      <div class="section-head">
+        <p class="t-eyebrow">Reserva</p>
+        <h2 class="t-display-2 section-head__title">Pide tu cita.</h2>
+      </div>
+      <div class="contact">
+        <div class="booking-cta">
+          <p class="t-eyebrow">Reserva online</p>
+          <p class="t-title-1" style="margin:var(--space-1) 0 var(--space-3)">Lista en 30 segundos.</p>
+          <p class="t-callout t-secondary" style="margin:0">Elige tu día, tu hora y tu barbero. Sin llamadas, sin esperas.</p>
+          <ul class="checks">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmación inmediata</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Cancela gratis hasta 1 hora antes</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Puedes repetir la cita cada semana o cada mes</li>
+          </ul>
+          <button class="btn btn--filled btn--large btn--block" type="button">Ver disponibilidad</button>
+        </div>
+        <div>
+          <ul class="list">
+            <li class="row row--icon row--stack-sm"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="row__main"><span class="row__subtitle" style="margin:0">Dirección</span><span class="row__title">[TU DIRECCIÓN AQUÍ]</span></span></li>
+            <li class="row row--icon"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span><span class="row__main"><span class="row__subtitle" style="margin:0">Teléfono</span><span class="row__title">[TU TELÉFONO AQUÍ]</span></span></li>
+            <li class="row row--icon"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="row__main"><span class="row__subtitle" style="margin:0">Horario</span><span class="row__title">Lun–jue 10:00 a. m.–8:00 p. m.</span><span class="row__title">Vie 7:00 a. m.–9:00 p. m.</span><span class="row__title">Sáb 7:00 a. m.–8:00 p. m.</span><span class="row__title">Dom 7:00 a. m.–2:00 p. m.</span></span></li>
+            <li class="row row--icon"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="row__main"><span class="row__subtitle" style="margin:0">Redes</span><span class="row__title">[TUS REDES AQUÍ]</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__row">
+      <img class="logo" src="assets/9sm-logo.png" alt="9SM NEXO" style="height:24px;width:auto">
+      <nav class="footer__links" aria-label="Redes y citas">
+        <a href="#mis-citas">Mis citas</a><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">WhatsApp</a>
+      </nav>
+      <p style="margin:0;flex-basis:100%">© 2026 9SM NEXO · Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <div class="float-cta">
+    <p class="float-cta__text"><b>Reserva en 30 segundos</b><span>Elige día, hora y barbero</span></p>
+    <button class="btn btn--filled btn--small" type="button">Reservar</button>
+  </div>
+</template>
+
+<template data-shot="web-menu" data-code="W02" data-group="Inicio" data-name="Menú (móvil)" data-only="phone"
+  data-note="Menú a pantalla completa con material grueso, como apple.com. Solo secciones y las dos acciones; desaparece el interruptor de tema (decisión: seguir al sistema, HIG › Dark Mode). En escritorio los enlaces van en la barra.">
+  <x-part name="behind"></x-part>
+  <div class="menu-sheet" role="dialog" aria-modal="true" aria-label="Menú">
+    <div class="menu-sheet__top">
+      <img class="logo" src="assets/9sm-logo.png" alt="9SM NEXO" style="height:26px;width:auto">
+      <button class="icon-btn" type="button" aria-label="Cerrar menú"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button>
+    </div>
+    <ul class="menu-sheet__links">
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#galeria">Galería</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <div class="menu-sheet__actions">
+      <button class="btn btn--filled btn--large btn--block" type="button">Reservar cita</button>
+      <button class="btn btn--gray btn--large btn--block" type="button">Mis citas</button>
+    </div>
+  </div>
+</template>
+
+<!-- =====================================================================
+     W · RESERVAR CITA (sheet de 3 pasos)
+     ===================================================================== -->
+<template data-shot="web-reservar-1-vacio" data-code="W03" data-group="Reservar cita" data-name="Reservar · Paso 1 · Sin barbero elegido"
+  data-note="Sheet de pantalla completa en iPhone y form sheet centrada en escritorio (HIG › Sheets). <b>Cancelar</b> a la izquierda. Barra de progreso determinada de 3 pasos (HIG › Progress indicators). El botón Continuar está desactivado hasta elegir barbero y servicio; la lista de servicios explica por qué está vacía (HIG › Writing: «Provide clear next steps»).">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step1"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-1"></x-part>
+      <x-part name="barbers-none"></x-part>
+      <h3 class="list-header list-header--large" style="margin-top:var(--space-8)">Servicio</h3>
+      <div class="notice notice--info"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><div class="notice__body">Elige primero un barbero para ver sus servicios, precios y duración.</div></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-1" data-code="W04" data-group="Reservar cita" data-name="Reservar · Paso 1 · Barbero y servicio elegidos"
+  data-note="Barbero como tarjeta seleccionable: borde de acento + marca, no solo color (HIG › Toggles). Servicios en lista de opciones con marca de verificación (HIG › Lists and tables). Precio y duración son los de ese barbero.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step1"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-1"></x-part>
+      <x-part name="barbers-seb"></x-part>
+      <h3 class="list-header list-header--large" style="margin-top:var(--space-8)">Servicio</h3>
+      <div class="list" role="radiogroup" aria-label="Servicio">
+        <button class="row" role="radio" aria-checked="false" type="button"><span class="row__main"><span class="row__title">09 Brow</span><span class="row__subtitle">$8.000 · 15 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="radio" aria-checked="false" type="button"><span class="row__main"><span class="row__title">NEXO Classic</span><span class="row__subtitle">$25.000 · 40 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row is-selected" role="radio" aria-checked="true" type="button"><span class="row__main"><span class="row__title">NEXO Cut</span><span class="row__subtitle">$35.000 · 50 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="radio" aria-checked="false" type="button"><span class="row__main"><span class="row__title">09 Beard</span><span class="row__subtitle">$17.000 · 25 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="radio" aria-checked="false" type="button"><span class="row__main"><span class="row__title">PRIME Ritual</span><span class="row__subtitle">$50.000 · 45 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="radio" aria-checked="false" type="button"><span class="row__main"><span class="row__title">NEXO Experience</span><span class="row__subtitle">$60.000 – $70.000 · 1 h</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-1-sin-servicios" data-code="W05" data-group="Reservar cita" data-name="Reservar · Paso 1 · Barbero sin servicios"
+  data-note="El barbero elegido no tiene servicios activos. El mensaje dice qué hacer.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step1"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-1"></x-part>
+      <h3 class="list-header list-header--large">Barbero</h3>
+      <div class="choices" role="radiogroup" aria-label="Barbero">
+        <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span></button>
+        <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span></button>
+        <button class="choice" role="radio" aria-checked="true" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span></button>
+      </div>
+      <h3 class="list-header list-header--large" style="margin-top:var(--space-8)">Servicio</h3>
+      <div class="empty" style="padding:var(--space-8) var(--space-4)">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-scissors"/></svg></div>
+        <p class="empty__title">James no tiene servicios disponibles</p>
+        <p class="empty__text">Elige otro barbero para ver sus servicios y horas libres.</p>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-2-cargando" data-code="W06" data-group="Reservar cita" data-name="Reservar · Paso 2 · Cargando agenda"
+  data-note="Se ve algo de inmediato: la semana y huecos de marcador donde llegarán las horas (HIG › Loading: «Show something as soon as possible»). El texto dice qué se está cargando, no solo «Cargando».">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-2"></x-part>
+      <x-part name="week"></x-part>
+      <p class="status-inline" style="margin:var(--space-6) 0 var(--space-3)"><span class="spinner"></span>Buscando horas libres de Sebastian…</p>
+      <div class="slots" aria-hidden="true">
+        <span class="skeleton" style="height:44px;border-radius:10px"></span><span class="skeleton" style="height:44px;border-radius:10px"></span><span class="skeleton" style="height:44px;border-radius:10px"></span>
+        <span class="skeleton" style="height:44px;border-radius:10px"></span><span class="skeleton" style="height:44px;border-radius:10px"></span><span class="skeleton" style="height:44px;border-radius:10px"></span>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-2" data-code="W07" data-group="Reservar cita" data-name="Reservar · Paso 2 · Día y hora elegidos"
+  data-note="Días pasados desactivados; los días con horas libres llevan un punto. Horas ocupadas tachadas, no solo en gris (HIG › Color › Inclusive color). Agrupadas en Mañana y Tarde. Hora en formato de Colombia: «3:15 p. m.».">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-2"></x-part>
+      <x-part name="week"></x-part>
+      <x-part name="slots"></x-part>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-2-sin-horas" data-code="W08" data-group="Reservar cita" data-name="Reservar · Paso 2 · Día sin horas libres"
+  data-note="Estado vacío con siguiente paso: un botón al próximo día con horas. Si una semana entera no tiene horas, se salta sola a la siguiente (como hoy).">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-2"></x-part>
+      <x-part name="week-none"></x-part>
+      <div class="empty" style="padding:var(--space-10) var(--space-4)">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div>
+        <p class="empty__title">No quedan horas el sábado 21</p>
+        <p class="empty__text">Sebastian tiene la agenda llena ese día.</p>
+        <div class="empty__actions"><button class="btn btn--gray" type="button">Ver domingo 22</button></div>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-2-error" data-code="W09" data-group="Reservar cita" data-name="Reservar · Paso 2 · Error al cargar la agenda"
+  data-note="No se inventan horas si la agenda no llegó. Mensaje sin culpas y con acción (HIG › Writing: «Write clear error messages»).">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-2"></x-part>
+      <x-part name="week"></x-part>
+      <div class="empty" style="padding:var(--space-10) var(--space-4)">
+        <div class="empty__icon empty__icon--error"><svg class="icon" aria-hidden="true"><use href="#i-wifi-off"/></svg></div>
+        <p class="empty__title">No se pudo cargar la agenda</p>
+        <p class="empty__text">Revisa tu conexión a internet y vuelve a intentarlo.</p>
+        <div class="empty__actions"><button class="btn btn--gray" type="button"><svg class="icon" aria-hidden="true"><use href="#i-retry"/></svg>Reintentar</button></div>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-2-hora-ocupada" data-code="W10" data-group="Reservar cita" data-name="Reservar · Paso 2 · La hora se acaba de ocupar"
+  data-note="Al confirmar, la hora ya estaba tomada: se vuelve al paso 2 con la agenda al día y un aviso arriba, junto a lo que hay que cambiar.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-2"></x-part>
+      <div class="notice notice--warning" style="margin-bottom:var(--space-4)" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>Alguien reservó las 3:15 p. m. antes que tú.</strong> Elige otra hora; las demás siguen libres.</div></div>
+      <x-part name="week"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Tarde</h3>
+      <div class="slots">
+        <button class="slot" type="button">2:30 p. m.</button>
+        <button class="slot" type="button" disabled aria-label="3:15 p. m., ocupada">3:15 p. m.</button>
+        <button class="slot" type="button">4:00 p. m.</button>
+        <button class="slot" type="button" disabled>4:45 p. m.</button>
+        <button class="slot" type="button">5:30 p. m.</button>
+        <button class="slot" type="button">6:15 p. m.</button>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Continuar</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-3" data-code="W11" data-group="Reservar cita" data-name="Reservar · Paso 3 · Confirmar (cliente nuevo)"
+  data-note="Resumen en lista agrupada, opción de repetir en fichas y datos con etiqueta visible, teclado de teléfono y autocompletar (HIG › Text fields, Entering data). Un solo botón prominente.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-3"></x-part>
+      <x-part name="summary"></x-part>
+      <x-part name="recur-none"></x-part>
+      <x-part name="client-new"></x-part>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Confirmar reserva</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-3-recurrente" data-code="W12" data-group="Reservar cita" data-name="Reservar · Paso 3 · Cita que se repite y cliente conocido"
+  data-note="Al elegir repetición aparece cuántas citas (control segmentado, 5 opciones) y la vista previa de fechas: ocupada con aspa y texto, no solo color. Cliente que ya reservó: tarjeta con sus datos y «No soy yo».">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-3"></x-part>
+      <x-part name="summary"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">¿Quieres repetir esta cita?</h3>
+      <div class="chips" role="radiogroup" aria-label="Repetir">
+        <button class="chip" role="radio" aria-checked="false" type="button">Solo esta vez</button>
+        <button class="chip" role="radio" aria-checked="true" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Cada semana</button>
+        <button class="chip" role="radio" aria-checked="false" type="button">Cada 15 días</button>
+        <button class="chip" role="radio" aria-checked="false" type="button">Cada mes</button>
+      </div>
+      <h3 class="list-header" style="margin-top:var(--space-5)">¿Cuántas citas en total?</h3>
+      <div class="segmented segmented--block" role="radiogroup" aria-label="Número de citas">
+        <button class="segmented__item" role="radio" aria-selected="false" type="button">2</button>
+        <button class="segmented__item" role="radio" aria-selected="true" type="button">4</button>
+        <button class="segmented__item" role="radio" aria-selected="false" type="button">6</button>
+        <button class="segmented__item" role="radio" aria-selected="false" type="button">8</button>
+        <button class="segmented__item" role="radio" aria-selected="false" type="button">12</button>
+      </div>
+      <h3 class="list-header" style="margin-top:var(--space-5)">Tus citas</h3>
+      <ul class="list">
+        <li class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Vie 20 nov · 3:15 p. m.</span></span></li>
+        <li class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Vie 27 nov · 3:15 p. m.</span></span></li>
+        <li class="row"><svg class="icon" style="color:var(--red)" aria-hidden="true"><use href="#i-alert"/></svg><span class="row__main"><span class="row__title t-secondary" style="text-decoration:line-through">Vie 4 dic · 3:15 p. m.</span></span><span class="badge badge--cancelled">Ocupada</span></li>
+        <li class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Vie 11 dic · 3:15 p. m.</span></span></li>
+      </ul>
+      <p class="list-footer">Se reservarán 3 de 4 citas. El 4 de diciembre ya hay otra reserva a esa hora y se omite.</p>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Tus datos</h3>
+      <div class="list"><div class="row row--avatar"><span class="avatar">JP</span><span class="row__main"><span class="row__title row__title--strong">Juan Pablo Restrepo</span><span class="row__subtitle">300 123 4567</span></span><button class="btn btn--plain btn--small" type="button">No soy yo</button></div></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Confirmar 3 citas</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-3-datos-incompletos" data-code="W13" data-group="Reservar cita" data-name="Reservar · Paso 3 · Datos incompletos"
+  data-note="El error va junto a cada campo, con icono y en rojo, y dice cómo arreglarlo (HIG › Writing: «Show errors right next to the field»). El foco salta al primer campo con error.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-3"></x-part>
+      <x-part name="summary"></x-part>
+      <x-part name="recur-none"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Tus datos</h3>
+      <div class="form">
+        <div class="field field--error"><label class="field__label">Nombre</label><div class="field__control"><input class="field__input" type="text" autocomplete="name" placeholder="Nombre y apellido" aria-invalid="true"></div><p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Escribe tu nombre para que el barbero sepa a quién espera.</p></div>
+        <div class="field"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" autocomplete="tel-national" value="300 123 4567"><button class="field__clear" type="button" aria-label="Borrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button></div><p class="field__hint">Te confirmamos la cita por este número.</p></div>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Confirmar reserva</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-3-guardando" data-code="W14" data-group="Reservar cita" data-name="Reservar · Paso 3 · Guardando"
+  data-note="El botón muestra el indicador y cambia a «Reservando…» (HIG › Buttons › iOS). Se vuelve a comprobar que la hora sigue libre.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-3"></x-part>
+      <x-part name="summary"></x-part>
+      <x-part name="recur-none"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Tus datos</h3>
+      <div class="list"><div class="row row--avatar"><span class="avatar">JP</span><span class="row__main"><span class="row__title row__title--strong">Juan Pablo Restrepo</span><span class="row__subtitle">300 123 4567</span></span></div></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block is-loading" type="button" aria-disabled="true" style="--btn-bg:var(--accent);--btn-fg:var(--on-accent);opacity:.85"><span class="spinner"></span>Reservando…</button></div>
+  </div>
+</template>
+
+<template data-shot="web-reservar-3-error" data-code="W15" data-group="Reservar cita" data-name="Reservar · Paso 3 · Error al guardar"
+  data-note="La conexión falló o tardó más de 12 s. El aviso queda encima del botón, dice qué pasó y qué hacer; los datos no se pierden.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reservar cita">
+    <x-part name="bar-step"></x-part>
+    <div class="sheet__body">
+      <x-part name="steps-3"></x-part>
+      <x-part name="summary"></x-part>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Tus datos</h3>
+      <div class="list"><div class="row row--avatar"><span class="avatar">JP</span><span class="row__main"><span class="row__title row__title--strong">Juan Pablo Restrepo</span><span class="row__subtitle">300 123 4567</span></span><button class="btn btn--plain btn--small" type="button">No soy yo</button></div></div>
+    </div>
+    <div class="sheet__footer">
+      <div class="notice notice--error" style="margin-bottom:var(--space-3)" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>No se pudo confirmar la reserva.</strong> La conexión tardó demasiado. Revisa tu internet y vuelve a intentarlo.</div></div>
+      <button class="btn btn--filled btn--large btn--block" type="button">Intentar de nuevo</button>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-reserva-confirmada" data-code="W16" data-group="Reservar cita" data-name="Reserva confirmada"
+  data-note="Confirmación de una acción importante (HIG › Feedback). Código en monoespaciada para copiarlo. Las acciones de calendario y WhatsApp son filas de lista: no compiten con «Listo», que es la única acción prominente. Sin recarga automática.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reserva confirmada">
+    <div class="sheet__grabber" aria-hidden="true"></div>
+    <div class="sheet__body" style="padding-top:var(--space-6)">
+      <div class="empty" style="padding:var(--space-4) 0 var(--space-6)">
+        <div class="empty__icon empty__icon--success" style="width:72px;height:72px"><svg class="icon" style="width:36px;height:36px;stroke-width:2.2" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <h2 class="t-title-1" style="margin:var(--space-2) 0 0">Cita confirmada</h2>
+        <p class="empty__text">Viernes 20 de noviembre · 3:15 p. m.</p>
+      </div>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Nombre</span></span><span class="row__detail">Juan Pablo Restrepo</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Código de reserva</span></span><span class="row__detail row__detail--strong t-mono">9SM-4K7P</span></li>
+      </ul>
+      <h3 class="list-header" style="margin-top:var(--space-6)">Que no se te olvide</h3>
+      <div class="list">
+        <button class="row row--icon" type="button"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir a mi calendario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button>
+        <a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="row__main"><span class="row__title">Abrir en Google Calendar</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
+        <a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="row__main"><span class="row__title">Confirmar por WhatsApp</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
+      </div>
+      <p class="list-footer">Tu calendario te avisa el día antes y 2 horas antes. Puedes ver o cancelar la cita en Mis citas.</p>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--filled btn--large btn--block" type="button">Listo</button>
+      <button class="btn btn--plain btn--block" type="button">Reservar otra cita</button>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-reserva-confirmada-serie" data-code="W17" data-group="Reservar cita" data-name="Reserva confirmada · Cita que se repite"
+  data-note="Misma pantalla con las filas de la serie: repetición, citas reservadas, última cita y fechas omitidas.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Reserva confirmada">
+    <div class="sheet__grabber" aria-hidden="true"></div>
+    <div class="sheet__body" style="padding-top:var(--space-6)">
+      <div class="empty" style="padding:var(--space-4) 0 var(--space-6)">
+        <div class="empty__icon empty__icon--success" style="width:72px;height:72px"><svg class="icon" style="width:36px;height:36px;stroke-width:2.2" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <h2 class="t-title-1" style="margin:var(--space-2) 0 0">3 citas confirmadas</h2>
+        <p class="empty__text">Cada semana desde el viernes 20 de noviembre · 3:15 p. m.</p>
+      </div>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Repetición</span></span><span class="row__detail">Cada semana</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Primera cita</span></span><span class="row__detail">Vie 20 de noviembre</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Última cita</span></span><span class="row__detail">Vie 11 de diciembre</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Sin disponibilidad</span></span><span class="row__detail">1 fecha (4 dic)</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Código de reserva</span></span><span class="row__detail row__detail--strong t-mono">9SM-4K7P</span></li>
+      </ul>
+      <div class="list" style="margin-top:var(--space-6)">
+        <button class="row row--icon" type="button"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir a mi calendario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button>
+        <a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="row__main"><span class="row__title">Confirmar por WhatsApp</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn--filled btn--large btn--block" type="button">Listo</button>
+      <button class="btn btn--plain btn--block" type="button">Reservar otra cita</button>
+    </div>
+  </div>
+</template>
+
+<!-- =====================================================================
+     W · MIS CITAS
+     ===================================================================== -->
+<template data-shot="web-mis-citas-buscar" data-code="W18" data-group="Mis citas" data-name="Mis citas · Buscar por número"
+  data-note="Se abre cuando el navegador no recuerda reservas. Una sola pregunta, con etiqueta, pista de formato y teclado numérico.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <h2 class="t-title-2" style="margin:var(--space-2) 0 var(--space-2)">Busca tu cita</h2>
+      <p class="t-callout t-secondary" style="margin:0 0 var(--space-6)">Escribe el número de WhatsApp con el que reservaste.</p>
+      <div class="field"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="300 123 4567"></div></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Ver mis citas</button></div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-buscar-error" data-code="W19" data-group="Mis citas" data-name="Mis citas · Número vacío"
+  data-note="Error junto al campo.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <h2 class="t-title-2" style="margin:var(--space-2) 0 var(--space-2)">Busca tu cita</h2>
+      <p class="t-callout t-secondary" style="margin:0 0 var(--space-6)">Escribe el número de WhatsApp con el que reservaste.</p>
+      <div class="field field--error"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" placeholder="300 123 4567" aria-invalid="true"></div><p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Escribe tu número de WhatsApp para buscar tus citas.</p></div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Ver mis citas</button></div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-cargando" data-code="W20" data-group="Mis citas" data-name="Mis citas · Buscando"
+  data-note="Indicador con texto concreto mientras se consultan las citas.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body"><div class="loading-block" style="min-height:280px"><span class="spinner spinner--lg"></span>Buscando tus citas…</div></div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas" data-code="W21" data-group="Mis citas" data-name="Mis citas · Próxima cita"
+  data-note="La hora es lo más grande (jerarquía por tamaño y peso, HIG › Typography). Estado con icono y texto. «Cancelar cita» en estilo destructivo y no prominente (HIG › Buttons: el rol destructivo nunca es primario). Debajo, las otras fechas de la serie: tocar una la muestra arriba.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+      <p class="t-callout t-secondary" style="margin:var(--space-4) 0 var(--space-1)">Viernes 20 de noviembre</p>
+      <p class="t-large-title t-num" style="margin:0 0 var(--space-5);font-size:calc(var(--text-large-title) * 1.3)">3:15 p. m.</p>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Código</span></span><span class="row__detail t-mono">9SM-4K7P</span></li>
+      </ul>
+      <button class="btn btn--destructive btn--block" type="button" style="margin-top:var(--space-4)">Cancelar cita</button>
+      <p class="list-footer" style="text-align:center">Puedes cancelar hasta 1 hora antes.</p>
+      <h3 class="list-header" style="margin-top:var(--space-8)"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-repeat"/></svg> Cita semanal · tus fechas</h3>
+      <div class="list" role="listbox" aria-label="Tus fechas">
+        <button class="row is-selected" role="option" aria-selected="true" type="button"><span class="row__main"><span class="row__title">Vie 20 nov · 3:15 p. m.</span><span class="row__subtitle">Sebastian · 1 de 3</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="option" aria-selected="false" type="button"><span class="row__main"><span class="row__title">Vie 27 nov · 3:15 p. m.</span><span class="row__subtitle">Sebastian · 2 de 3</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+        <button class="row" role="option" aria-selected="false" type="button"><span class="row__main"><span class="row__title">Vie 11 dic · 3:15 p. m.</span><span class="row__subtitle">Sebastian · 3 de 3</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-confirmar-cancelar" data-code="W22" data-group="Mis citas" data-name="Mis citas · Confirmar cancelación"
+  data-note="Alerta porque es una acción destructiva que no se puede deshacer (HIG › Alerts). Botones que dicen el resultado: «Cancelar cita» en rojo y «Mantener cita» como salida segura (en español, «Cancelar» a secas sería ambiguo junto a «Cancelar cita»).">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas" aria-hidden="true">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+      <p class="t-callout t-secondary" style="margin:var(--space-4) 0 var(--space-1)">Viernes 20 de noviembre</p>
+      <p class="t-large-title t-num" style="margin:0 0 var(--space-5);font-size:calc(var(--text-large-title) * 1.3)">3:15 p. m.</p>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="scrim alert-scrim"></div>
+  <div class="alert" role="alertdialog" aria-modal="true" aria-label="¿Cancelar tu cita?">
+    <p class="alert__title">¿Cancelar tu cita del viernes 20 a las 3:15 p. m.?</p>
+    <p class="alert__text">Tu hora quedará libre para otra persona. No se puede deshacer.</p>
+    <div class="alert__actions">
+      <button class="btn btn--destructive btn--block" type="button">Cancelar cita</button>
+      <button class="btn btn--gray btn--block" type="button">Mantener cita</button>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-cancelando" data-code="W23" data-group="Mis citas" data-name="Mis citas · Cancelando"
+  data-note="El botón muestra el indicador mientras se guarda.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+      <p class="t-callout t-secondary" style="margin:var(--space-4) 0 var(--space-1)">Viernes 20 de noviembre</p>
+      <p class="t-large-title t-num" style="margin:0 0 var(--space-5);font-size:calc(var(--text-large-title) * 1.3)">3:15 p. m.</p>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+      </ul>
+      <button class="btn btn--destructive btn--block is-loading" type="button" aria-disabled="true" style="margin-top:var(--space-4)"><span class="spinner"></span>Cancelando…</button>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-error-cancelar" data-code="W24" data-group="Mis citas" data-name="Mis citas · No se pudo cancelar"
+  data-note="El error aparece donde estaba el botón, con reintento.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+      <p class="t-callout t-secondary" style="margin:var(--space-4) 0 var(--space-1)">Viernes 20 de noviembre</p>
+      <p class="t-large-title t-num" style="margin:0 0 var(--space-5);font-size:calc(var(--text-large-title) * 1.3)">3:15 p. m.</p>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">NEXO Cut</span></li>
+      </ul>
+      <div class="notice notice--error" style="margin-top:var(--space-4)" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>No se pudo cancelar la cita.</strong> Revisa tu conexión y vuelve a intentarlo.<br><button class="btn btn--gray btn--small" type="button">Intentar de nuevo</button></div></div>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-ultima-hora" data-code="W25" data-group="Mis citas" data-name="Mis citas · Falta menos de 1 hora"
+  data-note="Ya no se puede cancelar desde la web. En vez de un botón desactivado sin explicación, se dice por qué y se ofrece la salida: escribir a la barbería (HIG › Feedback: «Show people when a command can't be carried out and help them understand why»).">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--full sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+      <p class="t-callout t-secondary" style="margin:var(--space-4) 0 var(--space-1)">Hoy, jueves 19 de noviembre</p>
+      <p class="t-large-title t-num" style="margin:0 0 var(--space-5);font-size:calc(var(--text-large-title) * 1.3)">4:00 p. m.</p>
+      <ul class="list">
+        <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Miguel Ángel Zuluaga</span></li>
+        <li class="row"><span class="row__main"><span class="row__title">Servicio</span></span><span class="row__detail">09 Beard</span></li>
+      </ul>
+      <div class="notice" style="margin-top:var(--space-4)"><svg class="icon" style="color:var(--label-secondary)" aria-hidden="true"><use href="#i-clock"/></svg><div class="notice__body">Falta menos de 1 hora para tu cita, así que ya no se puede cancelar desde aquí. Si no puedes llegar, avísale a la barbería.</div></div>
+      <a class="btn btn--gray btn--block" href="#" style="margin-top:var(--space-3)"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>Avisar por WhatsApp</a>
+    </div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-cancelada" data-code="W26" data-group="Mis citas" data-name="Mis citas · Cita cancelada"
+  data-note="Confirmación breve con «Listo».">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <div class="empty">
+        <div class="empty__icon empty__icon--success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <p class="empty__title">Cita cancelada</p>
+        <p class="empty__text">Tu hora del viernes 20 a las 3:15 p. m. quedó libre.</p>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Listo</button></div>
+  </div>
+</template>
+
+<template data-shot="web-mis-citas-vacio" data-code="W27" data-group="Mis citas" data-name="Mis citas · Sin citas próximas"
+  data-note="Estado vacío con la acción que corresponde: reservar.">
+  <x-part name="behind"></x-part>
+  <div class="scrim"></div>
+  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Mis citas">
+    <x-part name="bar-close" title="Mis citas"></x-part>
+    <div class="sheet__body">
+      <div class="empty">
+        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div>
+        <p class="empty__title">No tienes citas próximas</p>
+        <p class="empty__text">Cuando reserves, tu cita aparecerá aquí.</p>
+        <div class="empty__actions"><button class="btn btn--filled" type="button">Reservar cita</button></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script src="maqueta.js"></script>
+</body>
+</html>
