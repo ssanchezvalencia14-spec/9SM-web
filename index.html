@@ -43,7 +43,7 @@
     html[data-theme="light"] {
       filter: invert(1) hue-rotate(180deg);
     }
-    html[data-theme="light"] #heroVideo {
+    html[data-theme="light"] #hero3d {
       filter: invert(1) hue-rotate(180deg);
     }
     /* .gallery-photo ya tiene su propio filter (brightness) en reposo y al hover; como "filter"
@@ -277,15 +277,14 @@
     /* ═══════════════════════════
        HERO SCROLL-VIDEO
     ═══════════════════════════ */
+    /* El hero ocupa una pantalla: ya no hay vídeo que recorrer con el scroll */
+    /* padding 0: si no, hereda el de <section> y el lienzo queda corrido y recortado */
     .scroll-video-hero {
-      height: 300vh; position: relative;
-      overflow: clip;
+      height: 100vh; height: 100svh; position: relative;
+      overflow: clip; padding: 0;
     }
-    /* En móvil el hero se recorre en poco más de una pantalla y media,
-       y los reveals van más rápido: con 300vh había que arrastrar tres
-       pantallas antes de llegar al contenido. */
+    /* En móvil los reveals van más rápido */
     @media (max-width: 820px) {
-      .scroll-video-hero { height: 165vh; }
       .reveal, .reveal-left, .reveal-right { transition-duration: 0.45s; }
       .stagger > * { transition-duration: 0.4s; }
       .stagger.visible > *:nth-child(2) { transition-delay: 0.05s; }
@@ -296,14 +295,17 @@
     }
     .scroll-video-sticky {
       position: sticky; top: 0;
-      height: 100vh; width: 100%; overflow: hidden;
+      height: 100%; width: 100%; overflow: hidden;
       background: #000;
     }
-    .scroll-video-sticky video {
+    /* Herramientas en 3D (assets/hero-3d.js); aparecen con un fundido al estar listas */
+    #hero3d {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
-      object-fit: cover;
+      display: block;
+      opacity: 0; transition: opacity 1.2s ease;
     }
+    #hero3d.listo { opacity: 1; }
     /* Logo: zona superior, bien separado del texto */
     .hero-logo {
       position: absolute;
@@ -323,7 +325,8 @@
     /* Texto: zona central-baja, bien separado del logo */
     .hero-overlay {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,0.44);
+      /* Velo solo detrás del texto: las herramientas de los bordes se ven con todo su brillo */
+      background: radial-gradient(ellipse 60% 50% at 50% 55%, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0) 100%);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       z-index: 2; text-align: center;
@@ -1750,8 +1753,7 @@
 <!-- HERO SCROLL-VIDEO -->
 <section class="scroll-video-hero" id="scroll-hero">
   <div class="scroll-video-sticky">
-    <!-- El src lo pone el script del hero cuando la página ya cargó (en celular, una versión ligera) -->
-    <video id="heroVideo" playsinline muted preload="auto"></video>
+    <canvas id="hero3d" aria-hidden="true"></canvas>
     <div class="hero-logo">
       <img src="assets/9sm-logo.png" alt="9SM NEXO" />
     </div>
@@ -2395,66 +2397,19 @@ if (sb) cntObs.observe(sb);
   obs.observe(el);
 })();
 
-/* ── Scroll-video hero (avance suave: el video persigue el scroll con inercia, no salta de golpe) ── */
+/* ── Hero 3D: se pide cuando la página ya cargó, para no competir con lo demás ── */
 (function () {
-  const video = document.getElementById('heroVideo');
-  const hero  = document.getElementById('scroll-hero');
-  if (!video || !hero) return;
-
-  // El video NUNCA se reproduce solo: siempre queda en pausa y el scroll es lo único que mueve el frame.
-  video.autoplay = false;
-  video.loop = false;
-  video.removeAttribute('autoplay');
-  video.removeAttribute('loop');
-  video.pause();
-  video.currentTime = 0;
-  video.addEventListener('play', () => video.pause()); // por si algo externo intenta reproducirlo
-
-  let ready = false;
-  video.addEventListener('loadedmetadata', () => { ready = true; computeTarget(); });
-  video.addEventListener('error', () => console.error('No se pudo cargar el video del hero:', video.error));
-
-  // El vídeo pesa mucho: se pide cuando la página ya terminó de cargar, para no
-  // retrasar el primer pintado ni la agenda. En celular va la versión de 720p
-  // (7 MB en vez de 22 MB).
-  const MOVIL = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
-  function cargarVideo() {
-    video.src = MOVIL ? 'assets/9sm-video-movil.mp4' : 'assets/9sm-video.mp4';
-    video.load();
-  }
   let pedido = false;
-  function cargarUnaVez() { if (!pedido) { pedido = true; cargarVideo(); } }
-  if (document.readyState === 'complete') cargarUnaVez();
+  function cargar() {
+    if (pedido) return;
+    pedido = true;
+    import('./assets/hero-3d.js').catch(function (e) { console.warn('No se pudo cargar el hero 3D:', e && e.message); });
+  }
+  if (document.readyState === 'complete') cargar();
   else {
-    window.addEventListener('load', cargarUnaVez, { once: true });
-    setTimeout(cargarUnaVez, 5000);   // si alguna imagen retrasa «load», no se espera más
+    window.addEventListener('load', cargar, { once: true });
+    setTimeout(cargar, 5000);   // si alguna imagen retrasa «load», no se espera más
   }
-
-  let targetTime   = 0;    // punto del video que le corresponde a la posición actual del scroll
-  let renderedTime = 0;    // punto realmente mostrado, que avanza poco a poco hacia targetTime
-  // Más bajo = más suave y lento; más alto = sigue el scroll de cerca.
-  // En móvil se sube: con 0.07 el vídeo iba muy por detrás del dedo.
-  const SMOOTHING  = (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) ? 0.2 : 0.07;
-
-  function computeTarget() {
-    if (!ready || !video.duration) return;
-    const rect = hero.getBoundingClientRect();
-    const scrolled   = -rect.top;
-    const scrollable = hero.offsetHeight - window.innerHeight;
-    const p = scrollable > 0 ? Math.min(1, Math.max(0, scrolled / scrollable)) : 0;
-    targetTime = p * video.duration;
-  }
-  window.addEventListener('scroll', computeTarget, { passive: true });
-  window.addEventListener('resize', computeTarget);
-
-  function tick() {
-    renderedTime += (targetTime - renderedTime) * SMOOTHING;
-    if (Math.abs(targetTime - renderedTime) > 0.01 && !video.seeking) {
-      video.currentTime = renderedTime;
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
 })();
 
 
@@ -4545,7 +4500,7 @@ loadSiteConfig();
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261124a';
+  var BUILD = '20261124b';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
