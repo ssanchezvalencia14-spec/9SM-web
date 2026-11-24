@@ -83,7 +83,7 @@
 <div class="viewer-layout">
   <nav class="viewer-index" id="index" aria-label="Pantallas"></nav>
   <main class="viewer-main" id="shots">
-    <p class="viewer-intro">Estas son <strong>todas las pantallas y estados del panel</strong>, con las <strong>mismas secciones del panel actual</strong> y sus mismos nombres: Agenda (Calendario, Hoy, Esta semana, Todas las citas, Nueva cita), Mi trabajo (Mi horario, Bloquear espacios, Balance, Reseñas) y Administración (Clientes, Inventario, Personalizar web). En el computador van en la sidebar; en el teléfono, en la barra inferior (Agenda, Hoy, Nueva cita, Balance, Más) y la hoja «Más». Solo cambia el aspecto. El nombre y el código de cada pantalla son los que usa la matriz de flujos (<code>pruebas/flujos.md</code>). En las pantallas de página completa el marco mide toda la página, así que la barra inferior aparece al final; en el teléfono real queda pegada al borde de la pantalla.</p>
+    <p class="viewer-intro">Estas son <strong>todas las pantallas y estados del panel</strong>, con las <strong>mismas secciones del panel actual</strong> y sus mismos nombres: Agenda (Calendario, Hoy, Esta semana, Todas las citas, Nueva cita), Mi trabajo (Mi horario, Bloquear espacios, Balance) y Administración (Clientes, Inventario, Personalizar web). En el computador van en la sidebar; en el teléfono, en la barra inferior (Agenda, Hoy, Nueva cita, Balance, Más) y la hoja «Más». Solo cambia el aspecto. El nombre y el código de cada pantalla son los que usa la matriz de flujos (<code>pruebas/flujos.md</code>). En las pantallas de página completa el marco mide toda la página, así que la barra inferior aparece al final; en el teléfono real queda pegada al borde de la pantalla.</p>
   </main>
 </div>
 
@@ -108,7 +108,6 @@
       <a class="sidebar__item" data-nav="horario" href="#"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Mi horario</a>
       <a class="sidebar__item" data-nav="bloquear" href="#"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Bloquear espacios</a>
       <a class="sidebar__item" data-nav="balance" href="#"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Balance</a>
-      <a class="sidebar__item" data-nav="resenas" href="#"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>Reseñas</a>
       <p class="sidebar__section" data-admin>Administración</p>
       <a class="sidebar__item" data-admin data-nav="clientes" href="#"><svg class="icon" aria-hidden="true"><use href="#i-persons"/></svg>Clientes</a>
       <a class="sidebar__item" data-admin data-nav="inventario" href="#"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg>Inventario</a>
@@ -809,52 +808,10 @@
   </x-part>
 </template>
 
-<template data-shot="panel-resenas" data-code="P24" data-group="Mi trabajo" data-name="Reseñas" data-app="app--grouped" data-full="true"
-  data-note="Como hoy: «Código QR de cada barbero» y «Reseñas recibidas» con el resumen.">
-  <x-part name="shell" current="resenas" tab="mas">
-    <x-part name="toolbar" title="Reseñas"></x-part>
-    <header class="page-head"><h1 class="page-head__title">Reseñas</h1><p class="page-head__sub">Tu código QR y las reseñas que han dejado tus clientes.</p></header>
-    <div class="page-body">
-      <h3 class="list-header">Código QR de cada barbero</h3>
-      <div class="card qr-card">
-        <div class="qr-box" role="img" aria-label="Código QR de Sebastian"><svg class="icon" aria-hidden="true"><use href="#i-qr"/></svg></div>
-        <div style="flex:1;min-width:220px">
-          <p class="card__title">Sebastian Montoya Garcia</p>
-          <p class="card__text">Imprime el QR y ponlo en el puesto o en la tarjeta. Al escanearlo se abre la web con el formulario de reseña de ese barbero ya seleccionado.</p>
-          <p class="t-mono t-footnote" style="margin:var(--space-3) 0 0">9sm.site/?r=b1</p>
-        </div>
-      </div>
-      <h3 class="list-header" style="margin-top:var(--space-8)">Reseñas recibidas</h3>
-      <div class="card" style="margin-bottom:var(--space-3);display:flex;align-items:center;gap:var(--space-4)"><span class="stat__value">4,9</span><span><span style="color:var(--yellow)" aria-label="4,9 de 5">★★★★★</span><span class="card__text" style="display:block">32 reseñas</span></span></div>
-      <ul class="list">
-        <li class="row" style="align-items:flex-start"><span class="row__main"><span class="t-footnote" style="color:var(--yellow)" aria-label="4 de 5 estrellas">★★★★<span style="color:var(--label-quaternary)">★</span></span><span class="row__title" style="margin-top:4px">Muy puntual y el degradado quedó perfecto.</span><span class="row__subtitle">Juan Pablo · hoy</span></span></li>
-        <li class="row" style="align-items:flex-start"><span class="row__main"><span class="t-footnote" style="color:var(--yellow)" aria-label="5 de 5 estrellas">★★★★★</span><span class="row__title" style="margin-top:4px">Siempre salgo feliz.</span><span class="row__subtitle">Anónimo · 16 nov</span></span></li>
-      </ul>
-    </div>
-  </x-part>
-</template>
-
-<template data-shot="panel-resenas-vacio" data-code="P25" data-group="Mi trabajo" data-name="Reseñas · Sin reseñas y QR no disponible" data-app="app--grouped"
-  data-note="El aviso del panel actual cuando no carga el generador de QR, y el estado sin reseñas.">
-  <x-part name="shell" current="resenas" tab="mas">
-    <x-part name="toolbar" title="Reseñas"></x-part>
-    <header class="page-head"><h1 class="page-head__title">Reseñas</h1><p class="page-head__sub">Tu código QR y las reseñas que han dejado tus clientes.</p></header>
-    <div class="page-body">
-      <div class="notice notice--warning" style="margin-bottom:var(--space-4)"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body">No se pudo cargar el generador de códigos QR (sin conexión o bloqueado). Los enlaces de abajo funcionan igual: puedes generar el QR con cualquier herramienta.</div></div>
-      <div class="card"><p class="card__title">James David Mosquera</p><p class="t-mono t-footnote" style="margin:var(--space-2) 0 0">9sm.site/?r=b3</p></div>
-      <div class="empty">
-        <div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></div>
-        <p class="empty__title">Aún no hay reseñas</p>
-        <p class="empty__text">Pon tu QR en el puesto para que tus clientes te califiquen.</p>
-      </div>
-    </div>
-  </x-part>
-</template>
-
 <!-- =====================================================================
      P · ADMINISTRACIÓN
      ===================================================================== -->
-<template data-shot="panel-clientes" data-code="P26" data-group="Administración" data-name="Clientes" data-app="app--grouped" data-full="true"
+<template data-shot="panel-clientes" data-code="P24" data-group="Administración" data-name="Clientes" data-app="app--grouped" data-full="true"
   data-note="Como hoy: base de clientes, «Exportar CSV» y la tabla Nombre, Teléfono / WhatsApp, Última cita y Acción. En el teléfono la tabla se muestra como lista.">
   <x-part name="shell" current="clientes" tab="mas" role="admin" user="Administrador" userrole="Administrador · Admin" initials="AD">
     <x-part name="toolbar" title="Clientes"></x-part>
@@ -898,7 +855,7 @@
   </ul>
 </template>
 
-<template data-shot="panel-inventario" data-code="P27" data-group="Administración" data-name="Inventario" data-app="app--grouped" data-full="true"
+<template data-shot="panel-inventario" data-code="P25" data-group="Administración" data-name="Inventario" data-app="app--grouped" data-full="true"
   data-note="Como hoy: «Agregar producto» (Producto, Cantidad, Unidad) y cada producto con − / + y Eliminar. Botones de 44 × 44.">
   <x-part name="shell" current="inventario" tab="mas" role="admin" user="Administrador" userrole="Administrador · Admin" initials="AD">
     <x-part name="toolbar" title="Inventario"></x-part>
@@ -907,7 +864,7 @@
   </x-part>
 </template>
 
-<template data-shot="panel-inventario-eliminar" data-code="P28" data-group="Administración" data-name="Inventario · Confirmar eliminación" data-app="app--grouped"
+<template data-shot="panel-inventario-eliminar" data-code="P26" data-group="Administración" data-name="Inventario · Confirmar eliminación" data-app="app--grouped"
   data-note="La confirmación que ya pide el panel actual, como alerta del sistema.">
   <x-part name="shell" current="inventario" tab="mas" role="admin" user="Administrador" userrole="Administrador · Admin" initials="AD">
     <x-part name="toolbar" title="Inventario"></x-part>
@@ -930,7 +887,7 @@
   </div>
 </template>
 
-<template data-shot="panel-web" data-code="P29" data-group="Administración" data-name="Personalizar web" data-app="app--grouped" data-full="true"
+<template data-shot="panel-web" data-code="P27" data-group="Administración" data-name="Personalizar web" data-app="app--grouped" data-full="true"
   data-note="Los mismos bloques y campos del panel actual: Secciones de la web, Foto del local, Barberos, Servicios y precios, Galería y Datos del negocio, con «Guardar y publicar» y «Descartar cambios».">
   <x-part name="shell" current="web" tab="mas" role="admin" user="Administrador" userrole="Administrador · Admin" initials="AD">
     <x-part name="toolbar" title="Personalizar web"></x-part>
@@ -1017,8 +974,8 @@
   </x-part>
 </template>
 
-<template data-shot="panel-mas" data-code="P30" data-group="Administración" data-name="Más (móvil)" data-app="app--grouped" data-only="phone"
-  data-note="La hoja «Más» del panel actual, con los mismos grupos: Agenda (Esta semana, Todas las citas), Mi trabajo (Mi horario, Bloquear espacios, Reseñas), Administración (Clientes, Inventario, Personalizar web) y Cerrar sesión.">
+<template data-shot="panel-mas" data-code="P28" data-group="Administración" data-name="Más (móvil)" data-app="app--grouped" data-only="phone"
+  data-note="La hoja «Más» del panel actual, con los mismos grupos: Agenda (Esta semana, Todas las citas), Mi trabajo (Mi horario, Bloquear espacios), Administración (Clientes, Inventario, Personalizar web) y Cerrar sesión.">
   <x-part name="shell" current="hoy" tab="mas" role="admin" user="Administrador" userrole="Administrador · Admin" initials="AD">
     <x-part name="toolbar" title="Hoy" badge="4"></x-part>
     <header class="page-head"><h1 class="page-head__title">Hoy</h1><p class="page-head__sub">Las citas de hoy, en orden.</p></header>
@@ -1037,7 +994,6 @@
       <ul class="list">
         <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span class="row__main"><span class="row__title">Mi horario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
         <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><span class="row__main"><span class="row__title">Bloquear espacios</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
-        <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="row__main"><span class="row__title">Reseñas</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
       </ul>
       <h3 class="list-header" style="margin-top:var(--space-5)">Administración</h3>
       <ul class="list">

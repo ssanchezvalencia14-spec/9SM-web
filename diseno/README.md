@@ -132,8 +132,8 @@ los dos hilos de implementación deben aplicarlos:
    la página.
 7. Mis citas: cancelar pide confirmación en una alerta (hoy es en línea);
    el estado vacío ofrece «Reservar cita».
-8. Reseña: «Enviar» desactivado hasta elegir estrellas, en vez de mostrar un
-   error después.
+8. Se retiran las reseñas (formulario por QR y estrellas de los barberos),
+   por decisión de 9SM.
 
 **Panel**
 
@@ -141,14 +141,15 @@ El panel conserva las mismas secciones, grupos, nombres, campos y botones del
 panel actual. Solo cambia el aspecto:
 
 - Sidebar en el computador: Agenda (Calendario, Hoy, Esta semana, Todas las
-  citas, Nueva cita), Mi trabajo (Mi horario, Bloquear espacios, Balance,
-  Reseñas) y Administración (Clientes, Inventario, Personalizar web).
+  citas, Nueva cita), Mi trabajo (Mi horario, Bloquear espacios, Balance)
+  y Administración (Clientes, Inventario, Personalizar web).
 - Barra inferior en el teléfono: Agenda, Hoy, Nueva cita, Balance y Más, con
   la hoja «Más» de siempre. La HIG pide no poner acciones en la tab bar
   («Nueva cita» lo es), pero se mantiene porque es una sección del panel
   actual y los barberos ya la usan así.
 - Cada cita conserva sus acciones: Recordar, Completar y Cancelar si está
   pendiente; Registrar pago si se completó sin método; Avisar si se canceló.
+- Se retira la sección Reseñas y sus códigos QR, por decisión de 9SM.
 - Lo único nuevo en el panel es la confirmación al cancelar una cita
   (alerta, HIG › Alerts), porque no se puede deshacer. El resto de ventanas
   (método de pago, citas del día, eliminar producto) ya existen y solo

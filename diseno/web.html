@@ -158,17 +158,17 @@
 <template data-part="barbers-none">
   <h3 class="list-header list-header--large">Barbero</h3>
   <div class="choices" role="radiogroup" aria-label="Barbero">
-    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span><span class="choice__meta"><svg class="icon icon--sm" style="color:var(--yellow)" aria-hidden="true"><use href="#i-star"/></svg> 4,9 · 32</span></button>
-    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span><span class="choice__meta"><svg class="icon icon--sm" style="color:var(--yellow)" aria-hidden="true"><use href="#i-star"/></svg> 4,8 · 21</span></button>
-    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span><span class="choice__meta">Sin reseñas aún</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span></button>
   </div>
 </template>
 <template data-part="barbers-seb">
   <h3 class="list-header list-header--large">Barbero</h3>
   <div class="choices" role="radiogroup" aria-label="Barbero">
-    <button class="choice" role="radio" aria-checked="true" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span><span class="choice__meta"><svg class="icon icon--sm" style="color:var(--yellow)" aria-hidden="true"><use href="#i-star"/></svg> 4,9 · 32</span></button>
-    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span><span class="choice__meta"><svg class="icon icon--sm" style="color:var(--yellow)" aria-hidden="true"><use href="#i-star"/></svg> 4,8 · 21</span></button>
-    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span><span class="choice__meta">Sin reseñas aún</span></button>
+    <button class="choice" role="radio" aria-checked="true" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber1.jpg" alt=""></span><span class="choice__title">Sebastian Montoya</span><span class="choice__meta">Head Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg"><img src="assets/barber2.jpg" alt=""></span><span class="choice__title">Miguel Ángel Zuluaga</span><span class="choice__meta">Barber</span></button>
+    <button class="choice" role="radio" aria-checked="false" type="button"><span class="choice__mark"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><span class="avatar avatar--lg">JD</span><span class="choice__title">James David Mosquera</span><span class="choice__meta">Barber</span></button>
   </div>
 </template>
 
@@ -957,118 +957,6 @@
         <div class="empty__actions"><button class="btn btn--filled" type="button">Reservar cita</button></div>
       </div>
     </div>
-  </div>
-</template>
-
-<!-- =====================================================================
-     W · RESEÑA (se abre con el QR de cada barbero)
-     ===================================================================== -->
-<template data-part="resena-head">
-  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-3);padding:var(--space-2) 0 var(--space-4)">
-    <span class="avatar avatar--xl"><img src="assets/barber1.jpg" alt=""></span>
-    <h2 class="t-title-2" style="margin:0">¿Cómo te atendió Sebastian?</h2>
-  </div>
-</template>
-
-<template data-shot="web-resena" data-code="W28" data-group="Reseña" data-name="Reseña · Sin puntuar"
-  data-note="Estrellas como grupo de opciones, cada una de 44 × 44. «Enviar» desactivado hasta elegir puntuación, con la pista debajo (mejor que un error después).">
-  <x-part name="behind"></x-part>
-  <div class="scrim"></div>
-  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Tu reseña">
-    <x-part name="bar-close" title="Tu reseña"></x-part>
-    <div class="sheet__body">
-      <x-part name="resena-head"></x-part>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-1)">
-        <div class="stars" role="radiogroup" aria-label="Puntuación">
-          <button class="star" role="radio" aria-checked="false" aria-label="1 estrella, muy mal" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star" role="radio" aria-checked="false" aria-label="2 estrellas, mejorable" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star" role="radio" aria-checked="false" aria-label="3 estrellas, correcto" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star" role="radio" aria-checked="false" aria-label="4 estrellas, muy bien" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star" role="radio" aria-checked="false" aria-label="5 estrellas, excelente" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-        </div>
-        <p class="t-footnote t-secondary" style="margin:0">Toca una estrella para puntuar</p>
-      </div>
-      <div class="form" style="margin-top:var(--space-6)">
-        <div class="field"><label class="field__label">Comentario <span class="field__optional">(opcional)</span></label><div class="field__control field__control--textarea"><textarea class="field__textarea" rows="3" maxlength="400" placeholder="Cuéntanos cómo te atendieron"></textarea></div></div>
-        <div class="field"><label class="field__label">Tu nombre <span class="field__optional">(opcional)</span></label><div class="field__control"><input class="field__input" type="text" maxlength="40" autocomplete="given-name" placeholder="Nombre"></div></div>
-      </div>
-    </div>
-    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button" disabled>Enviar reseña</button></div>
-  </div>
-</template>
-
-<template data-shot="web-resena-lista" data-code="W29" data-group="Reseña" data-name="Reseña · Lista para enviar"
-  data-note="La palabra de la puntuación acompaña a las estrellas (no solo color).">
-  <x-part name="behind"></x-part>
-  <div class="scrim"></div>
-  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Tu reseña">
-    <x-part name="bar-close" title="Tu reseña"></x-part>
-    <div class="sheet__body">
-      <x-part name="resena-head"></x-part>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-1)">
-        <div class="stars" role="radiogroup" aria-label="Puntuación">
-          <button class="star is-on" role="radio" aria-checked="false" aria-label="1 estrella" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star is-on" role="radio" aria-checked="false" aria-label="2 estrellas" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star is-on" role="radio" aria-checked="false" aria-label="3 estrellas" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star is-on" role="radio" aria-checked="true" aria-label="4 estrellas, muy bien" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-          <button class="star" role="radio" aria-checked="false" aria-label="5 estrellas" type="button"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></button>
-        </div>
-        <p class="t-headline" style="margin:0">Muy bien</p>
-      </div>
-      <div class="form" style="margin-top:var(--space-6)">
-        <div class="field"><label class="field__label">Comentario <span class="field__optional">(opcional)</span></label><div class="field__control field__control--textarea"><textarea class="field__textarea" rows="3">Muy puntual y el degradado quedó perfecto.</textarea></div></div>
-        <div class="field"><label class="field__label">Tu nombre <span class="field__optional">(opcional)</span></label><div class="field__control"><input class="field__input" type="text" value="Juan Pablo"></div></div>
-      </div>
-    </div>
-    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Enviar reseña</button></div>
-  </div>
-</template>
-
-<template data-shot="web-resena-enviando" data-code="W30" data-group="Reseña" data-name="Reseña · Enviando"
-  data-note="Indicador dentro del botón.">
-  <x-part name="behind"></x-part>
-  <div class="scrim"></div>
-  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Tu reseña">
-    <x-part name="bar-close" title="Tu reseña"></x-part>
-    <div class="sheet__body">
-      <x-part name="resena-head"></x-part>
-      <div style="display:flex;justify-content:center"><div class="stars"><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span></div></div>
-    </div>
-    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block is-loading" type="button" aria-disabled="true" style="--btn-bg:var(--accent);--btn-fg:var(--on-accent);opacity:.85"><span class="spinner"></span>Enviando…</button></div>
-  </div>
-</template>
-
-<template data-shot="web-resena-error" data-code="W31" data-group="Reseña" data-name="Reseña · No se pudo enviar"
-  data-note="El texto escrito se conserva. El mensaje no muestra códigos técnicos.">
-  <x-part name="behind"></x-part>
-  <div class="scrim"></div>
-  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Tu reseña">
-    <x-part name="bar-close" title="Tu reseña"></x-part>
-    <div class="sheet__body">
-      <x-part name="resena-head"></x-part>
-      <div style="display:flex;justify-content:center"><div class="stars"><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star is-on"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span><span class="star"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg></span></div></div>
-    </div>
-    <div class="sheet__footer">
-      <div class="notice notice--error" style="margin-bottom:var(--space-3)" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>No se pudo enviar tu reseña.</strong> Tu texto sigue aquí. Inténtalo de nuevo en un momento.</div></div>
-      <button class="btn btn--filled btn--large btn--block" type="button">Intentar de nuevo</button>
-    </div>
-  </div>
-</template>
-
-<template data-shot="web-resena-gracias" data-code="W32" data-group="Reseña" data-name="Reseña · Gracias"
-  data-note="Confirmación con «Listo».">
-  <x-part name="behind"></x-part>
-  <div class="scrim"></div>
-  <div class="sheet sheet--grouped" role="dialog" aria-modal="true" aria-label="Tu reseña">
-    <x-part name="bar-close" title="Tu reseña"></x-part>
-    <div class="sheet__body">
-      <div class="empty">
-        <div class="empty__icon empty__icon--success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
-        <p class="empty__title">Gracias por tu reseña</p>
-        <p class="empty__text">Le ayuda a Sebastian y a 9SM NEXO a mejorar.</p>
-      </div>
-    </div>
-    <div class="sheet__footer"><button class="btn btn--filled btn--large btn--block" type="button">Listo</button></div>
   </div>
 </template>
 

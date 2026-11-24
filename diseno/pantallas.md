@@ -38,17 +38,12 @@ El código (W01, P01…) es solo para ordenar; el **id** es lo que no cambia.
 | W25 | `web-mis-citas-ultima-hora` | Mis citas · Falta menos de 1 hora |
 | W26 | `web-mis-citas-cancelada` | Mis citas · Cita cancelada |
 | W27 | `web-mis-citas-vacio` | Mis citas · Sin citas próximas |
-| W28 | `web-resena` | Reseña · Sin puntuar |
-| W29 | `web-resena-lista` | Reseña · Lista para enviar |
-| W30 | `web-resena-enviando` | Reseña · Enviando |
-| W31 | `web-resena-error` | Reseña · No se pudo enviar |
-| W32 | `web-resena-gracias` | Reseña · Gracias |
 
 ## Panel del barbero (`panel.html`)
 
 Mismas secciones y nombres que el panel actual. Sidebar: Agenda (Calendario,
 Hoy, Esta semana, Todas las citas, Nueva cita), Mi trabajo (Mi horario,
-Bloquear espacios, Balance, Reseñas) y Administración (Clientes, Inventario,
+Bloquear espacios, Balance) y Administración (Clientes, Inventario,
 Personalizar web). Barra inferior del teléfono: Agenda, Hoy, Nueva cita,
 Balance y Más.
 
@@ -77,13 +72,11 @@ Balance y Más.
 | P21 | `panel-bloquear` | Bloquear espacios |
 | P22 | `panel-balance` | Balance (administrador) |
 | P23 | `panel-balance-vacio` | Balance · Sin datos |
-| P24 | `panel-resenas` | Reseñas |
-| P25 | `panel-resenas-vacio` | Reseñas · Sin reseñas y QR no disponible |
-| P26 | `panel-clientes` | Clientes |
-| P27 | `panel-inventario` | Inventario |
-| P28 | `panel-inventario-eliminar` | Inventario · Confirmar eliminación |
-| P29 | `panel-web` | Personalizar web |
-| P30 | `panel-mas` | Más (móvil) |
+| P24 | `panel-clientes` | Clientes |
+| P25 | `panel-inventario` | Inventario |
+| P26 | `panel-inventario-eliminar` | Inventario · Confirmar eliminación |
+| P27 | `panel-web` | Personalizar web |
+| P28 | `panel-mas` | Más (móvil) |
 
 ## Correspondencia con lo que existe hoy
 
@@ -96,7 +89,7 @@ Balance y Más.
 | `#bookingOverlay` · `#bview-3` (`#bConfirmForm`) | W11–W15 |
 | `#bookingOverlay` · `#bSuccess` | W16–W17 |
 | `#myCitasOverlay` (`mcPhoneForm`, `mcLoading`, `mcCard`, `mcDone`, `mcEmpty`; `mcSetActions`) | W18–W27 |
-| `#resenaOverlay` (`resForm`, `resOk`) | W28–W32 |
+| `#resenaOverlay` (reseña por QR) | Se retira (las reseñas no se muestran) |
 | Engranaje `.settings-wrap` y opción de tema del menú | Se retiran: la apariencia sigue al sistema |
 | `panel-barbero.html` · `#loginScreen` | P01–P03 |
 | `setTab('calendario')`, `#dayModalOverlay` | P04–P05 |
@@ -109,8 +102,8 @@ Balance y Más.
 | `setTab('horario')` (con precios por barbero solo admin) | P18–P20 |
 | `setTab('bloquear')` | P21 |
 | `setTab('balance')` | P22–P23 |
-| `setTab('resenas')` | P24–P25 |
-| `setTab('clientes')` | P26 |
-| `setTab('inventario')` | P27–P28 |
-| `setTab('web')` | P29 |
-| `#mbnMoreSheet` | P30 |
+| `setTab('resenas')` | Se retira |
+| `setTab('clientes')` | P24 |
+| `setTab('inventario')` | P25–P26 |
+| `setTab('web')` | P27 |
+| `#mbnMoreSheet` | P28 |
