@@ -1750,7 +1750,8 @@
 <!-- HERO SCROLL-VIDEO -->
 <section class="scroll-video-hero" id="scroll-hero">
   <div class="scroll-video-sticky">
-    <video id="heroVideo" src="assets/9sm-video.mp4" playsinline muted preload="auto"></video>
+    <!-- El src lo pone el script del hero cuando la página ya cargó (en celular, una versión ligera) -->
+    <video id="heroVideo" playsinline muted preload="auto"></video>
     <div class="hero-logo">
       <img src="assets/9sm-logo.png" alt="9SM NEXO" />
     </div>
@@ -2412,7 +2413,22 @@ if (sb) cntObs.observe(sb);
   let ready = false;
   video.addEventListener('loadedmetadata', () => { ready = true; computeTarget(); });
   video.addEventListener('error', () => console.error('No se pudo cargar el video del hero:', video.error));
-  video.load();
+
+  // El vídeo pesa mucho: se pide cuando la página ya terminó de cargar, para no
+  // retrasar el primer pintado ni la agenda. En celular va la versión de 720p
+  // (7 MB en vez de 22 MB).
+  const MOVIL = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+  function cargarVideo() {
+    video.src = MOVIL ? 'assets/9sm-video-movil.mp4' : 'assets/9sm-video.mp4';
+    video.load();
+  }
+  let pedido = false;
+  function cargarUnaVez() { if (!pedido) { pedido = true; cargarVideo(); } }
+  if (document.readyState === 'complete') cargarUnaVez();
+  else {
+    window.addEventListener('load', cargarUnaVez, { once: true });
+    setTimeout(cargarUnaVez, 5000);   // si alguna imagen retrasa «load», no se espera más
+  }
 
   let targetTime   = 0;    // punto del video que le corresponde a la posición actual del scroll
   let renderedTime = 0;    // punto realmente mostrado, que avanza poco a poco hacia targetTime
@@ -2584,6 +2600,51 @@ function bChangeWeek(delta) {
   bRenderCalendar();
   bUpdateCalBtn();
 }
+
+/* Descarta la fecha u hora elegidas si ya pasaron. En el celular la pestaña
+   se congela y se retoma horas o días después con la selección de entonces.
+   Devuelve true si quitó algo. */
+function bDescartarVencida() {
+  if (!bState.selDate) return false;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  if (bState.selDate < hoy) {
+    bState.selDate = null; bState.selTime = null; bState.weekOffset = 0;
+    return true;
+  }
+  if (bState.selTime) {
+    const p = bState.selTime.split(':');
+    const inicio = new Date(bState.selDate);
+    inicio.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0);
+    if (inicio <= new Date()) { bState.selTime = null; return true; }
+  }
+  return false;
+}
+
+/* Al volver a la pestaña con la reserva abierta: se recalcula «hoy»,
+   se quita lo vencido y se releen las citas. */
+function bAlVolver() {
+  const ov = document.getElementById('bookingOverlay');
+  if (!ov || !ov.classList.contains('open')) return;
+  const vista = [1,2,3].find(function(i) {
+    const v = document.getElementById('bview-' + i);
+    return v && v.style.display === 'block';
+  });
+  if (vista === 3) {
+    const exito = document.getElementById('bSuccess');
+    if (exito && exito.style.display === 'block') return;   // la cita ya quedó guardada
+    const enviar = document.querySelector('#bConfirmForm button[type="submit"]');
+    if (enviar && enviar.disabled) return;                    // se está guardando
+  }
+  const quitada = bDescartarVencida();
+  if (vista === 3 && quitada) bGoToView(2);
+  else if (vista === 2) { bRenderCalendar(); bUpdateCalBtn(); }
+  // Se releen las citas sin vaciar las que ya había: al reanudar, la red del
+  // celular suele tardar en responder y no conviene perder la agenda por eso.
+  if (bDatosOK) bFetchAndRefresh();
+  else bLoadBookings().then(function() { bRefreshSlotsIfVisible(); bUpdateCalBtn(); });
+}
+document.addEventListener('visibilitychange', function() { if (!document.hidden) bAlVolver(); });
+window.addEventListener('pageshow', function(e) { if (e.persisted) bAlVolver(); });
 
 function bGetMonday(offset) {
   const t = new Date(); t.setHours(0,0,0,0);
@@ -2774,8 +2835,16 @@ function bRefreshSlotsIfVisible() {
 }
 
 /* Fetch REST que actualiza datos y re-renderiza */
+/* Con red lenta una lectura tarda más de 1 s: sin este freno las peticiones
+   se apilaban y saturaban la conexión del celular. Tampoco se pide nada con
+   la pestaña oculta. */
+let bSondeoEnCurso = false;
 function bFetchAndRefresh() {
-  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+  if (bSondeoEnCurso || document.hidden) return;
+  bSondeoEnCurso = true;
+  var ctrl = new AbortController();
+  setTimeout(function() { ctrl.abort(); }, 8000);   // una lectura colgada no frena el sondeo
+  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && typeof data === 'object' && !data.error) {
@@ -2783,7 +2852,8 @@ function bFetchAndRefresh() {
         bRefreshSlotsIfVisible();
       }
     })
-    .catch(function() {});
+    .catch(function() {})
+    .then(function() { bSondeoEnCurso = false; });
 }
 
 /* Arranca el listener SDK + polling REST cada 1 s (doble mecanismo) */
@@ -3573,6 +3643,7 @@ function bSlots(date) {
 }
 
 function bRenderCalendar() {
+  if (bDescartarVencida()) bUpdateCalBtn();
   /* ── Pill: barbero + servicio seleccionados ── */
   const pill = document.getElementById('bSelPill');
   if (pill) {
@@ -3841,6 +3912,11 @@ function bSubmit(e) {
   bLoadBookings()
   .then(function(ok) {
     if (!ok) throw new Error('No pudimos comprobar la disponibilidad. Revisa tu conexión.');
+    if (bDescartarVencida()) {
+      var e1 = new Error('Esa hora ya pasó. Elige otra, por favor.');
+      e1.horaOcupada = true;
+      throw e1;
+    }
     if (!fitsFor(bState.selBarber, d, bState.selTime)) {
       var e2 = new Error('Esa hora acaba de ocuparse. Elige otra, por favor.');
       e2.horaOcupada = true;
