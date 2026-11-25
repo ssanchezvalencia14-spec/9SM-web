@@ -3561,7 +3561,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261125b';
+  var BUILD = '20261125c';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
