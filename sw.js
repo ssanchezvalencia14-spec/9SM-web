@@ -11,7 +11,7 @@
  *   - No guarda el vídeo de portada: pesa casi 200 MB.
  */
 
-const CACHE = 'nexo-estaticos-v1';
+const CACHE = 'nexo-estaticos-v2';
 
 /* Solo se guardan estos tipos, y solo del propio dominio */
 const CACHEABLE = /\.(?:png|jpe?g|webp|svg|ico|woff2?|ttf)$/i;
@@ -25,8 +25,8 @@ self.addEventListener('install', function(e) {
     caches.open(CACHE).then(function(c) {
       // Los iconos de la app conviene tenerlos ya disponibles
       return c.addAll([
-        '/assets/icon-192.png',
-        '/assets/icon-512.png'
+        '/assets/icono-9sm-192.png',
+        '/assets/icono-9sm-512.png'
       ]).catch(function() { /* si alguno falla, no se aborta la instalación */ });
     })
   );
@@ -75,8 +75,8 @@ self.addEventListener('push', function(e) {
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { texto: e.data && e.data.text() }; }
   e.waitUntil(self.registration.showNotification(d.titulo || '9SM NEXO', {
     body: d.texto || '',
-    icon: '/assets/icon-192.png',
-    badge: '/assets/icon-192.png',
+    icon: '/assets/icono-9sm-192.png',
+    badge: '/assets/icono-9sm-192.png',
     tag: d.tag || undefined,
     data: { url: d.url || '/' }
   }));
