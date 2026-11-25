@@ -22,7 +22,27 @@
   <!-- Sistema de diseño (HIG de Apple): ver diseno/README.md -->
   <link rel="stylesheet" href="diseno/tokens.css"/>
   <link rel="stylesheet" href="diseno/componentes.css"/>
-  <style>[hidden] { display: none !important; }</style>
+  <style>[hidden] { display: none !important; }
+    /* Balance: ingresos por día como lista de barras horizontales con su valor */
+    .bal-resumen { margin: 0 0 var(--space-4); color: var(--label-secondary); font-size: var(--text-subhead); }
+    .bal-resumen strong { color: var(--label); }
+    .bal-dias { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+    .bal-dia { display: grid; grid-template-columns: 96px 1fr auto; align-items: center; gap: var(--space-3); }
+    .bal-dia__fecha { font-size: var(--text-subhead); font-weight: 600; }
+    .bal-dia__fecha small { display: block; font-weight: 400; font-size: var(--text-caption-1); color: var(--label-secondary); }
+    .bal-dia__barra { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--fill-quaternary, rgba(120,120,128,.12)); }
+    .bal-dia__barra i { display: block; height: 100%; }
+    .bal-dia__barra .ef { background: var(--green, #34c759); }
+    .bal-dia__barra .tr { background: var(--blue, #007aff); }
+    .bal-dia__barra .sp { background: var(--orange, #ff9500); }
+    .bal-dia__valor { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; min-width: 92px; }
+    .bal-dia__valor small { display: block; font-weight: 400; font-size: var(--text-caption-1); color: var(--label-secondary); }
+    .bal-dia.is-cero .bal-dia__valor, .bal-dia.is-cero .bal-dia__fecha { color: var(--label-tertiary); }
+    .bal-dia__estrella { color: var(--orange, #ff9500); }
+    @media (max-width: 480px) { .bal-dia { grid-template-columns: 72px 1fr auto; gap: var(--space-2); } .bal-dia__valor { min-width: 80px; } }
+    .pay-monto { padding: var(--space-3) var(--space-4) var(--space-4); display: grid; gap: var(--space-1); text-align: left; }
+    .pay-monto label { font-size: var(--text-footnote); color: var(--label-secondary); }
+  </style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
@@ -210,7 +230,7 @@
           <div class="stats" id="balTotales"></div>
           <div id="balBarberWrap"><h3 class="list-header" style="margin-top:var(--space-8)">Por barbero</h3><div class="stats stats--3" id="balBarberCards"></div></div>
           <h3 class="list-header" style="margin-top:var(--space-8)">Ingresos por día</h3>
-          <div class="card" id="balChartWrap" role="img" aria-label=""><div class="bars" id="balBars"></div><div class="bars-axis" id="balAxis"></div><div class="legend" id="balChartLegend" style="margin-top:var(--space-3)"></div></div>
+          <div class="card" id="balChartWrap"><p class="bal-resumen" id="balResumen"></p><div class="legend" id="balChartLegend" style="margin-bottom:var(--space-4)"><span><i style="--dot:var(--green)"></i>Efectivo</span><span><i style="--dot:var(--blue)"></i>Transferencia</span><span><i style="--dot:var(--orange)"></i>Sin registrar pago</span></div><ul class="bal-dias" id="balDias"></ul></div>
           <h3 class="list-header" style="margin-top:var(--space-8)">Desglose por servicio</h3>
           <div class="table-wrap"><table class="table">
             <thead><tr><th scope="col">Servicio</th><th scope="col" class="num">Citas</th><th scope="col" class="num">Ingresos</th></tr></thead>
@@ -404,6 +424,7 @@
 <div class="action-sheet" id="payOverlay" role="dialog" aria-modal="true" aria-labelledby="payTitle" hidden>
   <div class="action-sheet__group">
     <div class="action-sheet__head"><p class="action-sheet__title" id="payTitle">¿Cómo pagó el cliente?</p><p class="action-sheet__text" id="paySub"></p></div>
+    <div class="pay-monto"><label for="payMonto">Valor que pagó el cliente (cámbialo si hubo descuento o propina)</label><div class="field__control"><span class="field__suffix">$</span><input class="field__input" type="number" id="payMonto" min="0" step="1000" inputmode="numeric"></div></div>
     <button class="action-sheet__btn" type="button" id="payEfectivo"><svg class="icon" aria-hidden="true"><use href="#i-cash"/></svg>Efectivo</button>
     <button class="action-sheet__btn" type="button" id="payTransferencia"><svg class="icon" aria-hidden="true"><use href="#i-transfer"/></svg>Transferencia</button>
   </div>
@@ -1622,7 +1643,9 @@ function openPayModal(key, marcarCompletada) {
   var a = allAppointments.find(function(x){ return x._key === key; });
   if (!a) return;
   document.getElementById('paySub').textContent = (a.nombre || 'Cliente') + ' · ' + (a.service || '')
-    + ' · ' + formatCOP(servicePrice(a.service, a.barber));
+    + ' · precio de lista ' + formatCOP(servicePrice(a.service, a.barber));
+  var yaCobrado = Number(a.paidAmount) > 0 ? Number(a.paidAmount) : servicePrice(a.service, a.barber);
+  document.getElementById('payMonto').value = yaCobrado || '';
   document.getElementById('payEfectivo').onclick = function() { savePayment(key, 'efectivo', marcarCompletada); };
   document.getElementById('payTransferencia').onclick = function() { savePayment(key, 'transferencia', marcarCompletada); };
   document.getElementById('payScrim').hidden = false;
@@ -1635,6 +1658,13 @@ function closePayModal() {
   document.getElementById('payOverlay').hidden = true;
 }
 
+/* Lo que escribió el barbero en la hoja de pago; vacío = precio de lista */
+function montoCobrado(a) {
+  var v = Math.round(Number(document.getElementById('payMonto').value));
+  if (v > 0) return v;
+  return a ? servicePrice(a.service, a.barber) : 0;
+}
+
 function savePayment(key, metodo, marcarCompletada) {
   if (!PAY_METHODS[metodo]) return;
   var a = allAppointments.find(function(x){ return x._key === key; });
@@ -1642,7 +1672,7 @@ function savePayment(key, metodo, marcarCompletada) {
     paymentMethod: metodo,
     paidAt: Date.now(),
     paidBy: (currentBarber && currentBarber.id) || 'barbero',
-    paidAmount: a ? servicePrice(a.service, a.barber) : 0
+    paidAmount: montoCobrado(a)
   };
   if (marcarCompletada) upd.status = 'done';
   db.ref('bookings/' + key).update(upd).then(closePayModal).catch(function() {
@@ -2017,6 +2047,66 @@ function balDesdeLimpiar() {
   balDesdeGuardar('');
 }
 
+
+/* Ingresos por día pensados para el barbero: cada día es una fila con su fecha,
+   una barra (verde efectivo, azul transferencia, naranja sin registrar) y el
+   valor escrito. Hoy y Semana muestran todos los días, también los de $0. */
+function balDiaKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function renderBalanceDias(citas, filtro, hoy, semana) {
+  const porDia = {};
+  citas.forEach(function(a) {
+    if (!a.date) return;
+    const d = porDia[a.date] || (porDia[a.date] = { ef: 0, tr: 0, sp: 0, n: 0 });
+    const v = apptPrice(a);
+    if (a.paymentMethod === 'efectivo') d.ef += v; else if (a.paymentMethod === 'transferencia') d.tr += v; else d.sp += v;
+    d.n++;
+  });
+  let dias;
+  if (filtro === 'semana') dias = Array.from(semana).filter(function(k) { return k <= hoy; });
+  else if (filtro === 'hoy') dias = [hoy];
+  else dias = Object.keys(porDia).sort();
+  // Más de 31 días: se agrupa por mes para que la lista siga siendo corta
+  let porMes = false;
+  if (filtro === 'todo' && dias.length > 31) {
+    porMes = true;
+    const meses = {};
+    dias.forEach(function(k) {
+      const m = k.slice(0, 7), d = porDia[k], t = meses[m] || (meses[m] = { ef: 0, tr: 0, sp: 0, n: 0 });
+      t.ef += d.ef; t.tr += d.tr; t.sp += d.sp; t.n += d.n;
+    });
+    Object.keys(meses).forEach(function(m) { porDia[m] = meses[m]; });
+    dias = Object.keys(meses).sort();
+  }
+  dias = dias.slice().reverse();   // lo más reciente arriba
+  const total = function(k) { const d = porDia[k]; return d ? d.ef + d.tr + d.sp : 0; };
+  const max = Math.max.apply(null, dias.map(total).concat([1]));
+  const conIngreso = dias.filter(function(k) { return total(k) > 0; });
+  const mejor = conIngreso.reduce(function(p, k) { return total(k) > total(p) ? k : p; }, conIngreso[0]);
+  const etiqueta = function(k) {
+    if (porMes) { const p = k.split('-').map(Number); return { t: MESES_LARGOS[p[1] - 1].slice(0, 3), s: String(p[0]) }; }
+    const p = k.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2]);
+    const ayer = new Date(); ayer.setDate(ayer.getDate() - 1);
+    const t = k === hoy ? 'Hoy' : k === balDiaKey(ayer) ? 'Ayer' : DIAS_LARGOS[d.getDay()].slice(0, 3);
+    return { t: t, s: p[2] + ' ' + MESES_LARGOS[p[1] - 1].slice(0, 3) };
+  };
+  document.getElementById('balDias').innerHTML = dias.map(function(k) {
+    const d = porDia[k] || { ef: 0, tr: 0, sp: 0, n: 0 }, tot = total(k), e = etiqueta(k);
+    const seg = function(c, v) { return v > 0 ? '<i class="' + c + '" style="width:' + (v / max * 100).toFixed(1) + '%"></i>' : ''; };
+    const detalle = [d.ef ? 'efectivo ' + formatCOP(d.ef) : '', d.tr ? 'transferencia ' + formatCOP(d.tr) : '', d.sp ? 'sin registrar ' + formatCOP(d.sp) : ''].filter(Boolean).join(', ');
+    return '<li class="bal-dia' + (tot ? '' : ' is-cero') + (k === mejor && conIngreso.length > 1 ? ' is-mejor' : '') + '" aria-label="' + escHtml(e.t + ' ' + e.s + ': ' + formatCOP(tot) + ', ' + d.n + ' citas' + (detalle ? ' (' + detalle + ')' : '')) + '">'
+      + '<span class="bal-dia__fecha" aria-hidden="true">' + escHtml(e.t) + (k === mejor && conIngreso.length > 1 ? ' <span class="bal-dia__estrella">★</span>' : '') + '<small>' + escHtml(e.s) + '</small></span>'
+      + '<span class="bal-dia__barra" aria-hidden="true" title="' + escHtml(detalle) + '">' + seg('ef', d.ef) + seg('tr', d.tr) + seg('sp', d.sp) + '</span>'
+      + '<span class="bal-dia__valor" aria-hidden="true">' + formatCOP(tot) + '<small>' + (d.n ? d.n + (d.n === 1 ? ' cita' : ' citas') : 'sin citas') + '</small></span></li>';
+  }).join('');
+  const sumaTotal = conIngreso.reduce(function(s, k) { return s + total(k); }, 0);
+  const unidad = porMes ? 'mes' : 'día';
+  document.getElementById('balResumen').innerHTML = conIngreso.length
+    ? (conIngreso.length > 1
+        ? 'Mejor ' + unidad + ': <strong>' + escHtml(etiqueta(mejor).t + ' ' + etiqueta(mejor).s) + '</strong> con <strong>' + formatCOP(total(mejor)) + '</strong>. Promedio por ' + unidad + ' trabajado: <strong>' + formatCOP(sumaTotal / conIngreso.length) + '</strong>.'
+        : 'Total: <strong>' + formatCOP(sumaTotal) + '</strong>.')
+    : 'Todavía no hay ingresos en este periodo.';
+}
+
 /* ── Balance / Ingresos (P22–P23) ── */
 function setBalanceFilter(filter, btn) {
   balanceFilter = filter;
@@ -2090,13 +2180,15 @@ function renderBalanceView() {
     return filtered.filter(function(a){ return a.paymentMethod === m; }).reduce(function(s,a){ return s + apptPrice(a); }, 0);
   };
   const sinPago = filtered.filter(function(a){ return !payLabel(a.paymentMethod); });
+  const sinPrecio = filtered.filter(function(a){ return !(apptPrice(a) > 0); });
   const ico = function(id, color) { return '<svg class="icon icon--sm"' + (color ? ' style="color:' + color + '"' : '') + ' aria-hidden="true"><use href="#' + id + '"/></svg> '; };
   document.getElementById('balTotales').innerHTML = kpi('Ingresos', formatCOP(totIng))
     + kpi('Citas completadas', String(totCitas))
     + kpi('Promedio por cita', formatCOP(prom))
     + kpi('Efectivo', formatCOP(porMetodo('efectivo')), ico('i-cash'))
     + kpi('Transferencia', formatCOP(porMetodo('transferencia')), ico('i-transfer'))
-    + (sinPago.length ? kpi('Sin registrar pago', String(sinPago.length), ico('i-alert', 'var(--orange)')) : '');
+    + (sinPago.length ? kpi('Sin registrar pago', String(sinPago.length), ico('i-alert', 'var(--orange)')) : '')
+    + (sinPrecio.length ? kpi('Completadas en $0 (servicio sin precio)', String(sinPrecio.length), ico('i-alert', 'var(--red)')) : '');
 
   // Tarjetas por barbero (solo con todo el local)
   document.getElementById('balBarberWrap').hidden = scope !== 'all';
@@ -2110,22 +2202,8 @@ function renderBalanceView() {
       + '<p class="card__text">' + citas.length + ' cita' + (citas.length !== 1 ? 's' : '') + ' · efectivo ' + formatCOP(ef) + ' · transferencia ' + formatCOP(tr) + '</p></div>';
   }).join('');
 
-  // Ingresos por día: barras con descripción accesible (HIG › Charts)
-  const porDia = {};
-  filtered.forEach(function(a) { if (a.date) porDia[a.date] = (porDia[a.date] || 0) + apptPrice(a); });
-  const dias = Object.keys(porDia).sort();
-  const max = Math.max.apply(null, dias.map(function(d) { return porDia[d]; }));
-  const pico = dias.reduce(function(p, d) { return porDia[d] > porDia[p] ? d : p; }, dias[0]);
-  document.getElementById('balBars').innerHTML = dias.map(function(d) {
-    return '<span style="height:' + Math.max(2, Math.round(porDia[d] / max * 100)) + '%" title="' + fechaLarga(d) + ': ' + formatCOP(porDia[d]) + '"></span>';
-  }).join('');
-  const salto = Math.ceil(dias.length / 10);
-  document.getElementById('balAxis').innerHTML = dias.map(function(d, i) {
-    return '<span>' + (i % salto === 0 ? +d.slice(8) : '') + '</span>';
-  }).join('');
-  document.getElementById('balChartWrap').setAttribute('aria-label', 'Ingresos por día, ' + dias.length + ' días con ingresos. El día más alto fue el '
-    + fechaLarga(pico).toLowerCase() + ' con ' + formatCOP(porDia[pico]) + '.');
-  document.getElementById('balChartLegend').innerHTML = '';
+  // Ingresos por día: una fila por día, con fecha, barra partida por método de pago y valor
+  renderBalanceDias(filtered, balanceFilter, today, week);
 
   // Desglose por servicio
   const svcMap = {};
@@ -3498,7 +3576,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261124d';
+  var BUILD = '20261125a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
