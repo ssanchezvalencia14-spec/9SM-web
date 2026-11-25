@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9SM NEXO · Sistema de diseño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;display=swap">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="componentes.css">
+<link rel="stylesheet" href="maqueta.css">
+<style>
+  /* Estilos de esta página de documentación (no forman parte del sistema) */
+  .doc { max-width: 1080px; margin: 0 auto; padding: 32px 24px 120px; }
+  .doc h2 { margin: 72px 0 6px; font-size: var(--text-title-1); line-height: var(--leading-title-1); font-weight: 700; letter-spacing: var(--tracking-tight); }
+  .doc h3 { margin: 32px 0 10px; font-size: var(--text-headline); font-weight: 600; }
+  .doc .cite { margin: 0 0 18px; max-width: 46rem; color: var(--label-secondary); font-size: var(--text-subhead); line-height: var(--leading-loose); }
+  .doc .cite b { color: var(--label); font-weight: 600; }
+  .doc-table { width: 100%; border-collapse: collapse; font-size: var(--text-footnote); }
+  .doc-table th { text-align: left; color: var(--label-secondary); font-weight: 600; padding: 8px 10px; border-bottom: .5px solid var(--separator); }
+  .doc-table td { padding: 8px 10px; border-bottom: .5px solid var(--separator); vertical-align: middle; }
+  .doc-table code { font-family: var(--font-mono); font-size: 12px; }
+  .sw { display: inline-block; width: 28px; height: 28px; border-radius: 8px; box-shadow: inset 0 0 0 .5px var(--separator-opaque); vertical-align: middle; }
+  .demo { padding: 24px; border-radius: var(--radius-lg); background: var(--bg-grouped); margin-bottom: 12px; }
+  .demo--box { position: relative; contain: layout paint; overflow: hidden; }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .space-bar { display: flex; align-items: center; gap: 12px; font-size: var(--text-footnote); margin: 4px 0; }
+  .space-bar i { display: block; height: 12px; background: var(--accent); border-radius: 3px; }
+  .radius-demo { display: grid; place-items: center; width: 96px; height: 72px; background: var(--fill-tertiary); font-size: 12px; color: var(--label-secondary); }
+  .mat-demo { position: relative; height: 220px; border-radius: var(--radius-lg); overflow: hidden; background: url(assets/g01.jpg) center 30%/cover; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 24px; align-items: end; }
+  .mat-demo div { padding: 14px; border-radius: 16px; font-size: 13px; font-weight: 600; -webkit-backdrop-filter: var(--material-blur); backdrop-filter: var(--material-blur); }
+  .motion-demo { width: 64px; height: 64px; border-radius: 16px; background: var(--accent); }
+  .grid-2 { display: grid; gap: 16px; }
+  @media (min-width: 800px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body class="viewer">
+<!--ICONOS-->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <!-- Iconos de interfaz 9SM. Rejilla 24, trazo 1,75 (lo pone .icon), puntas redondas.
+       Equivalencias con SF Symbols (HIG › Icons › Standard icons) en el nombre. -->
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-calendar-plus" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.8v5M9.5 15.3h5"/></symbol>
+  <symbol id="i-calendar-today" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><rect x="8" y="13" width="3.5" height="3.5" rx=".8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 5.5l6.5 6.5-6.5 6.5"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M5.5 9.5L12 16l6.5-6.5"/></symbol>
+  <symbol id="i-xmark" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"/></symbol>
+  <symbol id="i-persons" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M2.8 19.5c.7-3.2 3.1-5 6.2-5s5.5 1.8 6.2 5M15.5 5.6a3.2 3.2 0 0 1 0 6M17.6 14.6c2 .6 3.3 2.2 3.7 4.9"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6.5" cy="17" r="2.8"/><circle cx="6.5" cy="7" r="2.8"/><path d="M8.8 8.6L20 17M8.8 15.4L20 7"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M20 11.5c0 4.1-3.6 7.5-8 7.5-1.2 0-2.3-.2-3.3-.6L4 19.5l1.3-3.7A7.2 7.2 0 0 1 4 11.5C4 7.4 7.6 4 12 4s8 3.4 8 7.5z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.8l2.6-.3 1.6 4-1.9 1.4a11 11 0 0 0 6.2 6.2l1.4-1.9 4 1.6-.3 2.6a2 2 0 0 1-2.1 1.8C10.4 18.8 5.2 13.6 4.8 6a2 2 0 0 1 1.8-2.2z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5v-2h5v2M6.5 6.5l.9 13a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-13M10 10.5v6M14 10.5v6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4.5 19.5l1-4L16 5a2.1 2.1 0 0 1 3 3L8.5 18.5z"/><path d="M14 7l3 3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16.5v-5M12 16.5V7M17 16.5v-8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><path d="M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke-width="2.6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.3 3.5 5.2 3.5 8.5s-1.2 6.2-3.5 8.5c-2.3-2.3-3.5-5.2-3.5-8.5S9.7 5.8 12 3.5z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3.5l7.5 4v9L12 20.5l-7.5-4v-9z"/><path d="M4.5 7.5L12 11.5l7.5-4M12 11.5v9"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1M19.5 14h.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-ellipsis" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.4h.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6h.01"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M19 4.5V8h-3.5"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 8.5h14M14.5 5L18 8.5 14.5 12M20 15.5H6M9.5 12L6 15.5 9.5 19"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M14 4.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h7M11 12h9.5M17 8.5l3.5 3.5-3.5 3.5"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11M8 7l4-4 4 4M8 10.5H6.5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H16"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4M5 19.5h14"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20.5 15.5L16 11l-8 8"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4.5 9h15M4.5 15h15"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 4.5L19.5 7 17 9.5M19.5 7H8a3.5 3.5 0 0 0-3.5 3.5V12M7 19.5L4.5 17 7 14.5M4.5 17H16a3.5 3.5 0 0 0 3.5-3.5V12"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="12.5" rx="2.2"/><path d="M16 8V5.7a2.2 2.2 0 0 0-2.2-2.2H6.7a2.2 2.2 0 0 0-2.2 2.2v8.1A2.2 2.2 0 0 0 6.7 16H8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 24 24"><path d="M4 13.5l2.2-7.3a2 2 0 0 1 1.9-1.4h7.8a2 2 0 0 1 1.9 1.4l2.2 7.3v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M4 9.5a12 12 0 0 1 5-2.6M14.5 6.8A12 12 0 0 1 20 9.5M7 13a7.5 7.5 0 0 1 3.4-1.8M17 13a7.5 7.5 0 0 0-2-1.3M10 16.3a3 3 0 0 1 4 0M12 19.5h.01M4 4l16 16"/></symbol>
+</svg>
+<!--/ICONOS-->
+
+<header class="viewer-top">
+  <h1>9SM NEXO · Sistema de diseño<small>tokens.css · componentes.css · según las Human Interface Guidelines de Apple</small></h1>
+  <div class="segmented" role="group" aria-label="Apariencia de la maqueta">
+    <button class="segmented__item" data-set-appearance="light" aria-pressed="false">Claro</button>
+    <button class="segmented__item" data-set-appearance="dark" aria-pressed="false">Oscuro</button>
+  </div>
+</header>
+
+<div class="app" style="background:transparent">
+<main class="doc" id="shots">
+
+  <p class="t-eyebrow">Sistema visual de 9SM NEXO</p>
+  <h1 class="t-display-2" style="margin:4px 0 12px">Claro, nativo y al servicio del contenido.</h1>
+  <p class="cite" style="font-size:var(--text-callout)">La web pública se ve como apple.com y el panel como una app de iOS o macOS. La marca 9SM vive en el logo, las fotos y el video; la interfaz es neutra, con acento <b>grafito</b> y modo claro u oscuro según el ajuste del dispositivo. Fuente: <b>developer.apple.com/design/human-interface-guidelines</b>, leída el 19 de noviembre de 2026. Cada bloque cita la guía que lo sustenta.</p>
+
+  <!-- ============================================================ -->
+  <h2>Principios</h2>
+  <p class="cite">La HIG actual (Design principles, junio 2026) define ocho principios. Estos son los que más pesan aquí y cómo se aplican.</p>
+  <div class="grid-2">
+    <div class="card"><p class="card__title">Simplicidad: «Establish hierarchy»</p><p class="card__text">Una acción prominente por vista, tamaño y peso para ordenar (hora de la cita lo más grande, luego cliente, luego servicio). Se retiran adornos: cinta animada, números de sección, segunda tipografía.</p></div>
+    <div class="card"><p class="card__title">Familiaridad: «Keep visuals and interactions consistent»</p><p class="card__text">Componentes que la gente ya conoce: sheets con agarrador, listas agrupadas tipo Ajustes, tab bar abajo en el teléfono, sidebar en el computador, alertas para lo irreversible.</p></div>
+    <div class="card"><p class="card__title">Agencia: «Help people recover from mistakes»</p><p class="card__text">Confirmación antes de cancelar una cita o eliminar un producto; los errores dicen qué pasó y qué hacer; los datos escritos no se pierden si algo falla.</p></div>
+    <div class="card"><p class="card__title">Flexibilidad: «Design for everyone»</p><p class="card__text">Contraste AA en los dos modos, texto que crece con Dynamic Type, objetivos de 44 × 44, foco visible, nada comunicado solo con color, movimiento opcional.</p></div>
+  </div>
+  <p class="cite" style="margin-top:14px">«Armonía» se aplica como la piden Layout y Toolbars: radios concéntricos, controles que flotan en vidrio sobre el contenido (Liquid Glass) y la marca en la capa de contenido, no en los controles (Branding: «consider moving it into the content layer»).</p>
+
+  <!-- ============================================================ -->
+  <h2>Color</h2>
+  <p class="cite"><b>HIG › Color</b>: colores semánticos definidos por su función, con variante clara, oscura y de más contraste. <b>Dark Mode</b>: «Avoid offering an app-specific appearance setting», así que la web y el panel siguen el ajuste del sistema. Contraste mínimo 4,5:1 (Accessibility › Vision). Donde el valor de iOS no llega en la web (etiqueta secundaria al 60 % ≈ 3,4:1; azul #0088FF = 3,5:1) se usa el valor de «Increased contrast» publicado en la propia HIG.</p>
+
+  <h3>Fondos y etiquetas</h3>
+  <div class="table-wrap"><table class="doc-table">
+    <thead><tr><th>Muestra</th><th>Token</th><th>Claro</th><th>Oscuro</th><th>Uso</th><th>Contraste</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--bg)"></span></td><td><code>--bg</code></td><td>#FFFFFF</td><td>#000000</td><td>Fondo de la web</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:var(--bg-secondary)"></span></td><td><code>--bg-secondary</code></td><td>#F2F2F7</td><td>#1C1C1E</td><td>Secciones alternas, tarjetas</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:var(--bg-grouped)"></span></td><td><code>--bg-grouped</code></td><td>#F2F2F7</td><td>#000000</td><td>Fondo del panel (listas agrupadas)</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:var(--bg-grouped-secondary)"></span></td><td><code>--bg-grouped-secondary</code></td><td>#FFFFFF</td><td>#1C1C1E</td><td>Celdas de lista</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:var(--bg-elevated)"></span></td><td><code>--bg-elevated</code></td><td>#FFFFFF</td><td>#1C1C1E</td><td>Sheets y alerts (en oscuro suben de nivel)</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:var(--label)"></span></td><td><code>--label</code></td><td>#1D1D1F</td><td>#F5F5F7</td><td>Texto principal</td><td>16,8:1 · 18,9:1</td></tr>
+      <tr><td><span class="sw" style="background:var(--label-secondary)"></span></td><td><code>--label-secondary</code></td><td>#646469</td><td>#AAAAAF</td><td>Texto secundario</td><td>≥ 4,6:1 sobre los fondos y hasta --fill-tertiary</td></tr>
+      <tr><td><span class="sw" style="background:var(--label-tertiary)"></span></td><td><code>--label-tertiary</code></td><td>#8E8E93</td><td>#7C7C80</td><td>Solo iconos, ≥ 18 px o inactivo</td><td>3,3:1 (no para texto pequeño)</td></tr>
+      <tr><td><span class="sw" style="background:var(--placeholder)"></span></td><td><code>--placeholder</code></td><td>#646468</td><td>#AAAAAE</td><td>Pista dentro de un campo</td><td>≥ 4,6:1 dentro del campo</td></tr>
+      <tr><td><span class="sw" style="background:var(--separator)"></span></td><td><code>--separator</code></td><td>rgba(60,60,67,.29)</td><td>rgba(84,84,88,.65)</td><td>Líneas entre filas</td><td>decorativo</td></tr>
+      <tr><td><span class="sw" style="background:var(--fill-tertiary)"></span></td><td><code>--fill-*</code></td><td>rgba(120,120,128,.20 → .08)</td><td>rgba(120,120,128,.36 → .18)</td><td>Fondos de controles</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Acento grafito (decisión de 9SM)</h3>
+  <p class="cite"><b>HIG › Color › Liquid Glass color</b>: «If your app features colorful backgrounds or visually rich content, prefer a monochromatic appearance». Las fotos de la galería son muy coloridas y el logo es negro: el acento es el mismo tono del texto, invertido en oscuro. <b>Branding</b>: «Apply your app's accent color judiciously»: solo la acción principal, la pestaña elegida y la selección. Los enlaces se marcan con subrayado. El foco de teclado usa azul para no significar dos cosas con un mismo color.</p>
+  <div class="table-wrap"><table class="doc-table">
+    <thead><tr><th>Muestra</th><th>Token</th><th>Claro</th><th>Oscuro</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--accent)"></span></td><td><code>--accent</code> / <code>--on-accent</code></td><td>#1D1D1F / #FFF</td><td>#F5F5F7 / #000</td><td>Botón prominente, segmento y día elegidos</td></tr>
+      <tr><td><span class="sw" style="background:var(--accent-tint)"></span></td><td><code>--accent-tint</code></td><td>rgba(29,29,31,.08)</td><td>rgba(245,245,247,.12)</td><td>Botón «tinted», fila actual de la sidebar</td></tr>
+      <tr><td><span class="sw" style="background:var(--focus)"></span></td><td><code>--focus</code></td><td>#1E6EF4</td><td>#5CB8FF</td><td>Anillo de foco de teclado (3 px)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Estado (siempre con icono y texto)</h3>
+  <p class="cite"><b>HIG › System colors</b>, columna «Increased contrast», ajustada lo justo para pasar 4,5:1 sobre blanco, #F2F2F7 y su propio relleno (claro) o sobre negro, #1C1C1E y #2C2C2E con relleno (oscuro). <b>Inclusive color</b>: «Avoid relying solely on color».</p>
+  <div class="demo-row" style="margin-bottom:12px">
+    <span class="badge badge--pending"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Pendiente</span>
+    <span class="badge badge--done"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Completada</span>
+    <span class="badge badge--cancelled"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg>Cancelada</span>
+    <span class="badge badge--blocked"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Bloqueado</span>
+    <span class="badge badge--confirmed"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Confirmada</span>
+  </div>
+  <div class="table-wrap"><table class="doc-table">
+    <thead><tr><th>Muestra</th><th>Token</th><th>Claro</th><th>Oscuro</th><th>Significado</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:var(--red)"></span></td><td><code>--red</code></td><td>#C41226</td><td>#FF8082</td><td>Destructivo, cancelada, error</td></tr>
+      <tr><td><span class="sw" style="background:var(--orange)"></span></td><td><code>--orange</code></td><td>#AB4800</td><td>#FF9C43</td><td>Pendiente, aviso</td></tr>
+      <tr><td><span class="sw" style="background:var(--green)"></span></td><td><code>--green</code></td><td>#00772C</td><td>#30D158</td><td>Completada, éxito, interruptor encendido</td></tr>
+      <tr><td><span class="sw" style="background:var(--yellow)"></span></td><td><code>--yellow</code></td><td>#8F5E00</td><td>#FFD600</td><td>Estrellas de calificación</td></tr>
+      <tr><td><span class="sw" style="background:var(--barber-1)"></span><span class="sw" style="background:var(--barber-2);margin-left:4px"></span><span class="sw" style="background:var(--barber-3);margin-left:4px"></span></td><td><code>--barber-1…3</code></td><td>índigo · teal · marrón</td><td>(versiones oscuras)</td><td>Identidad de cada barbero en la agenda, siempre con sus iniciales o nombre</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- ============================================================ -->
+  <h2>Tipografía</h2>
+  <p class="cite"><b>HIG › Typography</b>: SF Pro es la fuente del sistema; «Minimize the number of typefaces». En la web, <code>-apple-system</code> carga SF Pro en iPhone, iPad y Mac; en Android y Windows cae a <b>Inter</b> (SF Pro no se puede servir como webfont fuera de equipos Apple). Escala <b>Dynamic Type</b> de iOS en tamaño «Large (default)», expresada en rem con 1 rem = 17 pt: si la persona agranda el texto del sistema, toda la escala crece. Mínimo 11 pt. Pesos Regular, Medium, Semibold y Bold («avoid Ultralight, Thin, and Light»).</p>
+  <div class="table-wrap"><table class="doc-table">
+    <thead><tr><th>Estilo</th><th>Token</th><th>Tamaño / interlineado</th><th>Peso</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Display 1 (web)</td><td><code>--text-display-1</code></td><td>48 → 80 / 1,05</td><td>Bold</td><td><span class="t-display-1" style="font-size:40px">El corte que te define.</span></td></tr>
+      <tr><td>Display 2 (web)</td><td><code>--text-display-2</code></td><td>34 → 56 / 1,07</td><td>Bold</td><td><span class="t-display-2" style="font-size:32px">Pide tu cita.</span></td></tr>
+      <tr><td>Large Title</td><td><code>--text-large-title</code></td><td>34 / 41</td><td>Bold (enfatizado)</td><td><span class="t-large-title">Agenda</span></td></tr>
+      <tr><td>Title 1</td><td><code>--text-title-1</code></td><td>28 / 34</td><td>Bold</td><td><span class="t-title-1">Cita confirmada</span></td></tr>
+      <tr><td>Title 2</td><td><code>--text-title-2</code></td><td>22 / 28</td><td>Bold</td><td><span class="t-title-2">Busca tu cita</span></td></tr>
+      <tr><td>Title 3</td><td><code>--text-title-3</code></td><td>20 / 25</td><td>Semibold</td><td><span class="t-title-3">NEXO Cut</span></td></tr>
+      <tr><td>Headline</td><td><code>--text-headline</code></td><td>17 / 22</td><td>Semibold</td><td><span class="t-headline">Reservar cita</span></td></tr>
+      <tr><td>Body</td><td><code>--text-body</code></td><td>17 / 22 (párrafos 25)</td><td>Regular</td><td><span class="t-body">Sebastian Montoya</span></td></tr>
+      <tr><td>Callout</td><td><code>--text-callout</code></td><td>16 / 21</td><td>Regular</td><td><span class="t-callout">Elige tu día, tu hora y tu barbero.</span></td></tr>
+      <tr><td>Subhead</td><td><code>--text-subhead</code></td><td>15 / 20</td><td>Regular</td><td><span class="t-subhead">NEXO Cut · $35.000</span></td></tr>
+      <tr><td>Footnote</td><td><code>--text-footnote</code></td><td>13 / 18</td><td>Regular</td><td><span class="t-footnote">Puedes cancelar hasta 1 hora antes.</span></td></tr>
+      <tr><td>Caption 1</td><td><code>--text-caption-1</code></td><td>12 / 16</td><td>Regular</td><td><span class="t-caption">40 min</span></td></tr>
+      <tr><td>Caption 2</td><td><code>--text-caption-2</code></td><td>11 / 13</td><td>Regular</td><td><span style="font-size:var(--text-caption-2)">Agenda (tab bar)</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="cite" style="margin-top:12px">Formatos de Colombia: hora «3:15 p. m.» (<code>toLocaleTimeString('es-CO')</code>), fecha «viernes 20 de noviembre», dinero «$35.000». Números tabulares en horas, precios y cifras.</p>
+
+  <!-- ============================================================ -->
+  <h2>Espaciado, márgenes y objetivos táctiles</h2>
+  <p class="cite">Rejilla de 4 pt, saltos grandes en múltiplos de 8. <b>HIG › Layout</b>: márgenes y safe areas del sistema (<code>env(safe-area-inset-*)</code>). <b>Accessibility › Mobility</b>: controles de 44 × 44 pt en iOS (mínimo 28); ~12 pt entre controles con borde y ~24 sin borde. Tamaños con media queries (Size classes): compact &lt; 734 px, regular ≥ 734, ancho ≥ 1068.</p>
+  <div class="demo">
+    <div class="space-bar"><i style="width:4px"></i>--space-1 · 4</div>
+    <div class="space-bar"><i style="width:8px"></i>--space-2 · 8</div>
+    <div class="space-bar"><i style="width:12px"></i>--space-3 · 12</div>
+    <div class="space-bar"><i style="width:16px"></i>--space-4 · 16 (margen del teléfono)</div>
+    <div class="space-bar"><i style="width:24px"></i>--space-6 · 24</div>
+    <div class="space-bar"><i style="width:32px"></i>--space-8 · 32 (margen regular)</div>
+    <div class="space-bar"><i style="width:48px"></i>--space-12 · 48</div>
+    <div class="space-bar"><i style="width:64px"></i>--space-16 · 64 (sección en el teléfono)</div>
+    <div class="space-bar"><i style="width:96px"></i>--space-24 · 96 (sección en pantallas anchas)</div>
+  </div>
+
+  <h2>Radios concéntricos</h2>
+  <p class="cite"><b>HIG › Toolbars</b>: «ensure that its corner radius is also concentric with the bar's corners». Regla: radio interior = radio exterior − separación (sheet 28 con relleno 16 → campo 12). Los botones y barras flotantes son cápsulas.</p>
+  <div class="demo demo-row">
+    <div class="radius-demo" style="border-radius:var(--radius-xs)">xs · 6</div>
+    <div class="radius-demo" style="border-radius:var(--radius-sm)">sm · 10</div>
+    <div class="radius-demo" style="border-radius:var(--radius-md)">md · 12</div>
+    <div class="radius-demo" style="border-radius:var(--radius-media)">media · 18</div>
+    <div class="radius-demo" style="border-radius:var(--radius-lg)">lg · 20</div>
+    <div class="radius-demo" style="border-radius:var(--radius-xl)">xl · 28</div>
+    <div class="radius-demo" style="border-radius:var(--radius-capsule)">cápsula</div>
+  </div>
+
+  <h2>Materiales y sombras</h2>
+  <p class="cite"><b>HIG › Materials</b>: <b>Liquid Glass</b> solo para la capa de controles que flota (barra de la web, tab bar, barra de guardar); «Don't use Liquid Glass in the content layer». Materiales estándar (ultrathin → thick) para el contenido. En la web se aproximan con <code>backdrop-filter: saturate(180%) blur(20px)</code>. Con <b>Reducir transparencia</b> se vuelven opacos. Detrás de sheets y alerts, capa de atenuación (35 % en claro). Sombras suaves; en oscuro la profundidad la dan los fondos elevados.</p>
+  <div class="mat-demo">
+    <div style="background:var(--material-ultrathin)">ultrathin</div>
+    <div style="background:var(--material-thin)">thin</div>
+    <div style="background:var(--material-regular)">regular</div>
+    <div style="background:var(--glass-bg);box-shadow:var(--shadow-glass)">glass (controles)</div>
+  </div>
+
+  <h2>Movimiento</h2>
+  <p class="cite"><b>HIG › Motion</b>: «Add motion purposefully», «Aim for brevity and precision», «Let people cancel motion». <b>Accessibility › Cognitive</b>: con Reducir movimiento, sustituir desplazamientos por fundidos y evitar animaciones repetitivas. Tokens: <code>--dur-instant 100</code>, <code>--dur-fast 200</code>, <code>--dur-base 300</code>, <code>--dur-slow 450</code> ms; curvas <code>--ease-standard</code>, <code>--ease-out</code>, <code>--ease-sheet</code>; <code>--enter-offset</code> 16 px → 0 con <code>prefers-reduced-motion</code>. El video del hero no se reproduce solo con Reducir movimiento y siempre tiene botón de pausa.</p>
+
+  <h2>Accesibilidad (reglas que se verifican)</h2>
+  <div class="list" style="--cell-bg:var(--bg-secondary)">
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Contraste AA en claro y oscuro</span><span class="row__subtitle">4,5:1 texto normal, 3:1 texto ≥ 18 pt o en negrita y controles (HIG › Accessibility › Vision).</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Objetivos de 44 × 44 como mínimo</span><span class="row__subtitle">Botones pequeños amplían su área con un pseudoelemento (HIG › Buttons).</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Foco visible con teclado</span><span class="row__subtitle">Anillo azul de 3 px con <code>:focus-visible</code>; nunca <code>outline: none</code> sin reemplazo.</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Nada solo con color</span><span class="row__subtitle">Estados con icono y texto; horas ocupadas tachadas; barberos con nombre o iniciales.</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Texto que crece</span><span class="row__subtitle">Escala en rem atada a Dynamic Type (iOS) o al tamaño de letra del navegador; las filas se apilan si no caben (HIG › Typography).</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Lectores de pantalla</span><span class="row__subtitle">HTML real (button, a, label, input), <code>aria-label</code> en botones de solo icono, grupos de opciones con <code>role="radiogroup"</code>, diálogos con <code>aria-modal</code>.</span></span></div>
+    <div class="row"><svg class="icon" style="color:var(--green)" aria-hidden="true"><use href="#i-check-circle"/></svg><span class="row__main"><span class="row__title">Más contraste y menos transparencia</span><span class="row__subtitle"><code>prefers-contrast: more</code> oscurece etiquetas y separadores; <code>prefers-reduced-transparency</code> vuelve opacos los materiales.</span></span></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>Componentes</h2>
+
+  <h3>Botones — HIG › Buttons</h3>
+  <p class="cite">Una acción prominente por vista; estilo (no tamaño) marca la preferida; estado presionado siempre; indicador dentro del botón si tarda; destructivo en rojo y nunca primario.</p>
+  <div class="demo demo-row">
+    <button class="btn btn--filled" type="button">Reservar cita</button>
+    <button class="btn btn--tinted" type="button">Reservar</button>
+    <button class="btn btn--gray" type="button">Mis citas</button>
+    <button class="btn btn--plain" type="button">No soy yo</button>
+    <button class="btn btn--destructive" type="button">Cancelar cita</button>
+    <button class="btn btn--filled" type="button" disabled>Continuar</button>
+    <button class="btn btn--filled is-loading" type="button" aria-disabled="true" style="opacity:.85"><span class="spinner"></span>Guardando…</button>
+    <button class="btn btn--filled btn--small" type="button">Pequeño</button>
+    <button class="icon-btn icon-btn--filled" type="button" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-xmark"/></svg></button>
+    <button class="icon-btn" type="button" aria-label="Avisos"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span class="count-badge">2</span></button>
+  </div>
+
+  <h3>Campos — HIG › Text fields, Entering data</h3>
+  <div class="demo grid-2">
+    <div class="field"><label class="field__label">WhatsApp</label><div class="field__control"><span class="field__suffix">+57</span><input class="field__input" type="tel" inputmode="tel" placeholder="300 123 4567"></div><p class="field__hint">Te confirmamos la cita por este número.</p></div>
+    <div class="field field--error"><label class="field__label">Nombre</label><div class="field__control"><input class="field__input" type="text" placeholder="Nombre y apellido" aria-invalid="true"></div><p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Escribe tu nombre.</p></div>
+    <div class="field"><label class="field__label">Servicio</label><div class="field__control field__control--select"><select class="field__select"><option>NEXO Cut · 50 min</option></select></div></div>
+    <div class="field"><label class="field__label">Comentario <span class="field__optional">(opcional)</span></label><div class="field__control field__control--textarea"><textarea class="field__textarea" rows="2" placeholder="Cuéntanos cómo te atendieron"></textarea></div></div>
+  </div>
+
+  <h3>Selección — Segmented controls, Toggles, Lists</h3>
+  <div class="demo stack">
+    <div class="segmented" role="tablist"><button class="segmented__item" aria-selected="true" type="button">Hoy</button><button class="segmented__item" type="button">Semana</button><button class="segmented__item" type="button">Mes</button><button class="segmented__item" type="button">Todas</button></div>
+    <div class="chips"><button class="chip" aria-pressed="true" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Solo esta vez</button><button class="chip" aria-pressed="false" type="button">Cada semana</button><button class="chip" aria-pressed="false" type="button">Cada 15 días</button></div>
+    <div class="slots" style="max-width:420px"><button class="slot" type="button">2:30 p. m.</button><button class="slot" aria-pressed="true" type="button">3:15 p. m.</button><button class="slot" disabled type="button">4:45 p. m.</button><button class="slot slot--blocked" type="button"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-lock"/></svg> 2:00</button></div>
+    <label class="cluster"><input class="switch" type="checkbox" role="switch" checked> <span>Interruptor (solo dentro de filas)</span></label>
+  </div>
+
+  <h3>Listas agrupadas — HIG › Lists and tables</h3>
+  <div class="demo" style="max-width:480px">
+    <h4 class="list-header">Tus datos</h4>
+    <ul class="list" style="--cell-bg:var(--bg-grouped-secondary)">
+      <li class="row"><span class="row__main"><span class="row__title">Barbero</span></span><span class="row__detail">Sebastian Montoya</span></li>
+      <li><button class="row is-selected" type="button"><span class="row__main"><span class="row__title">NEXO Cut</span><span class="row__subtitle">$35.000 · 50 min</span></span><span class="row__check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span></button></li>
+      <li><a class="row row--icon" href="#"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir a mi calendario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></a></li>
+    </ul>
+    <p class="list-footer">Pie explicativo en footnote secundario.</p>
+  </div>
+
+  <h3>Avisos, vacíos y carga — HIG › Feedback, Writing, Loading</h3>
+  <div class="demo stack">
+    <div class="notice notice--error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>No se pudo confirmar la reserva.</strong> Revisa tu internet y vuelve a intentarlo.</div></div>
+    <div class="notice notice--warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div class="notice__body"><strong>Alguien reservó las 3:15 p. m. antes que tú.</strong> Elige otra hora.</div></div>
+    <div class="notice notice--success"><svg class="icon" aria-hidden="true"><use href="#i-check-circle"/></svg><div class="notice__body">Guardado. Ya se aplica en la web.</div></div>
+    <div class="grid-2">
+      <div class="card"><div class="empty" style="padding:16px"><div class="empty__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></div><p class="empty__title">No tienes citas próximas</p><p class="empty__text">Cuando reserves, tu cita aparecerá aquí.</p><div class="empty__actions"><button class="btn btn--filled btn--small" type="button">Reservar cita</button></div></div></div>
+      <div class="card stack"><p class="status-inline"><span class="spinner"></span>Buscando horas libres…</p><span class="skeleton skeleton--text" style="width:70%"></span><span class="skeleton skeleton--text" style="width:45%"></span><span class="skeleton" style="height:44px;border-radius:10px"></span></div>
+    </div>
+  </div>
+
+  <h3>Alertas y hojas de acción — HIG › Alerts, Action sheets</h3>
+  <div class="demo demo--box app" style="height:300px;background:var(--bg-secondary)">
+    <div class="alert" style="animation:none">
+      <p class="alert__title">¿Cancelar tu cita del viernes 20 a las 3:15 p. m.?</p>
+      <p class="alert__text">Tu hora quedará libre para otra persona. No se puede deshacer.</p>
+      <div class="alert__actions"><button class="btn btn--destructive btn--block" type="button">Cancelar cita</button><button class="btn btn--gray btn--block" type="button">Mantener cita</button></div>
+    </div>
+  </div>
+
+  <h3>Navegación — Tab bars, Sidebars, Toolbars</h3>
+  <p class="cite">Las mismas secciones del panel actual. Teléfono: barra inferior flotante en vidrio (Agenda, Hoy, Nueva cita, Balance, Más). Computador: sidebar con los grupos Agenda, Mi trabajo y Administración (dos niveles como máximo, HIG › Sidebars). Barra superior con título corto y avisos.</p>
+  <div class="demo demo--box app" style="height:120px;background:url(assets/g02.jpg) center 40%/cover">
+    <nav class="tabbar" aria-label="Ejemplo de tab bar" style="position:absolute">
+      <a class="tabbar__item" aria-current="page" href="#"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Agenda</a>
+      <a class="tabbar__item" href="#"><svg class="icon" aria-hidden="true"><use href="#i-calendar-today"/></svg>Hoy</a>
+      <a class="tabbar__item" href="#"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg>Nueva cita</a>
+      <a class="tabbar__item" href="#"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Balance</a>
+      <a class="tabbar__item" href="#"><svg class="icon" aria-hidden="true"><use href="#i-ellipsis"/></svg>Más</a>
+    </nav>
+  </div>
+
+  <h3>Iconos — HIG › Icons</h3>
+  <p class="cite">SF Symbols solo puede usarse en plataformas Apple, y la mayoría de clientes reserva desde Android. Por eso se usan glifos propios (iconos.svg) con el mismo estilo: rejilla de 24, trazo de 1,75 y puntas redondas, siempre con texto visible o <code>aria-label</code>.</p>
+  <div class="demo demo-row" id="icon-grid"></div>
+
+</main>
+</div>
+
+<script>
+  /* Rejilla de iconos a partir del sprite */
+  (function () {
+    var g = document.getElementById('icon-grid');
+    document.querySelectorAll('symbol[id^="i-"]').forEach(function (s) {
+      var d = document.createElement('div');
+      d.style.cssText = 'display:grid;justify-items:center;gap:6px;width:88px;font-size:11px;color:var(--label-secondary)';
+      d.innerHTML = '<svg class="icon" style="width:24px;height:24px;color:var(--label)" aria-hidden="true"><use href="#' + s.id + '"/></svg>' + s.id.slice(2);
+      g.appendChild(d);
+    });
+  })();
+</script>
+<script src="maqueta.js"></script>
+</body>
+</html>
