@@ -666,8 +666,10 @@ function getSlotsForDate(dateKey, barberId) {
 }
 function slotKey(time) { return time.replace(':', '_'); }
 function fmt12(time) {
-  if (!time) return time;
-  var parts = time.split(':');
+  if (!time) return '';
+  // Solo horas válidas: el texto viene de Firebase y acaba en el HTML
+  if (!/^\d{1,2}:\d{2}$/.test(String(time))) return '';
+  var parts = String(time).split(':');
   var h = parseInt(parts[0], 10), m = parts[1];
   var ampm = h >= 12 ? 'p. m.' : 'a. m.';
   h = h % 12 || 12;
@@ -832,7 +834,7 @@ const DIAS_LARGOS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes'
 const MESES_LARGOS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 function fechaLarga(dateKey) {
   const p = String(dateKey || '').split('-').map(Number);
-  if (p.length !== 3) return dateKey || '';
+  if (p.length !== 3 || p.some(isNaN)) return escHtml(dateKey || '');
   const d = new Date(p[0], p[1] - 1, p[2]);
   return DIAS_LARGOS[d.getDay()] + ' ' + p[2] + ' de ' + MESES_LARGOS[p[1] - 1];
 }
@@ -1327,7 +1329,7 @@ function manianaKey() {
 function seriesBadge(a) {
   if (!a || !a.seriesId) return '';
   var every = { week: 'semanal', '2weeks': 'quincenal', month: 'mensual' }[a.seriesEvery] || 'recurrente';
-  var pos = (a.seriesIndex && a.seriesTotal) ? ' ' + a.seriesIndex + '/' + a.seriesTotal : '';
+  var pos = (a.seriesIndex && a.seriesTotal) ? ' ' + (parseInt(a.seriesIndex, 10) || '') + '/' + (parseInt(a.seriesTotal, 10) || '') : '';
   return '<span class="appt__series"><svg class="icon" aria-hidden="true"><use href="#i-repeat"/></svg>' + every + pos + '</span>';
 }
 
@@ -2862,7 +2864,8 @@ function ncErrorHora(msg) {
   f.classList.toggle('field--error', !!msg);
   e.hidden = !msg;
   e.innerHTML = msg ? '<svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>' + escHtml(msg) : '';
-  if (msg) { sel.innerHTML = '<option>Sin turnos libres</option>'; sel.disabled = true; } else sel.disabled = false;
+  if (msg) { sel.innerHTML = '<option value="">Sin turnos libres</option>'; sel.disabled = true; } else sel.disabled = false;
+  document.getElementById('ncSaveBtn').disabled = !!msg;
   if (msg) document.getElementById('ncSlotInfo').textContent = 'Para reservas por teléfono o clientes que llegan sin cita. Solo se ofrecen los turnos libres de tu jornada.';
 }
 
@@ -2882,8 +2885,10 @@ function ncSave() {
   const bid     = ncBarberId();
   const mins    = panelSvcMins(bid, service);
 
-  if (!dateKey || !time) { ncMsg('Elige fecha y hora.', 'err'); return; }
-  if (!nombre)           { ncMsg('Falta el nombre del cliente.', 'err'); return; }
+  if (!dateKey || !/^\d{2}:\d{2}$/.test(time)) { ncMsg('Elige fecha y una hora libre.', 'err'); return; }
+  const nf = document.getElementById('ncNombreField'), ne = document.getElementById('ncNombreError');
+  nf.classList.toggle('field--error', !nombre); ne.hidden = !!nombre;
+  if (!nombre) { ne.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Falta el nombre del cliente.'; document.getElementById('ncNombre').focus(); return; }
 
   const bObj = (PANEL_CFG && Array.isArray(PANEL_CFG.barbers))
     ? PANEL_CFG.barbers.find(function(b){ return b.id === bid; }) : null;
@@ -2929,7 +2934,7 @@ function ncSave() {
 ══════════════════════════════════════════ */
 
 const WEB_SECTIONS = [
-  { id: 'scroll-hero', label: 'Portada con vídeo' },
+  { id: 'scroll-hero', label: 'Portada' },
   { id: 'nosotros',    label: '01 · Sobre nosotros' },
   { id: 'servicios',   label: '02 · Servicios' },
   { id: 'galeria',     label: '03 · Galería' },
@@ -3084,7 +3089,7 @@ function webRenderBarbers() {
       + webInput('Rol', 'role', b.role)
       + webInput('Iniciales', 'init', b.init)
       + webInput('Foto', 'photo', b.photo)
-      + '<div class="field span-all"><label class="field__label">Correo de acceso al panel</label><div class="field__control"><input class="field__input" type="email" data-k="email" value="'
+      + '<div class="field span-all"><label class="field__label">Correo de acceso al panel</label><div class="field__control"><input class="field__input" type="email" data-k="email" aria-label="Correo de acceso al panel" value="'
       +   escHtml(b.email || '') + '" placeholder="barbero@9smnexo.com"></div></div>'
       + '<div class="span-all spread"><label class="cluster" style="--cluster-gap:var(--space-3)"><input class="switch" type="checkbox" role="switch" data-k="admin"' + (esAdmin ? ' checked' : '')
       +   ' onchange="webToggleAdmin(this)"><span>Administrador</span></label>'
@@ -3115,7 +3120,7 @@ function webRenderServices() {
       + webInput('Minutos', 'mins', s.mins)
       + '<div class="field span-all"><label class="field__label">Descripción en la web'
       +     (webDefaultDesc(s.id) ? ' <button type="button" class="btn btn--plain btn--small" style="margin-left:4px" onclick="webRestoreDesc(' + i + ')">restaurar original</button>' : '')
-      +   '</label><div class="field__control field__control--textarea"><textarea class="field__textarea" data-k="desc" rows="2">'
+      +   '</label><div class="field__control field__control--textarea"><textarea class="field__textarea" data-k="desc" rows="2" aria-label="Descripción en la web">'
       +   escHtml(s.desc || '') + '</textarea></div></div>'
       + '<div class="span-all" style="text-align:right"><button class="btn btn--destructive btn--plain btn--small" type="button" onclick="webDelService(' + i + ')">Quitar</button></div>'
       + '</div></div>';
@@ -3493,7 +3498,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261124c';
+  var BUILD = '20261124d';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })

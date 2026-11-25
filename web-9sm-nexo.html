@@ -709,7 +709,7 @@ function bRenderStep1() {
     : [];
 
   // Si el servicio ya elegido no lo hace este barbero, se deselecciona
-  if (bState.selService && !ofrecidos.some(function(s) { return s.name === bState.selService; })) {
+  if (bState.selBarber && bState.selService && !ofrecidos.some(function(s) { return s.name === bState.selService; })) {
     bState.selService = '';
   }
 
@@ -831,8 +831,9 @@ const bDB = firebase.app('booking-public').database();
 
 /* Hora en formato de Colombia: «3:15 p. m.» (HIG › Writing) */
 function fmt12(time) {
-  if (!time) return time;
-  var parts = time.split(':');
+  if (!time) return '';
+  if (!/^\d{1,2}:\d{2}$/.test(String(time))) return '';
+  var parts = String(time).split(':');
   var h = parseInt(parts[0], 10), m = parts[1];
   var sufijo = h >= 12 ? 'p. m.' : 'a. m.';
   h = h % 12 || 12;
@@ -988,7 +989,10 @@ function bProcessData(data) {
 }
 
 /* Re-renderiza el calendario completo si la vista de fecha/hora esta visible */
+/* Solo se repinta si cambiaron los datos: así el foco no salta cada segundo */
+var _bUltimoPintado = '';
 function bRefreshSlotsIfVisible() {
+  if (JSON.stringify([bAppts, bBlockedCache, bDayCount, bDatosOK]) === _bUltimoPintado) return;
   var view2 = document.getElementById('bview-2');
   var ov = document.getElementById('bookingOverlay');
   if (view2 && !view2.hidden && ov && !ov.hidden) {
@@ -1872,6 +1876,14 @@ const BDIAS_CORTOS = ['dom','lun','mar','mié','jue','vie','sáb'];
 
 function bRenderCalendar() {
   if (bDescartarVencida()) bUpdateCalBtn();
+  _bUltimoPintado = JSON.stringify([bAppts, bBlockedCache, bDayCount, bDatosOK]);
+  // Devuelve el foco al mismo día u hora tras repintar
+  var foco = document.activeElement && document.activeElement.closest && document.activeElement.closest('#daysStrip .day, #slotsContent .slot');
+  var focoTxt = foco ? foco.textContent : null;
+  if (focoTxt) setTimeout(function() {
+    var el = Array.prototype.find.call(document.querySelectorAll('#daysStrip .day, #slotsContent .slot'), function(x) { return x.textContent === focoTxt; });
+    if (el) el.focus();
+  }, 0);
   /* ── Resumen: barbero · servicio · duración ── */
   const pill = document.getElementById('bSelPill');
   if (pill) {
@@ -2707,7 +2719,7 @@ loadSiteConfig();
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261124c';
+  var BUILD = '20261124d';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
