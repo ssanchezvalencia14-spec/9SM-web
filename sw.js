@@ -68,39 +68,6 @@ self.addEventListener('fetch', function(e) {
   );
 });
 
-/* ── Avisos push ──
- * Se activará cuando esté desplegada la función que los envía (capa 2).
- * Mientras no llegue ningún push, este bloque no hace nada.
- */
-self.addEventListener('push', function(e) {
-  let d = {};
-  try { d = e.data ? e.data.json() : {}; } catch (err) { d = {}; }
-  const n = d.notification || d;
-  const titulo = n.title || '9SM NEXO';
-  const opciones = {
-    body:  n.body || '',
-    icon:  '/assets/icon-192.png',
-    badge: '/assets/icon-192.png',
-    tag:   n.tag || 'nexo',
-    data:  { url: (d.data && d.data.url) || n.url || '/panel-barbero.html' }
-  };
-  e.waitUntil(self.registration.showNotification(titulo, opciones));
-});
-
-self.addEventListener('notificationclick', function(e) {
-  e.notification.close();
-  const destino = (e.notification.data && e.notification.data.url) || '/panel-barbero.html';
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(lista) {
-      // Si el panel ya está abierto se trae al frente en vez de abrir otra pestaña
-      for (const c of lista) {
-        if (c.url.indexOf('panel-barbero') >= 0 && 'focus' in c) return c.focus();
-      }
-      return self.clients.openWindow(destino);
-    })
-  );
-});
-
 /* ── Avisos push (citas nuevas, canceladas y recordatorios) ──
    El servidor manda { titulo, texto, url, tag }. */
 self.addEventListener('push', function(e) {
