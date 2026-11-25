@@ -372,8 +372,9 @@
           <button class="row row--icon" type="button" onclick="descargarICS()"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar-plus"/></svg></span><span class="row__main"><span class="row__title">Añadir a mi calendario</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button>
           <a class="row row--icon" id="calGoogle" href="#" target="_blank" rel="noopener"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><span class="row__main"><span class="row__title">Abrir en Google Calendar</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
           <a class="row row--icon" id="calWhats" href="#" target="_blank" rel="noopener" hidden><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span class="row__main"><span class="row__title">Confirmar por WhatsApp</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></span></a>
+          <button class="row row--icon" type="button" id="bAvisarBtn" onclick="bActivarAvisos()"><span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span><span class="row__main"><span class="row__title">Avisarme en este celular</span><span class="row__subtitle" id="bAvisarTxt">Te recordamos la cita el día antes y 2 horas antes</span></span><span class="row__chevron"><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span></button>
         </div>
-        <p class="list-footer">Tu calendario te avisa el día antes y 2 horas antes. Puedes ver o cancelar la cita en Mis citas.</p>
+        <p class="list-footer">Con los avisos activados te llega una notificación el día antes y 2 horas antes, y otra si la cita se cancela. Puedes ver o cancelar la cita en Mis citas.</p>
       </div>
     </div>
   </div>
@@ -1649,6 +1650,7 @@ function mcEjecutarCancelar() {
   }).then(function(res) {
     clearTimeout(t);
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    pushAvisar('cancelada', [_mcCurrentKey]);
     var d = cita.date ? new Date(cita.date + 'T00:00:00') : null;
     document.getElementById('mcDoneText').textContent = d
       ? 'Tu hora del ' + BDAYSFULL[d.getDay()].toLowerCase() + ' ' + d.getDate() + ' a las ' + fmt12(cita.time) + ' quedó libre.'
@@ -2138,6 +2140,66 @@ function bRenderConfirm() {
   }
 }
 
+
+/* ── Avisos push ──
+   La clave pública de Web Push no es secreta; la privada vive solo en Vercel. */
+var PUSH_VAPID = 'BIGbP75cH1bHUM0W6KaMBe7AdjUn4Uxz2gW8hO7pYcVvL82EbfqcPiyvHnaQCPoVw7KGYlEH6GhjCqdfaZW0U7w';
+function pushDisponible() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function pushEsIphoneSinInstalar() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window.navigator.standalone || matchMedia('(display-mode: standalone)').matches);
+}
+function pushClave(b64) {
+  var pad = '='.repeat((4 - b64.length % 4) % 4), raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, function(ch) { return ch.charCodeAt(0); });
+}
+function pushSuscribir() {
+  if (!pushDisponible()) return Promise.reject(new Error(pushEsIphoneSinInstalar() ? 'iphone' : 'no'));
+  return Notification.requestPermission().then(function(p) {
+    if (p !== 'granted') throw new Error('denegado');
+    return navigator.serviceWorker.register('/sw.js').then(function() { return navigator.serviceWorker.ready; });
+  }).then(function(reg) {
+    return reg.pushManager.getSubscription().then(function(s) {
+      return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushClave(PUSH_VAPID) });
+    });
+  }).then(function(s) { return s.toJSON(); });
+}
+function pushApi(ruta, datos) {
+  return fetch('/api/' + ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos), keepalive: true })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+}
+/* Avisa al servidor de una cita nueva o cancelada; si falla, la cita sigue bien */
+function pushAvisar(evento, claves) {
+  if (!claves || !claves.length) return;
+  pushApi('avisar', { evento: evento, claves: claves }).catch(function() {});
+}
+function pushErrorTxt(err) {
+  var m = err && err.message;
+  if (m === 'iphone') return 'En iPhone primero añade la web a la pantalla de inicio (Compartir › Añadir a inicio) y ábrela desde ahí.';
+  if (m === 'denegado') return 'Las notificaciones están bloqueadas. Actívalas en los ajustes del navegador para esta web.';
+  if (m === 'no') return 'Este navegador no admite notificaciones.';
+  return 'No se pudieron activar. Inténtalo de nuevo.';
+}
+
+var bUltimasClaves = [];
+function bPintarAvisos(estado, txt) {
+  var btn = document.getElementById('bAvisarBtn'), t = document.getElementById('bAvisarTxt');
+  if (!btn) return;
+  btn.disabled = estado === 'cargando' || estado === 'ok';
+  t.textContent = estado === 'cargando' ? 'Activando…'
+    : estado === 'ok' ? 'Listo: te avisaremos en este celular'
+    : estado === 'error' ? txt
+    : 'Te recordamos la cita el día antes y 2 horas antes';
+  t.style.color = estado === 'error' ? 'var(--red)' : estado === 'ok' ? 'var(--green)' : '';
+}
+function bActivarAvisos() {
+  if (!bUltimasClaves.length) return;
+  bPintarAvisos('cargando');
+  pushSuscribir()
+    .then(function(sub) { return pushApi('suscribir', { rol: 'cliente', sub: sub, claves: bUltimasClaves }); })
+    .then(function() { bPintarAvisos('ok'); })
+    .catch(function(err) { bPintarAvisos('error', pushErrorTxt(err)); });
+}
+
 function bSubmit(e) {
   e.preventDefault();
   var submitBtn = document.getElementById('bSubmitBtn');
@@ -2229,6 +2291,10 @@ function bSubmit(e) {
   })
   .then(function(res) {
     clearTimeout(saveTimeout);
+    // Aviso al barbero y claves para que el cliente pueda activar sus recordatorios
+    bUltimasClaves = res.keys || [];
+    pushAvisar('nueva', bUltimasClaves);
+    bPintarAvisos(null);
     const code = res.code;
     const nSaved = res.saved.length;
     const barbero = b ? bNombreCorto(b.name) : 'Cualquiera';
@@ -2719,7 +2785,7 @@ loadSiteConfig();
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261124d';
+  var BUILD = '20261125b';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
