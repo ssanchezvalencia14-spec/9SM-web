@@ -1,0 +1,10 @@
+{
+  "name": "9sm-web",
+  "private": true,
+  "description": "Web y panel de 9SM NEXO. Las funciones de /api envían los avisos push.",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "web-push": "^3.6.7"
+  }
+}

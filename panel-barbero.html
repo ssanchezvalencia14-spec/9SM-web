@@ -11,8 +11,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="9SM Panel"/>
-  <link rel="apple-touch-icon" href="/assets/icon-192.png"/>
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png"/>
+  <link rel="apple-touch-icon" href="/assets/icono-9sm-180.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icono-9sm-192.png"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -1040,6 +1040,68 @@ function renderNavCounts() {
    El service worker es lo que permite instalar el panel en el móvil.
    No cachea el HTML: la comprobación de versión sigue mandando.
 ══════════════════════════════════════════ */
+
+/* ── Avisos push ──
+   La clave pública de Web Push no es secreta; la privada vive solo en Vercel. */
+var PUSH_VAPID = 'BIGbP75cH1bHUM0W6KaMBe7AdjUn4Uxz2gW8hO7pYcVvL82EbfqcPiyvHnaQCPoVw7KGYlEH6GhjCqdfaZW0U7w';
+function pushDisponible() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function pushEsIphoneSinInstalar() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window.navigator.standalone || matchMedia('(display-mode: standalone)').matches);
+}
+function pushClave(b64) {
+  var pad = '='.repeat((4 - b64.length % 4) % 4), raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, function(ch) { return ch.charCodeAt(0); });
+}
+function pushSuscribir() {
+  if (!pushDisponible()) return Promise.reject(new Error(pushEsIphoneSinInstalar() ? 'iphone' : 'no'));
+  return Notification.requestPermission().then(function(p) {
+    if (p !== 'granted') throw new Error('denegado');
+    return navigator.serviceWorker.register('/sw.js').then(function() { return navigator.serviceWorker.ready; });
+  }).then(function(reg) {
+    return reg.pushManager.getSubscription().then(function(s) {
+      return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushClave(PUSH_VAPID) });
+    });
+  }).then(function(s) { return s.toJSON(); });
+}
+function pushApi(ruta, datos) {
+  return fetch('/api/' + ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos), keepalive: true })
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+}
+/* Avisa al servidor de una cita nueva o cancelada; si falla, la cita sigue bien */
+function pushAvisar(evento, claves) {
+  if (!claves || !claves.length) return;
+  pushApi('avisar', { evento: evento, claves: claves }).catch(function() {});
+}
+function pushErrorTxt(err) {
+  var m = err && err.message;
+  if (m === 'iphone') return 'En iPhone primero añade la web a la pantalla de inicio (Compartir › Añadir a inicio) y ábrela desde ahí.';
+  if (m === 'denegado') return 'Las notificaciones están bloqueadas. Actívalas en los ajustes del navegador para esta web.';
+  if (m === 'no') return 'Este navegador no admite notificaciones.';
+  return 'No se pudieron activar. Inténtalo de nuevo.';
+}
+
+/* Fila al principio de Avisos para recibirlos en este dispositivo aunque el panel esté cerrado */
+var pushPanelEstado = (typeof Notification !== 'undefined' && Notification.permission === 'granted' && localStorage.getItem('9sm_push_panel') === '1') ? 'ok' : '';
+var pushPanelMsg = '';
+function pushPanelFila() {
+  var t = pushPanelEstado === 'ok' ? 'Avisos activados en este dispositivo'
+    : pushPanelEstado === 'cargando' ? 'Activando…' : 'Recibir avisos en este dispositivo';
+  var sub = pushPanelEstado === 'ok' ? 'Te llegan las citas nuevas, las cancelaciones y los recordatorios, aunque el panel esté cerrado.'
+    : pushPanelEstado === 'error' ? pushPanelMsg : 'Citas nuevas, cancelaciones y recordatorios, aunque el panel esté cerrado.';
+  return '<div class="list" style="margin:var(--space-2) var(--space-3) var(--space-3)"><button class="row row--icon" type="button" onclick="pushPanelActivar()"' + (pushPanelEstado === 'ok' || pushPanelEstado === 'cargando' ? ' disabled' : '') + '>'
+    + '<span class="row__icon"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span><span class="row__main"><span class="row__title">' + t + '</span>'
+    + '<span class="row__subtitle"' + (pushPanelEstado === 'error' ? ' style="color:var(--red)"' : '') + '>' + escHtml(sub) + '</span></span></button></div>';
+}
+function pushPanelActivar() {
+  pushPanelEstado = 'cargando'; notifRender();
+  pushSuscribir()
+    .then(function(sub) {
+      return auth.currentUser.getIdToken().then(function(tok) { return pushApi('suscribir', { rol: 'barbero', sub: sub, idToken: tok }); });
+    })
+    .then(function() { pushPanelEstado = 'ok'; try { localStorage.setItem('9sm_push_panel', '1'); } catch (e) {} notifRender(); })
+    .catch(function(err) { pushPanelEstado = 'error'; pushPanelMsg = pushErrorTxt(err); notifRender(); });
+}
+
 let swReg = null;
 
 function registrarSW() {
@@ -1198,7 +1260,7 @@ function notifRender() {
   dot.textContent = sinLeer > 9 ? '9+' : String(sinLeer);
   document.getElementById('notifBtn').setAttribute('aria-label', sinLeer ? 'Avisos, ' + sinLeer + ' sin leer' : 'Avisos');
 
-  const html = notifHtml(eventos, visto);
+  const html = pushPanelFila() + notifHtml(eventos, visto);
   document.getElementById('notifPopover').innerHTML = html;
   document.getElementById('notifSheetBody').innerHTML = html;
 
@@ -1292,7 +1354,8 @@ document.addEventListener('click', function(ev) {
   const p = document.getElementById('notifPopover');
   const b = document.getElementById('notifBtn');
   if (!p || p.hidden) return;
-  if (p.contains(ev.target) || (b && b.contains(ev.target))) return;
+  // Un botón redibujado dentro del popover ya no está en la página: no cuenta como «fuera»
+  if (!ev.target.isConnected || p.contains(ev.target) || (b && b.contains(ev.target))) return;
   notifCerrar();
 });
 
@@ -1699,7 +1762,7 @@ function updateStatus(key, status) {
           status: 'cancelled',
           cancelledAt: Date.now(),
           cancelledBy: (currentBarber && currentBarber.id) || 'barbero'
-        });
+        }).then(function() { pushAvisar('cancelada', [key]); });
       }
     });
     return;
@@ -3576,7 +3639,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261125a';
+  var BUILD = '20261125e';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
