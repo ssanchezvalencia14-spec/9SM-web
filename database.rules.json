@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "bookings": {
+      ".read": "auth != null",
+      ".indexOn": ["date"],
+      "$id": {
+        ".write": "auth != null || (!data.exists() && newData.child('status').val() === 'pending' && newData.child('date').isString() && newData.child('time').isString() && newData.child('telefono').isString())"
+      }
+    },
+    "clients": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "inventory": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "siteConfig": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "reviews": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}
