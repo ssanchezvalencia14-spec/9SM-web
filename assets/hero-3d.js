@@ -62,20 +62,22 @@ function iniciar() {
   ];
   piezas.forEach(function (p) { scene.add(p.obj); });
 
-  /* Dónde va cada pieza: alrededor del texto, nunca encima del título.
-     [x, y] en fracciones del medio ancho/alto visible, escala, inclinación base */
+  /* Dónde va cada pieza: el texto del hero está abajo a la izquierda, así
+     que las herramientas ocupan la parte de arriba y la derecha, nunca encima
+     del título. [x, y] en fracciones del medio ancho/alto visible, escala,
+     inclinación base */
   const LAYOUT_ANCHO = [
-    [-0.66, 0.26, 1.0, [0.35, 0.25, 0.55]],
-    [0.66, 0.30, 0.95, [0.25, -0.3, -0.45]],
-    [-0.64, -0.40, 0.85, [0.3, 0.45, -0.35]],
-    [0.64, -0.44, 0.95, [0.45, -0.2, 0.3]],
+    [0.18, 0.50, 0.95, [0.35, 0.25, 0.55]],
+    [0.72, 0.42, 0.95, [0.25, -0.3, -0.45]],
+    [0.40, -0.30, 0.85, [0.3, 0.45, -0.35]],
+    [0.76, -0.48, 0.95, [0.45, -0.2, 0.3]],
   ];
-  // En vertical: dos a los lados del logo y dos debajo de los botones
+  // En vertical: el texto ocupa la mitad de abajo; las piezas, la de arriba
   const LAYOUT_ALTO = [
-    [-0.58, 0.53, 0.4, [0.35, 0.25, 0.5]],
-    [0.60, 0.55, 0.4, [0.25, -0.3, -0.6]],
-    [-0.48, -0.50, 0.4, [0.3, 0.45, -0.5]],
-    [0.50, -0.56, 0.42, [0.45, -0.2, 0.4]],
+    [-0.50, 0.64, 0.42, [0.35, 0.25, 0.5]],
+    [0.52, 0.66, 0.42, [0.25, -0.3, -0.6]],
+    [-0.42, 0.24, 0.4, [0.3, 0.45, -0.5]],
+    [0.50, 0.20, 0.42, [0.45, -0.2, 0.4]],
   ];
 
   function colocar() {
@@ -99,7 +101,10 @@ function iniciar() {
     });
   }
 
-  let t = 0, ultimo = performance.now(), activo = true, pedido = false;
+  // Pausa: la pide el botón del hero (HIG › Accessibility › Cognitive) y
+  // arranca puesta con «Reducir movimiento».
+  let t = 0, ultimo = performance.now(), activo = true, pedido = false, pausado = QUIETO;
+  function avisarEstado() { canvas.dispatchEvent(new CustomEvent('hero3d-estado', { detail: pausado ? 'pausado' : 'animando' })); }
   function pose(dt) {
     t += dt;
     piezas.forEach(function (p) {
@@ -117,19 +122,25 @@ function iniciar() {
 
   function frame(ahora) {
     pedido = false;
-    if (!activo) return;
+    if (!activo || pausado) return;
     const dt = Math.min(0.05, (ahora - ultimo) / 1000);
     ultimo = ahora;
     pose(dt);
     renderer.render(scene, camera);
-    if (!QUIETO) pedir();
+    if (!pausado) pedir();
   }
   function pedir() { if (!pedido) { pedido = true; requestAnimationFrame(frame); } }
 
   colocar();
   pose(0);
   renderer.render(scene, camera);
-  if (!QUIETO) pedir();
+  if (!pausado) pedir();
+
+  canvas.addEventListener('hero3d-alternar', function () {
+    pausado = !pausado;
+    if (!pausado) { ultimo = performance.now(); pedir(); }
+    avisarEstado();
+  });
 
   window.addEventListener('resize', function () { colocar(); pose(0); renderer.render(scene, camera); });
 
@@ -141,17 +152,18 @@ function iniciar() {
     pose(0);
     renderer.render(scene, camera);
     canvas.classList.add('listo');
-    if (!QUIETO) { ultimo = performance.now(); pedir(); }
+    if (!pausado) { ultimo = performance.now(); pedir(); }
   });
 
   // Sin hero en pantalla no se dibuja nada
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (e) {
       activo = e[0].isIntersecting;
-      if (activo && !QUIETO) { ultimo = performance.now(); pedir(); }
+      if (activo && !pausado) { ultimo = performance.now(); pedir(); }
     }).observe(hero);
   }
   canvas.classList.add('listo');
+  avisarEstado();
 }
 
 /* ════════ Entorno ════════ */
