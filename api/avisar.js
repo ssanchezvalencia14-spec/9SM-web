@@ -10,11 +10,20 @@ module.exports = async function(req, res) {
   if (c.cors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST' });
   const b = c.cuerpo(req);
-  const evento = b.evento;
-  if (evento !== 'nueva' && evento !== 'cancelada') return res.status(400).json({ error: 'Evento no válido' });
-  const claves = (Array.isArray(b.claves) ? b.claves : []).filter(function(k) { return /^[-\w]{10,40}$/.test(k); }).slice(0, 30);
-  const marca = evento === 'nueva' ? 'avisoNueva' : 'avisoCancelada';
+  if (b.evento !== 'nueva' && b.evento !== 'cancelada') return res.status(400).json({ error: 'Evento no válido' });
   try {
+    return res.json({ ok: true, enviados: await procesar(b.evento, b.claves) });
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo avisar' });
+  }
+};
+module.exports.procesar = procesar;
+
+/* Envía los avisos y devuelve cuántas citas se avisaron */
+async function procesar(evento, clavesIn) {
+  const claves = (Array.isArray(clavesIn) ? clavesIn : []).filter(function(k) { return /^[-\w]{10,40}$/.test(k); }).slice(0, 30);
+  const marca = evento === 'nueva' ? 'avisoNueva' : 'avisoCancelada';
+  {
     // Solo las que están en el estado correcto y aún no se avisaron (transacción: una sola vez)
     const citas = [];
     for (const k of claves) {
@@ -29,7 +38,7 @@ module.exports = async function(req, res) {
       });
       if (r.committed && r.snapshot.val()) citas.push(Object.assign({ _k: k }, r.snapshot.val()));
     }
-    if (!citas.length) return res.json({ ok: true, enviados: 0 });
+    if (!citas.length) return 0;
     citas.sort(function(a, z) { return (a.date + a.time).localeCompare(z.date + z.time); });
     const p = citas[0];
     const cuando = c.fechaTxt(p.date) + ' a las ' + c.hora12(p.time);
@@ -60,8 +69,6 @@ module.exports = async function(req, res) {
         await c.db().ref('pushSubs/citas/' + cita._k).remove();
       }
     }
-    return res.json({ ok: true, enviados: citas.length });
-  } catch (e) {
-    return res.status(500).json({ error: 'No se pudo avisar' });
+    return citas.length;
   }
-};
+}

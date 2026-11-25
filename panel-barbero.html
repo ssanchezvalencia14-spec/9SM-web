@@ -11,8 +11,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="9SM Panel"/>
-  <link rel="apple-touch-icon" href="/assets/icon-192.png"/>
-  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png"/>
+  <link rel="apple-touch-icon" href="/assets/icono-9sm-180.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icono-9sm-192.png"/>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -3561,7 +3561,7 @@ function webSave() {
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261125b';
+  var BUILD = '20261125d';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })

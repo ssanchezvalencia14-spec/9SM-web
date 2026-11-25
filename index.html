@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>9SM NEXO — Barbería</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icono-9sm-192.png"/>
+  <link rel="apple-touch-icon" href="/assets/icono-9sm-180.png"/>
   <meta name="color-scheme" content="light dark" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1011,7 +1013,7 @@ function bFetchAndRefresh() {
   bSondeoEnCurso = true;
   var ctrl = new AbortController();
   setTimeout(function() { ctrl.abort(); }, 8000);   // una lectura colgada no frena el sondeo
-  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' })
+  fetch('/api/agenda', { signal: ctrl.signal })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data && typeof data === 'object' && !data.error) {
@@ -1027,21 +1029,13 @@ function bFetchAndRefresh() {
 function bStartRealtimeListener() {
   bStopRealtimeListener();
 
-  // 1) Firebase SDK listener (tiempo real instantáneo)
-  try {
-    bRTListener = bDB.ref('bookings').on('value', function(snap) {
-      bProcessData(snap.val());
-      bRefreshSlotsIfVisible();
-    }, function() {});
-  } catch(e) {}
-
-  // 2) Polling REST cada 1 s (respaldo garantizado)
-  bPollInterval = setInterval(bFetchAndRefresh, 1000);
+  // Las citas ya no se leen directo de Firebase (tienen datos de clientes):
+  // /api/agenda da solo las horas ocupadas. Se consulta cada 2 s.
+  bPollInterval = setInterval(bFetchAndRefresh, 2000);
 }
 
 function bStopRealtimeListener() {
   if (bRTListener !== null) {
-    try { bDB.ref('bookings').off('value', bRTListener); } catch(e) {}
     bRTListener = null;
   }
   if (bPollInterval) { clearInterval(bPollInterval); bPollInterval = null; }
@@ -1063,7 +1057,7 @@ function bLoadBookings() {
   // Snapshot inicial vía REST
   var ctrl = new AbortController();
   setTimeout(function() { ctrl.abort(); }, 6000);
-  return fetch(FB_URL + '/bookings.json?t=' + Date.now(), { signal: ctrl.signal, cache: 'no-store' })
+  return fetch('/api/agenda', { signal: ctrl.signal })
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
@@ -1527,10 +1521,15 @@ function mcMostrarCita(cita, fbKey) {
 
 function mcCardVisible() { return !document.getElementById('mcCard').hidden; }
 
+/* Citas del cliente por su teléfono (el servidor no devuelve las de otros) */
+function mcPedirCitas(tel) {
+  return fetch('/api/mis-citas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telefono: tel }), cache: 'no-store' });
+}
+
 function mcVerificarEnFirebase(localCita) {
   // Busca el fbKey real y confirma que no fue cancelada por el admin
   var cleanTel = (localCita.telefono || '').replace(/\D/g, '');
-  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+  mcPedirCitas(cleanTel)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data || typeof data !== 'object') return;
@@ -1574,7 +1573,7 @@ function mcVerificarEnFirebase(localCita) {
 
 function mcCargarUltimaCita(telefono) {
   var cleanTel = telefono.replace(/\D/g, '');
-  fetch(FB_URL + '/bookings.json?t=' + Date.now(), { cache: 'no-store' })
+  mcPedirCitas(cleanTel)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data || typeof data !== 'object' || data.error) { mcShowView('mcEmpty'); return; }
@@ -1641,16 +1640,15 @@ function mcEjecutarCancelar() {
   var cita = _mcCurrentCita || {};
   var ctrl = new AbortController();
   var t = setTimeout(function() { ctrl.abort(); }, 8000);
-  fetch(FB_URL + '/bookings/' + _mcCurrentKey + '.json', {
-    method: 'PATCH',
+  // El servidor comprueba el teléfono, cancela y avisa al barbero
+  fetch('/api/cancelar', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // cancelledAt/cancelledBy alimentan los avisos del panel
-    body: JSON.stringify({ status: 'cancelled', cancelledAt: Date.now(), cancelledBy: 'cliente' }),
+    body: JSON.stringify({ clave: _mcCurrentKey, telefono: cita.telefono || '' }),
     signal: ctrl.signal
   }).then(function(res) {
     clearTimeout(t);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    pushAvisar('cancelada', [_mcCurrentKey]);
     var d = cita.date ? new Date(cita.date + 'T00:00:00') : null;
     document.getElementById('mcDoneText').textContent = d
       ? 'Tu hora del ' + BDAYSFULL[d.getDay()].toLowerCase() + ' ' + d.getDate() + ' a las ' + fmt12(cita.time) + ' quedó libre.'
@@ -2785,7 +2783,7 @@ loadSiteConfig();
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261125b';
+  var BUILD = '20261125d';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
