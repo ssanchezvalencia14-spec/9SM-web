@@ -1,0 +1,17 @@
+# Cada hora pide a Vercel que envíe los recordatorios de citas
+# (el día antes y 2 horas antes). La clave está en los secretos del repositorio.
+name: Recordatorios de citas
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+jobs:
+  recordar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enviar recordatorios
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 60 -H "Authorization: Bearer $CRON_SECRET" https://9sm.site/api/recordatorios
