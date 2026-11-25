@@ -18,9 +18,103 @@
     [hidden] { display: none !important; }
     html { scroll-behavior: smooth; scroll-padding-top: var(--navbar-h); }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-    /* Herramientas en 3D del hero (assets/hero-3d.js): aparecen con un fundido */
-    #hero3d { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity var(--dur-slow) var(--ease-out); }
-    #hero3d.listo { opacity: 1; }
+    /* Hero: logo brillante en el centro y las herramientas (renders de Blender,
+       assets/hero/*.webp; el modelo está en assets/modelos/herramientas.blend)
+       flotando alrededor. En pantallas anchas va en la mitad derecha, porque el
+       texto está abajo a la izquierda; en vertical, arriba del texto. */
+    .escena { position: absolute; inset: 0; --px: 0; --py: 0; }
+    .orbita {
+      position: absolute; left: 50%; top: 31%;
+      width: min(82vw, 48vh); aspect-ratio: 1; transform: translate(-50%, -50%);
+    }
+    @media (min-width: 734px) and (min-aspect-ratio: 1/1) {
+      .orbita { left: 74%; top: 50%; width: min(40vw, 72vh); }
+    }
+    .orbita > * { position: absolute; transform: translate(-50%, -50%) translate(calc(var(--px) * var(--prof) * 1px), calc(var(--py) * var(--prof) * 1px)); transition: transform 0.6s var(--ease-out); }
+    .escena__logo { left: 50%; top: 50%; width: 46%; --prof: 6; }
+    .escena__logo img, .escena__destello { display: block; width: 100%; aspect-ratio: 1; }
+    .escena__logo img { filter: invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.75)) drop-shadow(0 0 28px rgba(255,255,255,0.4)); animation: logo-pulso 4s ease-in-out infinite; }
+    /* Destello que cruza las letras: un degradado recortado con la forma del logo */
+    .escena__destello {
+      position: absolute; inset: 0;
+      -webkit-mask: url(assets/9sm-logo.png) center / contain no-repeat; mask: url(assets/9sm-logo.png) center / contain no-repeat;
+      background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.95) 50%, transparent 60%) 150% 0 / 250% 100% no-repeat;
+      animation: logo-destello 5s ease-in-out infinite;
+    }
+    /* Cada herramienta: un movimiento propio (en .escena__mov), un reflejo de luz
+       que la cruza (.escena__brillo, recortado con su silueta) y una sombra en el
+       «suelo» que se encoge cuando sube. */
+    .escena__pieza { aspect-ratio: var(--ar); }
+    .escena__mov { position: absolute; inset: 0; transform-style: preserve-3d; animation: flotar 7s ease-in-out infinite; }
+    .escena__mov img { display: block; width: 100%; height: 100%; filter: drop-shadow(0 18px 24px rgba(0,0,0,0.6)); }
+    .escena__brillo {
+      position: absolute; inset: 0; pointer-events: none;
+      -webkit-mask: var(--img) center / 100% 100% no-repeat; mask: var(--img) center / 100% 100% no-repeat;
+      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,0.85) 50%, transparent 58%) 160% 0 / 260% 100% no-repeat;
+      mix-blend-mode: screen; animation: reflejo 6s ease-in-out infinite;
+    }
+    .escena__pieza::before {
+      content: ""; position: absolute; left: 15%; right: 15%; bottom: -14%; height: 12%;
+      background: radial-gradient(closest-side, rgba(255,255,255,0.10), transparent);
+      animation: sombra 7s ease-in-out infinite;
+    }
+    .escena__pieza--tijeras { left: 15%; top: 17%; width: 36%; --prof: 22; --ar: 700/588; --img: url(assets/hero/tijeras.webp); }
+    .escena__pieza--navaja { left: 86%; top: 16%; width: 34%; --prof: 16; --ar: 700/570; --img: url(assets/hero/navaja.webp); }
+    .escena__pieza--maquina { left: 15%; top: 76%; width: 19%; --prof: 28; --ar: 324/700; --img: url(assets/hero/maquina.webp); }
+    .escena__pieza--peine { left: 84%; top: 82%; width: 34%; --prof: 12; --ar: 700/450; --img: url(assets/hero/peine.webp); }
+    /* Tijeras: se balancean como un péndulo desde los anillos */
+    .escena__pieza--tijeras .escena__mov { transform-origin: 20% 20%; animation: balanceo 5s ease-in-out -1.5s infinite; }
+    .escena__pieza--tijeras .escena__brillo { animation-delay: -1s; }
+    /* Navaja: gira en 3D sobre su eje largo, el filo capta la luz */
+    .escena__pieza--navaja .escena__mov { animation: girar3d 8s ease-in-out -4s infinite; }
+    .escena__pieza--navaja .escena__brillo { animation-delay: -3s; animation-duration: 5s; }
+    /* Máquina: flota y cada tanto vibra como si se encendiera */
+    .escena__pieza--maquina .escena__mov { animation: flotar 6.5s ease-in-out -2.5s infinite; }
+    .escena__pieza--maquina img { animation: vibrar 4.5s linear infinite; }
+    .escena__pieza--maquina .escena__brillo { animation-delay: -4.5s; animation-duration: 7s; }
+    /* Peine: se inclina hacia la cámara y vuelve */
+    .escena__pieza--peine .escena__mov { animation: inclinar 7.5s ease-in-out -5.5s infinite; }
+    .escena__pieza--peine .escena__brillo { animation-delay: -2s; animation-duration: 6.5s; }
+    @keyframes flotar { 0%, 100% { transform: translateY(-3%) rotate(-2deg); } 50% { transform: translateY(3%) rotate(2deg); } }
+    @keyframes balanceo { 0%, 100% { transform: translateY(-2%) rotate(-7deg); } 50% { transform: translateY(2%) rotate(5deg); } }
+    @keyframes girar3d { 0%, 100% { transform: perspective(700px) translateY(-3%) rotateY(-22deg) rotateX(6deg); } 50% { transform: perspective(700px) translateY(3%) rotateY(18deg) rotateX(-4deg); } }
+    @keyframes inclinar { 0%, 100% { transform: perspective(700px) translateY(-2%) rotateX(18deg) rotate(-2deg); } 50% { transform: perspective(700px) translateY(3%) rotateX(-12deg) rotate(2deg); } }
+    @keyframes vibrar {
+      0%, 70%, 100% { transform: none; }
+      72% { transform: translate(1.5%, 0) rotate(0.6deg); } 74% { transform: translate(-1.5%, 0) rotate(-0.6deg); }
+      76% { transform: translate(1.2%, 0) rotate(0.5deg); } 78% { transform: translate(-1.2%, 0) rotate(-0.5deg); }
+      80% { transform: translate(0.8%, 0); } 82% { transform: translate(-0.8%, 0); } 84% { transform: none; }
+    }
+    /* Destellos: estrellas de cuatro puntas que se encienden en los filos y el cromo */
+    .chispa {
+      position: absolute; width: 26%; aspect-ratio: 1; transform: translate(-50%, -50%) scale(0);
+      background: radial-gradient(circle, #fff 0 8%, rgba(255,255,255,0.5) 14%, transparent 34%),
+                  conic-gradient(from 45deg, transparent 0 22%, #fff 25%, transparent 28% 47%, #fff 50%, transparent 53% 72%, #fff 75%, transparent 78% 97%, #fff 100%);
+      -webkit-mask: radial-gradient(circle, #000 0 20%, transparent 50%); mask: radial-gradient(circle, #000 0 20%, transparent 50%);
+      filter: drop-shadow(0 0 4px #fff); pointer-events: none; mix-blend-mode: screen;
+      animation: chispa 4s ease-in-out infinite;
+    }
+    @keyframes chispa {
+      0%, 78%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+      86% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; }
+      94% { transform: translate(-50%, -50%) scale(0.2) rotate(90deg); opacity: 0; }
+    }
+    /* Rayos de luz que giran despacio detrás del logo */
+    .escena__rayos {
+      position: absolute; left: 50%; top: 50%; width: 120%; aspect-ratio: 1; transform: translate(-50%, -50%); --prof: 3;
+      background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.07) 0deg 4deg, transparent 4deg 18deg);
+      -webkit-mask: radial-gradient(closest-side, #000 18%, transparent 72%); mask: radial-gradient(closest-side, #000 18%, transparent 72%);
+      animation: rayos 40s linear infinite;
+    }
+    @keyframes rayos { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes reflejo { 0%, 50% { background-position: 160% 0; } 100% { background-position: -60% 0; } }
+    @keyframes sombra { 0%, 100% { transform: scaleX(1.1); opacity: 0.6; } 50% { transform: scaleX(0.85); opacity: 1; } }
+    @keyframes logo-pulso { 0%, 100% { opacity: 0.92; } 50% { opacity: 1; } }
+    @keyframes logo-destello { 0%, 55% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
+    .escena.is-pausada, .escena.is-pausada * { animation-play-state: paused !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .escena *, .orbita > * { animation: none !important; transition: none !important; }
+    }
     .hero__playback { z-index: 1; }
     .hero__playback[data-estado="pausado"] .i-pausa, .hero__playback:not([data-estado="pausado"]) .i-play { display: none; }
     .row__title-lines { display: grid; }
@@ -118,9 +212,20 @@
 </div>
 
 <main>
-<!-- W01 · Hero: siempre oscuro, con las herramientas en 3D (assets/hero-3d.js) -->
+<!-- W01 · Hero: siempre oscuro, logo brillante con las herramientas alrededor -->
 <section class="hero" id="scroll-hero" data-appearance="dark">
-  <div class="hero__media"><canvas id="hero3d" aria-hidden="true"></canvas></div>
+  <div class="hero__media">
+    <div class="escena" id="heroEscena" aria-hidden="true">
+      <div class="orbita">
+        <div class="escena__rayos"></div>
+        <div class="escena__logo"><img src="assets/9sm-logo.png" alt="" width="500" height="500" /><div class="escena__destello"></div><i class="chispa" style="left:84%;top:30%;width:12%;animation-delay:-2s"></i><i class="chispa" style="left:22%;top:34%;width:10%;animation-delay:-0.2s"></i></div>
+        <div class="escena__pieza escena__pieza--tijeras"><span class="escena__mov"><img src="assets/hero/tijeras.webp" alt="" width="700" height="588" /><i class="escena__brillo"></i><i class="chispa" style="left:94%;top:93%;animation-delay:-0.5s"></i><i class="chispa" style="left:18%;top:14%;animation-delay:-2.4s"></i></span></div>
+        <div class="escena__pieza escena__pieza--navaja"><span class="escena__mov"><img src="assets/hero/navaja.webp" alt="" width="700" height="570" /><i class="escena__brillo"></i><i class="chispa" style="left:92%;top:88%;animation-delay:-1.6s"></i><i class="chispa" style="left:30%;top:20%;animation-delay:-3.3s"></i></span></div>
+        <div class="escena__pieza escena__pieza--maquina"><span class="escena__mov"><img src="assets/hero/maquina.webp" alt="" width="324" height="700" /><i class="escena__brillo"></i><i class="chispa" style="left:50%;top:5%;width:45%;animation-delay:-0.9s"></i><i class="chispa" style="left:62%;top:30%;width:45%;animation-delay:-2.9s"></i></span></div>
+        <div class="escena__pieza escena__pieza--peine"><span class="escena__mov"><img src="assets/hero/peine.webp" alt="" width="700" height="450" /><i class="escena__brillo"></i><i class="chispa" style="left:94%;top:10%;animation-delay:-3.6s"></i><i class="chispa" style="left:20%;top:60%;animation-delay:-1.9s"></i></span></div>
+      </div>
+    </div>
+  </div>
   <div class="container hero__content">
     <h1 class="hero__title t-display-1">El corte que te define.</h1>
     <p class="hero__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
@@ -520,34 +625,32 @@ document.addEventListener('keydown', function (e) {
   closeMobileMenu();
 });
 
-/* ── Hero: botón de pausa de la animación 3D (HIG › Accessibility › Cognitive:
-   todo lo que se mueve solo debe poder pararse). Lo controla hero-3d.js. ── */
+/* ── Hero: las herramientas se mueven un poco con el mouse, y el botón pausa la
+   animación (HIG › Accessibility › Cognitive: todo lo que se mueve solo debe
+   poder pararse). Con «Reducir movimiento» no hay animación ni botón. ── */
 (function () {
-  const canvas = document.getElementById('hero3d');
+  const escena = document.getElementById('heroEscena');
   const btn = document.getElementById('heroPlayback');
-  if (!canvas || !btn) return;
-  canvas.addEventListener('hero3d-estado', function (e) {
-    const pausado = e.detail === 'pausado';
-    btn.hidden = false;
+  if (!escena || !btn) return;
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let pausado = quieto;
+  function pintar() {
+    escena.classList.toggle('is-pausada', pausado);
+    btn.hidden = quieto;
     btn.dataset.estado = pausado ? 'pausado' : 'animando';
     btn.setAttribute('aria-label', pausado ? 'Reproducir animación' : 'Pausar animación');
+  }
+  btn.addEventListener('click', function () { pausado = !pausado; pintar(); });
+  pintar();
+  if (quieto || !window.matchMedia('(pointer: fine)').matches) return;
+  const hero = document.getElementById('scroll-hero');
+  hero.addEventListener('pointermove', function (e) {
+    if (pausado) return;
+    const r = hero.getBoundingClientRect();
+    escena.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    escena.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
   });
-  btn.addEventListener('click', function () { canvas.dispatchEvent(new CustomEvent('hero3d-alternar')); });
-})();
-
-/* ── Hero 3D: se pide cuando la página ya cargó, para no competir con lo demás ── */
-(function () {
-  let pedido = false;
-  function cargar() {
-    if (pedido) return;
-    pedido = true;
-    import('./assets/hero-3d.js').catch(function (e) { console.warn('No se pudo cargar el hero 3D:', e && e.message); });
-  }
-  if (document.readyState === 'complete') cargar();
-  else {
-    window.addEventListener('load', cargar, { once: true });
-    setTimeout(cargar, 5000);   // si alguna imagen retrasa «load», no se espera más
-  }
+  hero.addEventListener('pointerleave', function () { escena.style.setProperty('--px', 0); escena.style.setProperty('--py', 0); });
 })();
 
 
