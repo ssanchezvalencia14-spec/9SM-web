@@ -8,7 +8,6 @@
  *   - No guarda en caché el HTML ni version.txt. El panel y la web se
  *     actualizan solos comparando su BUILD con version.txt, y si el service
  *     worker sirviera una copia vieja ese mecanismo dejaría de funcionar.
- *   - No guarda el vídeo de portada: pesa casi 200 MB.
  */
 
 const CACHE = 'nexo-estaticos-v1';
@@ -16,7 +15,7 @@ const CACHE = 'nexo-estaticos-v1';
 /* Solo se guardan estos tipos, y solo del propio dominio */
 const CACHEABLE = /\.(?:png|jpe?g|webp|svg|ico|woff2?|ttf)$/i;
 /* Nunca se guardan: deben llegar siempre frescos del servidor */
-const SIEMPRE_RED = /(?:\.html?|\.json|version\.txt|\.mp4)$/i;
+const SIEMPRE_RED = /(?:\.html?|\.json|version\.txt)$/i;
 
 self.addEventListener('install', function(e) {
   // Entra en servicio sin esperar a que se cierren las pestañas viejas

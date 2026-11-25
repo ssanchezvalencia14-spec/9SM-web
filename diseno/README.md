@@ -4,7 +4,7 @@ Sistema visual de la web pública (`index.html`) y del panel del barbero
 (`panel-barbero.html`), basado en las Human Interface Guidelines de Apple
 (developer.apple.com/design/human-interface-guidelines, leídas el
 19-11-2026). La web se ve como apple.com y el panel como una app de iOS o
-macOS. La marca 9SM queda en el logo, las fotos y el video.
+macOS. La marca 9SM queda en el logo y las fotos.
 
 ## Qué hay en esta carpeta
 
@@ -58,7 +58,7 @@ Las maquetas se abren en el navegador. Cada pantalla tiene un ancla
 |---|---|
 | **Acento grafito**: #1D1D1F en claro, #F5F5F7 en oscuro (elegido por 9SM) | Color › Liquid Glass color: «If your app features colorful backgrounds or visually rich content, prefer a monochromatic appearance». Branding: «Apply your app's accent color judiciously». Las fotos son muy coloridas y el logo es negro. |
 | **Apariencia según el sistema**; se quitan el engranaje y la opción de tema del menú (elegido por 9SM) | Dark Mode: «Avoid offering an app-specific appearance setting». |
-| **Hero siempre oscuro** | El video es oscuro. Dark Mode: «it can make sense for an app that supports immersive media viewing to use a permanently dark appearance». |
+| **Hero con el logo de 9SM** grande y flotando suave (sube 10 px y vuelve, 6 s, `ease-in-out`), sin video ni 3D; sigue la apariencia del sistema y queda quieto con Reducir movimiento (elegido por 9SM) | Branding: «Ensure branding always defers to content». Motion: «Make motion optional»; Accessibility › Cognitive: con Reducir movimiento, sin desplazamientos. |
 | **Una sola familia**: SF Pro (`-apple-system`) con Inter de respaldo | Typography: «Minimize the number of typefaces». SF Pro no puede servirse como webfont fuera de equipos Apple; Inter cubre Android y Windows. |
 | **Escala Dynamic Type en rem** (1 rem = 17 pt; en iPhone y iPad sigue el tamaño de texto del sistema con `font: -apple-system-body`) | Typography › Supporting Dynamic Type; Accessibility › Vision: «Support larger text sizes». |
 | **Colores de estado partiendo de los valores de alto contraste** de la HIG, oscurecidos (claro) o aclarados (oscuro) lo justo para pasar 4,5:1 donde se usan: sobre blanco, #F2F2F7 y su propio relleno translúcido | Accessibility › Vision: contraste mínimo 4,5:1. Los valores por defecto (#0088FF, #FF383C…) no llegan ni sobre blanco. |
@@ -114,7 +114,7 @@ Las maquetas se abren en el navegador. Cada pantalla tiene un ancla
 | Navegación panel | `.shell`, `.sidebar`, `.tabbar`, `.toolbar`, `.page-head` | Las secciones del panel actual. Sidebars (≤ 2 niveles); Toolbars (título grande); tab bar flotante en vidrio. |
 | Agenda | `.appt`, `.summary-bar`, `.month`, `.mday`, `.legend` | Color: el color del barbero va siempre con su nombre o iniciales. |
 | Cifras y gráfico | `.stat`, `.stats`, `.bars` | Charts: `role="img"` con descripción. |
-| Web | `.hero`, `.about`, `.service`, `.gallery`, `.contact`, `.booking-cta`, `.footer` | Layout: jerarquía de arriba abajo; Accessibility › Cognitive: control de pausa del video. |
+| Web | `.hero-brand` (en el `<style>` de `index.html`), `.about`, `.service`, `.gallery`, `.contact`, `.booking-cta`, `.footer` | Layout: jerarquía de arriba abajo; Accessibility › Cognitive: el logo del hero se detiene con Reducir movimiento. |
 
 ## Cambios de comportamiento que traen las maquetas
 
@@ -123,7 +123,7 @@ los dos hilos de implementación deben aplicarlos:
 
 **Web**
 1. Sin interruptor de tema: la apariencia sigue al sistema.
-2. Hero: con Reducir movimiento, póster quieto; botón de pausa siempre visible.
+2. Hero: el logo de 9SM flotando en lugar del video o del 3D; con Reducir movimiento, quieto.
 3. Paso 2: si el día no tiene horas, botón al siguiente día con horas.
 4. Si la hora se ocupó al confirmar, aviso arriba del paso 2 (hoy el mensaje
    sale en el paso 3).

@@ -114,13 +114,29 @@
 <!-- Página detrás de una sheet: barra + parte alta del hero -->
 <template data-part="behind">
   <x-part name="navbar"></x-part>
-  <section class="hero hero--short" data-appearance="dark" aria-hidden="true">
-    <div class="hero__media"><img src="assets/hero-poster.jpg" alt=""></div>
-    <div class="container hero__content">
-      <h1 class="hero__title t-display-1">El corte que te define.</h1>
-      <p class="hero__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
+  <x-part name="hero-style"></x-part>
+  <section class="hero-brand" aria-hidden="true">
+    <div class="container hero-brand__inner">
+      <img class="logo hero-brand__logo" src="assets/9sm-logo.png" alt="">
+      <h1 class="hero-brand__title t-display-1">El corte que te define.</h1>
+      <p class="hero-brand__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
     </div>
   </section>
+</template>
+
+<!-- Estilo del hero con el logo. En producción vive en el <style> de index.html. -->
+<template data-part="hero-style">
+  <style>
+    .hero-brand { display: flex; align-items: center; min-height: calc(min(92vh, 860px) - var(--navbar-h)); padding: var(--space-12) 0 var(--space-16); background: var(--bg); text-align: center; }
+    .hero-brand__inner { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .hero-brand__logo { width: min(56vw, 300px); height: auto; margin-bottom: var(--space-2); animation: hero-flotar 6s ease-in-out infinite; }
+    .hero-brand__title { margin: 0; }
+    .hero-brand__lead { margin: var(--space-4) auto 0; max-width: 28rem; color: var(--label-secondary); }
+    .hero-brand__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); margin-top: var(--space-8); }
+    @keyframes hero-flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @media (prefers-reduced-motion: reduce) { .hero-brand__logo { animation: none; } }
+    @media (min-width: 734px) { .hero-brand { padding: var(--space-16) 0 var(--space-24); } .hero-brand__logo { width: 320px; } }
+  </style>
 </template>
 
 <!-- Barra superior de la sheet de reserva, paso 1 -->
@@ -260,19 +276,19 @@
      W · INICIO
      ===================================================================== -->
 <template data-shot="web-inicio" data-code="W01" data-group="Inicio" data-name="Inicio" data-full="true"
-  data-note="Página completa. <b>Hero</b> siempre oscuro (el video es oscuro; HIG › Dark Mode permite apariencia fija para medios). El video avanza con el scroll como hoy; con <b>Reducir movimiento</b> se muestra el póster quieto y el botón de pausa siempre está (HIG › Accessibility › Cognitive). Se retiran la cinta animada «9SM NEXO · BARBERÍA…», los números de sección y Playfair Display (HIG › Branding: la marca vive en el logo, las fotos y el video). En móvil, la barra flotante «Reservar» aparece cuando el hero sale de pantalla.">
+  data-note="Página completa. <b>Hero</b> sin video ni 3D: el logo de 9SM grande, flotando suave (sube 10 px y vuelve, 6 s), con el titular, el texto y los dos botones. Sigue la apariencia del sistema (claro u oscuro); el logo se invierte en oscuro. Con <b>Reducir movimiento</b> el logo queda quieto (HIG › Accessibility › Cognitive). Se retiran la cinta animada «9SM NEXO · BARBERÍA…», los números de sección y Playfair Display (HIG › Branding: la marca vive en el logo, las fotos y el video). En móvil, la barra flotante «Reservar» aparece cuando el hero sale de pantalla.">
   <x-part name="navbar"></x-part>
-  <section class="hero" data-appearance="dark">
-    <div class="hero__media"><video data-hero src="assets/hero.mp4" poster="assets/hero-poster.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
-    <div class="container hero__content">
-      <h1 class="hero__title t-display-1">El corte que te define.</h1>
-      <p class="hero__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
-      <div class="hero__actions">
-        <button class="btn btn--on-media btn--large" type="button">Reservar cita</button>
-        <a class="btn btn--glass btn--large" href="#servicios">Ver servicios</a>
+  <x-part name="hero-style"></x-part>
+  <section class="hero-brand">
+    <div class="container hero-brand__inner">
+      <img class="logo hero-brand__logo" src="assets/9sm-logo.png" alt="9SM NEXO">
+      <h1 class="hero-brand__title t-display-1">El corte que te define.</h1>
+      <p class="hero-brand__lead t-lead">Precisión, estilo y cuidado personal. En 9SM NEXO cada visita es una experiencia.</p>
+      <div class="hero-brand__actions">
+        <button class="btn btn--filled btn--large" type="button">Reservar cita</button>
+        <a class="btn btn--gray btn--large" href="#servicios">Ver servicios</a>
       </div>
     </div>
-    <button class="icon-btn icon-btn--glass hero__playback" type="button" aria-label="Pausar video" style="color:#fff"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg></button>
   </section>
 
   <section class="section" id="nosotros">
