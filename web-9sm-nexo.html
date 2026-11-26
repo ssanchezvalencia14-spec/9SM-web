@@ -18,6 +18,57 @@
   <style>
     /* Solo lo propio de esta página; colores, tamaños y radios salen de los tokens. */
     [hidden] { display: none !important; }
+    /* Pantalla de carga: una tormenta eléctrica que crece hasta que el logo
+       entra con un impacto (ver el script junto al marcado, al inicio de <body>). */
+    .carga { position: fixed; inset: 0; z-index: 9999; background: #000; overflow: hidden; }
+    .carga__mundo { position: absolute; inset: 0; will-change: transform; }
+    .carga canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .carga__flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+    .carga__vineta { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%); }
+    .carga__grano { position: absolute; inset: -50%; pointer-events: none; opacity: 0.09; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: carga-grano 0.5s steps(4) infinite; }
+    @keyframes carga-grano { 0% { transform: translate(0,0); } 25% { transform: translate(-3%,2%); } 50% { transform: translate(2%,-3%); } 75% { transform: translate(-2%,-1%); } }
+
+    /* Logo y su entrada con rebote */
+    .carga__centro { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 18px; }
+    .carga__logo { position: relative; width: min(46vw, 260px); aspect-ratio: 1; opacity: 0; }
+    .carga__logo img { display: block; width: 100%; height: 100%; filter: invert(1); }
+    /* Destello que recorre las letras, recortado con la forma del logo */
+    .carga__barrido { position: absolute; inset: 0; -webkit-mask: url(assets/9sm-logo.png) center / contain no-repeat; mask: url(assets/9sm-logo.png) center / contain no-repeat;
+      background: linear-gradient(110deg, transparent 40%, #fff 50%, transparent 60%) 160% 0 / 250% 100% no-repeat; }
+    .fase-logo .carga__logo { animation: carga-logo-entra 1.2s linear forwards; }
+    .fase-logo .carga__logo img { animation: carga-logo-brillo 1.8s ease-out forwards, carga-logo-parpadeo 2.2s 1.4s steps(1) infinite; }
+    .fase-logo .carga__barrido { animation: carga-barrido 1.1s 0.5s cubic-bezier(.6,0,.3,1) forwards; }
+    @keyframes carga-logo-entra {
+      0% { opacity: 0; transform: scale(0.2) rotate(-8deg); animation-timing-function: cubic-bezier(.2,.9,.3,1); }
+      22% { opacity: 1; transform: scale(1.28) rotate(3deg); animation-timing-function: ease-in-out; }
+      40% { transform: scale(0.88) rotate(-1.5deg); } 56% { transform: scale(1.08) rotate(0.6deg); }
+      72% { transform: scale(0.97); } 86% { transform: scale(1.015); } 100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes carga-logo-brillo {
+      0% { filter: invert(1) brightness(3) drop-shadow(0 0 30px #fff) drop-shadow(0 0 90px rgba(255,255,255,0.8)); }
+      100% { filter: invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.8)) drop-shadow(0 0 30px rgba(255,255,255,0.45)); }
+    }
+    /* Parpadeo eléctrico de vez en cuando, como un neón con carga */
+    @keyframes carga-logo-parpadeo { 0%, 100% { opacity: 1; } 4% { opacity: 0.55; } 6% { opacity: 1; } 8% { opacity: 0.7; } 10% { opacity: 1; } }
+    @keyframes carga-barrido { to { background-position: -60% 0; } }
+
+    /* Lema letra por letra */
+    .carga__lema { display: flex; gap: 0.02em; color: #fff; font-weight: 500; font-size: clamp(11px, 1.4vw, 14px); letter-spacing: 0.5em; text-transform: uppercase; padding-left: 0.5em; }
+    .carga__lema span { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+    .fase-logo .carga__lema span { animation: carga-letra 0.6s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(0.75s + var(--i) * 0.045s); }
+    @keyframes carga-letra { 60% { opacity: 1; filter: blur(0); } 100% { opacity: 0.75; transform: none; filter: blur(0); } }
+
+    /* Ondas de choque */
+    .carga__onda { position: absolute; left: 50%; top: 50%; width: min(46vw, 260px); aspect-ratio: 1; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.8); box-shadow: 0 0 30px rgba(255,255,255,0.5), inset 0 0 30px rgba(255,255,255,0.35); transform: translate(-50%,-50%) scale(0); opacity: 0; pointer-events: none; }
+    .fase-logo .carga__onda { animation: carga-onda 1s cubic-bezier(.1,.7,.3,1) forwards; animation-delay: calc(var(--i) * 0.13s); }
+    @keyframes carga-onda { 0% { transform: translate(-50%,-50%) scale(0.2); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(4); opacity: 0; } }
+
+    /* Salida: el logo se acerca y atravesamos la pantalla hacia la web */
+    .fase-salida .carga__centro { animation: carga-atravesar 0.8s cubic-bezier(.7,0,.8,.3) forwards; }
+    .fase-salida { animation: carga-fundido 0.5s 0.45s ease forwards; pointer-events: none; }
+    @keyframes carga-atravesar { to { transform: translate(-50%, -50%) scale(9); opacity: 0; filter: blur(6px); } }
+    @keyframes carga-fundido { to { opacity: 0; visibility: hidden; } }
+    body.cargando { overflow: hidden; }
     html { scroll-behavior: smooth; scroll-padding-top: var(--navbar-h); }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     /* Hero: logo brillante en el centro y las herramientas (renders de Blender,
@@ -123,6 +174,177 @@
   </style>
 </head>
 <body>
+<div class="carga" id="carga" role="status" aria-label="Cargando 9SM NEXO">
+  <div class="carga__mundo" id="mundo">
+    <canvas id="lienzo"></canvas>
+    <div class="carga__onda" style="--i:0"></div><div class="carga__onda" style="--i:1"></div><div class="carga__onda" style="--i:2"></div>
+    <div class="carga__centro">
+      <div class="carga__logo"><img src="assets/9sm-logo.png" alt="9SM NEXO" width="500" height="500"><div class="carga__barrido"></div></div>
+      <div class="carga__lema" id="lema" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="carga__vineta"></div>
+  <div class="carga__grano"></div>
+  <div class="carga__flash" id="flash"></div>
+</div>
+<script>
+(function () {
+  /* Pantalla de carga: una tormenta en fases, unos 5 s (más si la página tarda).
+     1. Calma (0–0,7 s): oscuridad, polvo flotando y una brasa que late en el centro.
+     2. Tormenta (0,7–3 s): descargas desde los bordes cada vez más seguidas,
+        arcos vivos que orbitan el centro (se rehacen cada fotograma, como una
+        bobina Tesla), un remolino de partículas que se va cerrando y la
+        pantalla que tiembla más y más.
+     3. Carga (3–3,8 s): todo se concentra; una bola de plasma crece en el
+        centro chisporroteando.
+     4. Impacto: fogonazo blanco, ondas, las partículas salen disparadas, el
+        logo entra con rebote, un destello recorre las letras y aparece el lema.
+     5. Salida: el logo se acerca hasta atravesar la pantalla y se ve la web. */
+  var el = document.getElementById('carga'), mundo = document.getElementById('mundo'),
+      cv = document.getElementById('lienzo'), ctx = cv.getContext('2d'), flash = document.getElementById('flash');
+  document.body.classList.add('cargando');
+  var cargada = false;
+  addEventListener('load', function () { cargada = true; });
+  setTimeout(function () { cargada = true; }, 7000); // por si algún recurso se cuelga
+  var lema = 'Barbería · 9SM Nexo';
+  document.getElementById('lema').innerHTML = lema.split('').map(function (c, i) { return '<span style="--i:' + i + '">' + (c === ' ' ? '&nbsp;' : c) + '</span>'; }).join('');
+
+  var W, H, cx, cy, dpr = Math.min(devicePixelRatio || 1, 1.5);
+  function medir() { W = innerWidth; H = innerHeight; cx = W / 2; cy = H / 2; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  medir(); addEventListener('resize', medir);
+
+  var T = { tormenta: 700, carga: 3000, impacto: 3800, salida: 6300 };
+  var t0 = performance.now(), fase = 'calma';
+  function g() { return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; }
+  function ease(x) { return x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x); }
+
+  // ── Partículas: polvo que flota, luego remolino hacia el centro, luego explosión
+  var parts = [];
+  for (var i = 0; i < 420; i++) parts.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, vx: 0, vy: 0, z: 0.3 + Math.random() * 0.9 });
+
+  // ── Rayo dentado entre dos puntos (desplazamiento de punto medio)
+  function dentado(x1, y1, x2, y2, des) {
+    if (des < 2.5) return [[x1, y1], [x2, y2]];
+    var mx = (x1 + x2) / 2 + g() * des, my = (y1 + y2) / 2 + g() * des;
+    return dentado(x1, y1, mx, my, des / 2).concat(dentado(mx, my, x2, y2, des / 2).slice(1));
+  }
+  function trazo(pts, ancho, alfa) {
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.globalAlpha = alfa * 0.18; ctx.lineWidth = ancho * 7; ctx.stroke();
+    ctx.globalAlpha = alfa; ctx.lineWidth = ancho; ctx.stroke();
+  }
+
+  // ── Descargas desde los bordes (viven unos cientos de ms y parpadean)
+  var descargas = [];
+  function borde() { var l = Math.random() * 4 | 0, r = Math.random(); return l === 0 ? [W * r, -20] : l === 1 ? [W + 20, H * r] : l === 2 ? [W * r, H + 20] : [-20, H * r]; }
+  function descarga(hastaCentro) {
+    var o = borde(), a = Math.random() * Math.PI * 2, d = hastaCentro ? 0 : Math.min(W, H) * (0.15 + Math.random() * 0.25);
+    var tx = cx + Math.cos(a) * d, ty = cy + Math.sin(a) * d, pts = dentado(o[0], o[1], tx, ty, Math.hypot(tx - o[0], ty - o[1]) * 0.22), ramas = [];
+    for (var k = 0; k < 3; k++) { var p = pts[(pts.length * (0.25 + Math.random() * 0.6)) | 0], L = 60 + Math.random() * 160, b = Math.atan2(ty - o[1], tx - o[0]) + g() * 1.6; ramas.push(dentado(p[0], p[1], p[0] + Math.cos(b) * L, p[1] + Math.sin(b) * L, L * 0.3)); }
+    descargas.push({ pts: pts, ramas: ramas, nace: performance.now(), vida: 260 + Math.random() * 200 });
+    golpe(hastaCentro ? 0.5 : 0.12 + Math.random() * 0.15, hastaCentro ? 10 : 4);
+  }
+
+  // ── Temblor y fogonazos
+  var temblor = 0;
+  function golpe(luz, sacudida) {
+    temblor = Math.max(temblor, sacudida);
+    flash.animate([{ opacity: luz * 0.4 }, { opacity: 0 }], { duration: 160 + luz * 300, easing: 'ease-out' });
+  }
+
+  // ── Arcos vivos que orbitan el centro durante la tormenta
+  var nodos = [];
+  for (i = 0; i < 5; i++) nodos.push({ a: Math.random() * Math.PI * 2, v: (0.6 + Math.random()) * (Math.random() < 0.5 ? -1 : 1), r: 0.5 + Math.random() * 0.5 });
+
+  var proxima = 0;
+  function cuadro(now) {
+    var t = now - t0, dt = 16;
+    if (t > T.tormenta && fase === 'calma') fase = 'tormenta';
+    if (fase === 'tormenta' && t > T.carga && !cargada) { var extra = t - T.carga; T.carga += extra; T.impacto += extra; T.salida += extra; }
+    if (t > T.carga && fase === 'tormenta') fase = 'carga';
+    if (t > T.impacto && fase === 'carga') { fase = 'logo'; impacto(); }
+    if (t > T.salida && fase === 'logo') { fase = 'salida'; el.classList.add('fase-salida'); document.body.classList.remove('cargando'); setTimeout(function () { el.remove(); }, 1000); }
+
+    // Intensidad de la tormenta de 0 a 1
+    var I = fase === 'calma' ? 0 : fase === 'tormenta' ? ease((t - T.tormenta) / (T.carga - T.tormenta)) : fase === 'carga' ? 1 : 0;
+    var R = Math.min(W, H);
+
+    // Estela: el lienzo se oscurece en lugar de borrarse
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    ctx.fillStyle = fase === 'logo' || fase === 'salida' ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.28)'; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineCap = ctx.lineJoin = 'round';
+
+    // Partículas
+    var tira = fase === 'tormenta' ? 0.02 + I * 0.1 : fase === 'carga' ? 0.35 : 0;
+    var gira = fase === 'tormenta' ? 0.6 + I * 2.2 : fase === 'carga' ? 3.5 : 0;
+    parts.forEach(function (p) {
+      var dx = cx - p.x, dy = cy - p.y, d = Math.hypot(dx, dy) + 0.01;
+      if (fase === 'calma') { p.vx += g() * 0.03; p.vy += g() * 0.03 - 0.01; }
+      else if (fase === 'tormenta' || fase === 'carga') { p.vx += dx / d * tira * p.z + (-dy / d) * gira * 0.05 * p.z; p.vy += dy / d * tira * p.z + (dx / d) * gira * 0.05 * p.z; }
+      p.vx *= fase === 'logo' ? 0.965 : 0.94; p.vy *= fase === 'logo' ? 0.965 : 0.94;
+      p.x += p.vx; p.y += p.vy;
+      if ((fase === 'tormenta' || fase === 'carga') && d < 14) { var b = borde(); p.x = b[0]; p.y = b[1]; p.vx = p.vy = 0; }
+      var vel = Math.hypot(p.vx, p.vy);
+      ctx.globalAlpha = Math.min(1, 0.15 + vel * 0.08) * p.z;
+      if (vel > 2) { ctx.lineWidth = p.z; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 2.5, p.y - p.vy * 2.5); ctx.stroke(); }
+      else ctx.fillRect(p.x, p.y, 1.4 * p.z, 1.4 * p.z);
+    });
+
+    // Brasa / bola de plasma en el centro
+    var radio = fase === 'calma' ? 6 + Math.sin(t / 120) * 3 : fase === 'tormenta' ? 8 + I * 20 + Math.random() * 4 : fase === 'carga' ? 28 + ease((t - T.carga) / (T.impacto - T.carga)) * R * 0.12 + Math.random() * 8 : 0;
+    if (radio > 0) {
+      var gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, radio * 3);
+      gr.addColorStop(0, 'rgba(255,255,255,0.9)'); gr.addColorStop(0.25, 'rgba(255,255,255,0.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = fase === 'calma' ? 0.5 : 1; ctx.fillStyle = gr; ctx.fillRect(cx - radio * 3, cy - radio * 3, radio * 6, radio * 6); ctx.fillStyle = '#fff';
+    }
+
+    // Arcos vivos: de la bola a nodos que orbitan (se rehacen cada fotograma)
+    if (fase === 'tormenta' || fase === 'carga') {
+      var cuantos = fase === 'carga' ? nodos.length + 4 : Math.round(1 + I * 4);
+      for (var n = 0; n < cuantos; n++) {
+        var nd = nodos[n % nodos.length]; nd.a += nd.v * 0.02 * (1 + I);
+        var rr = (fase === 'carga' ? R * 0.18 * (1 - ease((t - T.carga) / (T.impacto - T.carga)) * 0.6) : R * (0.12 + nd.r * 0.25)) * (n >= nodos.length ? 0.6 : 1);
+        var ax = cx + Math.cos(nd.a + n) * rr, ay = cy + Math.sin(nd.a + n) * rr;
+        trazo(dentado(cx, cy, ax, ay, rr * 0.35), 1, 0.35 + Math.random() * 0.5);
+      }
+    }
+
+    // Descargas desde los bordes, cada vez más seguidas
+    if (fase === 'tormenta' && now > proxima) { descarga(false); if (Math.random() < I * 0.6) descarga(false); proxima = now + 380 - I * 300 + Math.random() * 150; }
+    if (fase === 'carga' && now > proxima) { descarga(true); proxima = now + 70 + Math.random() * 60; }
+    descargas = descargas.filter(function (d) { return now - d.nace < d.vida; });
+    descargas.forEach(function (d) {
+      var k = 1 - (now - d.nace) / d.vida, a = k > 0.6 ? 1 : (Math.random() < 0.4 ? k : k * 0.3);
+      trazo(d.pts, 1.6, a); d.ramas.forEach(function (b) { trazo(b, 0.8, a * 0.7); });
+    });
+
+    // Chispas que saltan alrededor del logo cuando ya está
+    if (fase === 'logo' && Math.random() < 0.18) {
+      var ang = Math.random() * Math.PI * 2, r1 = R * 0.16, r2 = r1 + 20 + Math.random() * 50;
+      trazo(dentado(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1, cx + Math.cos(ang + g() * 0.4) * r2, cy + Math.sin(ang + g() * 0.4) * r2, 14), 0.8, 0.8);
+    }
+
+    // Temblor de cámara
+    temblor *= 0.88;
+    var base = fase === 'tormenta' ? I * 1.5 : fase === 'carga' ? 3 : 0, s = temblor + base;
+    mundo.style.transform = s > 0.2 ? 'translate(' + g() * s + 'px,' + g() * s + 'px)' + (fase === 'carga' ? ' scale(' + (1 + ease((t - T.carga) / 800) * 0.04) + ')' : '') : '';
+
+    if (fase !== 'salida' || t < T.salida + 1000) requestAnimationFrame(cuadro);
+  }
+
+  function impacto() {
+    flash.animate([{ opacity: 1 }, { opacity: 1, offset: 0.15 }, { opacity: 0 }], { duration: 700, easing: 'ease-out' });
+    temblor = 18; descargas = [];
+    // Las partículas salen disparadas
+    parts.forEach(function (p) { var a = Math.random() * Math.PI * 2, v = 6 + Math.random() * 22; p.x = cx + g() * 10; p.y = cy + g() * 10; p.vx = Math.cos(a) * v; p.vy = Math.sin(a) * v; });
+    el.classList.add('fase-logo');
+  }
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.classList.add('fase-logo'); setTimeout(function () { el.classList.add('fase-salida'); document.body.classList.remove('cargando'); setTimeout(function () { el.remove(); }, 1000); }, 1800); return; }
+  requestAnimationFrame(cuadro);
+})();
+</script>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <!-- Iconos de interfaz 9SM. Rejilla 24, trazo 1,75 (lo pone .icon), puntas redondas.
        Equivalencias con SF Symbols (HIG › Icons › Standard icons) en el nombre. -->
@@ -2886,7 +3108,7 @@ loadSiteConfig();
    Solo una recarga por versión, para no entrar en bucle si el servidor
    aún sirve la anterior. */
 (function () {
-  var BUILD = '20261125f';
+  var BUILD = '20261126a';
   function comprobar() {
     fetch('version.txt?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.text() : ''; })
